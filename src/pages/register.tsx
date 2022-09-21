@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 
-const Register: NextPage = () => {
+const RegisterPage: NextPage = () => {
   return <div>Register</div>;
 };
 
-export default Register;
+export default RegisterPage;

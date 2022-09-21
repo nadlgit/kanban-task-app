@@ -1,10 +1,10 @@
 import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
 
-const Board: NextPage = () => {
+const BoardPage: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
   return <div> {`Board "${id}"`}</div>;
 };
 
-export default Board;
+export default BoardPage;
