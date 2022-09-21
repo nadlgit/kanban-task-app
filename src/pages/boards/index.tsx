@@ -1,7 +1,9 @@
 import type { NextPage } from 'next';
 
+import { Navigate, BOARDS_ROUTE } from 'webui/routes';
+
 const BoardIndex: NextPage = () => {
-  return <div>BoardIndex: redirect to first board or to create new board</div>;
+  return <Navigate route={`${BOARDS_ROUTE}/tmp_first_or_new`} />;
 };
 
 export default BoardIndex;

@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 
-const Home: NextPage = () => {
-  return <div>Home: redirect to /boards or to /login</div>;
-};
+import { Navigate, BOARDS_ROUTE } from 'webui/routes';
+
+const Home: NextPage = () => <Navigate route={BOARDS_ROUTE} />;
 
 export default Home;
