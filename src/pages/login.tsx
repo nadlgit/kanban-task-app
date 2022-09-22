@@ -1,7 +1,9 @@
 import type { NextPage } from 'next';
 
+import { Login } from 'webui/auth';
+
 const LoginPage: NextPage = () => {
-  return <div>Login</div>;
+  return <Login />;
 };
 
 export default LoginPage;
