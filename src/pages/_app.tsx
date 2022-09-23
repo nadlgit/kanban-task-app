@@ -2,7 +2,8 @@ import 'styles/globals.css';
 
 import type { AppProps } from 'next/app';
 
-import { AuthContextProvider, AuthRouter } from 'webui/auth';
+import { AuthContextProvider } from 'webui/auth';
+import { AuthRouter } from 'webui/routes';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (

@@ -2,7 +2,11 @@ import { useRouter } from 'next/router';
 import type { PropsWithChildren } from 'react';
 
 import { useAuth } from 'webui/auth';
-import { isPublicRoute, Navigate, LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
+import { Navigate, LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
+
+const isPublicRoute = (route: string) => [LOGIN_ROUTE, REGISTER_ROUTE].includes(route);
+
+const isLoginRegisterRoute = (route: string) => [LOGIN_ROUTE, REGISTER_ROUTE].includes(route);
 
 type AuthRouterProps = PropsWithChildren;
 
@@ -14,7 +18,7 @@ export const AuthRouter = ({ children }: AuthRouterProps) => {
     return <Navigate to={LOGIN_ROUTE} />;
   }
 
-  if (user && (router.pathname === LOGIN_ROUTE || router.pathname === REGISTER_ROUTE)) {
+  if (user && isLoginRegisterRoute(router.pathname)) {
     return <Navigate to="/" />;
   }
 
