@@ -16,8 +16,7 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 
   useEffect(() => {
     updateUser();
-    const unsubscribe = onAuthChange(authRepository, updateUser);
-    return () => unsubscribe();
+    return onAuthChange(authRepository, updateUser);
   }, []);
 
   return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>;

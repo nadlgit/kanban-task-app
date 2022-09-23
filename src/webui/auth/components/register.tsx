@@ -9,12 +9,12 @@ import { Navigate, LOGIN_ROUTE } from 'webui/routes';
 export const Register = () => {
   const [navigateNow, setNavigateNow] = useState(false);
 
-  const handleWithEmail: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleWithEmail: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     const data = new FormData(e.target as HTMLFormElement);
     try {
-      registerWithEmailInteractor(
+      await registerWithEmailInteractor(
         authRepository,
         data.get('email') as string,
         data.get('password') as string,
@@ -27,9 +27,9 @@ export const Register = () => {
     }
   };
 
-  const handleWithGoogle = () => {
+  const handleWithGoogle = async () => {
     try {
-      registerWithGoogleInteractor(authRepository);
+      await registerWithGoogleInteractor(authRepository);
       alert('Successfull!');
       setNavigateNow(true);
     } catch (e) {

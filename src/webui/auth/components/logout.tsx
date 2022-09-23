@@ -5,8 +5,13 @@ import Link from 'next/link';
 import { LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
 
 export const Logout = () => {
-  const handleClick = () => {
-    logout(authRepository);
+  const handleClick = async () => {
+    try {
+      await logout(authRepository);
+      alert('Successfull!');
+    } catch (e) {
+      alert(`Error: ${e}`);
+    }
   };
 
   return (
