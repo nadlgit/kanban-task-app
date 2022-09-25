@@ -9,5 +9,6 @@ export const Navigate = ({ to }: NavigateProps) => {
     router.push(to);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [to]);
+  //router shoudn't be in dependency array otherwise push() will be called multiple times
   return <div>Redirecting...</div>;
 };
