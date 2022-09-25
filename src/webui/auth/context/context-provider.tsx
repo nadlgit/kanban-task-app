@@ -9,9 +9,12 @@ import type { AuthUser } from 'core/ports';
 type AuthContextProviderProps = PropsWithChildren;
 
 export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AuthUser>(null);
   const updateUser = () => {
+    setLoading(true);
     setUser(getUser(authRepository));
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -19,5 +22,5 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     return onAuthChange(authRepository, updateUser);
   }, []);
 
-  return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ loading, user }}>{children}</AuthContext.Provider>;
 };

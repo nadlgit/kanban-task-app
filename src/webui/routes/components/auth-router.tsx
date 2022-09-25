@@ -11,8 +11,12 @@ const isLoginRegisterRoute = (route: string) => [LOGIN_ROUTE, REGISTER_ROUTE].in
 type AuthRouterProps = PropsWithChildren;
 
 export const AuthRouter = ({ children }: AuthRouterProps) => {
-  const user = useAuth();
+  const { loading, user } = useAuth();
   const router = useRouter();
+
+  if (loading) {
+    return <div>Loading ...</div>;
+  }
 
   if (!user && !isPublicRoute(router.pathname)) {
     return <Navigate to={LOGIN_ROUTE} />;
