@@ -1,7 +1,8 @@
 import type { BoardColumn } from './column';
+import type { UniqueId } from 'core/entities';
 
 export type TaskEntity = {
-  id: string;
+  id: UniqueId;
   title: string;
   description: string;
   subtasks: Subtask[];

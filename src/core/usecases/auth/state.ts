@@ -1,9 +1,9 @@
-import type { AuthProvider } from 'core/ports';
+import type { AuthRepository } from 'core/ports';
 
-export function getUser(repository: AuthProvider) {
+export function getUser(repository: AuthRepository) {
   return repository.getUser();
 }
 
-export function onAuthChange(repository: AuthProvider, callback: () => void) {
+export function onAuthChange(repository: AuthRepository, callback: () => void) {
   return repository.listenToAuthChange(callback);
 }

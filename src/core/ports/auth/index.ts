@@ -1,2 +1,2 @@
 export * from './auth-error';
-export * from './auth-provider';
+export * from './auth-repository';

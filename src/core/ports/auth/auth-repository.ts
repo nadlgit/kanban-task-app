@@ -26,7 +26,7 @@ export type LoginInfo =
 
 export type AuthUser = UserEntity | null;
 
-export type AuthProvider = {
+export type AuthRepository = {
   register: (authInfo: RegisterInfo) => Promise<void>;
   login: (authInfo: LoginInfo) => Promise<void>;
   logout: () => Promise<void>;
