@@ -1,4 +1,4 @@
-import { UniqueId } from 'core/entities';
+import type { UniqueId } from 'core/entities';
 
 export type UserEntity = {
   id: UniqueId;
