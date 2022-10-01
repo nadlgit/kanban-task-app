@@ -1,4 +1,3 @@
-import type { BoardColumn } from './column';
 import type { UniqueId } from 'core/entities';
 
 export type TaskEntity = {
@@ -6,10 +5,9 @@ export type TaskEntity = {
   title: string;
   description: string;
   subtasks: Subtask[];
-  status: BoardColumn;
 };
 
 type Subtask = {
   title: string;
-  isDone: boolean;
+  isCompleted: boolean;
 };
