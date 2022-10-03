@@ -26,5 +26,5 @@ export const AuthRouter = ({ children }: AuthRouterProps) => {
     return <Navigate to="/" />;
   }
 
-  return children;
+  return children as JSX.Element;
 };
