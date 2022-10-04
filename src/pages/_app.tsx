@@ -1,4 +1,4 @@
-import 'styles/globals.css';
+import 'webui/shared/styles/globals.css';
 
 import type { AppProps } from 'next/app';
 import { ErrorBoundary } from 'react-error-boundary';
