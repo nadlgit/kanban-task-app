@@ -1,5 +1,5 @@
-import { useRouter } from 'next/router';
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
 
 import { Logout } from 'webui/auth';
 

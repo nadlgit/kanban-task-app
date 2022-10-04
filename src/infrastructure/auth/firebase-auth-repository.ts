@@ -10,8 +10,8 @@ import {
   updateProfile,
 } from 'firebase/auth';
 
-import { firebaseApp } from 'infrastructure/config';
 import type { AuthRepository, AuthUser, LoginInfo, RegisterInfo } from 'core/ports';
+import { firebaseApp } from 'infrastructure/config';
 
 export class FirebaseAuthRepository implements AuthRepository {
   #auth = getAuth(firebaseApp);

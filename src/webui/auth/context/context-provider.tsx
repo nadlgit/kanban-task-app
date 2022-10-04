@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
 import { AuthContext } from './context';
+import type { AuthUser } from 'core/ports';
 import { getUser, onAuthChange } from 'core/usecases';
 import { authRepository } from 'infrastructure/auth';
-import type { AuthUser } from 'core/ports';
 
 type AuthContextProviderProps = PropsWithChildren;
 
