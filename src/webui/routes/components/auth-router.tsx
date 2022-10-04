@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import type { PropsWithChildren } from 'react';
 
 import { useAuth } from 'webui/auth';
+import { Loading } from 'webui/misc';
 import { Navigate, LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
 
 const isPublicRoute = (route: string) => [LOGIN_ROUTE, REGISTER_ROUTE].includes(route);
@@ -15,7 +16,7 @@ export const AuthRouter = ({ children }: AuthRouterProps) => {
   const router = useRouter();
 
   if (loading) {
-    return <div>Loading ...</div>;
+    return <Loading />;
   }
 
   if (!user && !isPublicRoute(router.pathname)) {
