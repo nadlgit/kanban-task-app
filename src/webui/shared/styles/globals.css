@@ -35,6 +35,30 @@ body {
   font-family: var(--font-family);
 }
 
+body.theme-light {
+  background-color: var(--color-grey-very-light);
+  color: var(--color-grey-medium);
+}
+
+body.theme-dark {
+  background-color: var(--color-grey-very-dark);
+  color: var(--color-white);
+}
+
+button,
+input,
+textarea {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-purple);
+}
+a:hover {
+  color: var(--color-red);
+}
+
 .heading-xl {
   font-weight: var(--font-weight-bold);
   font-size: 1.5rem;

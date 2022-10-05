@@ -7,6 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { AuthContextProvider } from 'webui/auth';
 import { ErrorFallback } from 'webui/misc';
 import { AuthRouter } from 'webui/routes';
+import { ThemeContextProvider } from 'webui/theme';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
@@ -17,7 +18,9 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <AuthContextProvider>
           <AuthRouter>
-            <Component {...pageProps} />
+            <ThemeContextProvider>
+              <Component {...pageProps} />
+            </ThemeContextProvider>
           </AuthRouter>
         </AuthContextProvider>
       </ErrorBoundary>
