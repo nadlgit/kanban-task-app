@@ -1,9 +1,10 @@
 import { useRouter } from 'next/router';
 import type { PropsWithChildren } from 'react';
 
+import { Navigate } from './navigate';
+import { LOGIN_ROUTE, REGISTER_ROUTE } from '../helpers';
 import { useAuth } from 'webui/auth';
 import { Loading } from 'webui/misc';
-import { Navigate, LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
 
 const isPublicRoute = (route: string) => [LOGIN_ROUTE, REGISTER_ROUTE].includes(route);
 
