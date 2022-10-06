@@ -1,3 +1,5 @@
+import GoogleLogo from './google-logo.svg';
+
 import Link from 'next/link';
 import { useState } from 'react';
 import type { FormEventHandler } from 'react';
@@ -5,6 +7,7 @@ import type { FormEventHandler } from 'react';
 import { registerWithEmailInteractor, registerWithGoogleInteractor } from 'core/usecases';
 import { authRepository } from 'infrastructure/auth';
 import { Navigate, LOGIN_ROUTE } from 'webui/routes';
+import { Button } from 'webui/shared';
 
 export const Register = () => {
   const [navigateNow, setNavigateNow] = useState(false);
@@ -59,10 +62,16 @@ export const Register = () => {
           <label htmlFor="username">Username</label>
           <input id="username" name="username" type="text" />
         </p>
-        <button type="submit">Register with email</button>
+        <Button variant="primary-s" type="submit">
+          Continue with email
+        </Button>
       </form>
       <p>- or -</p>
-      <button onClick={handleWithGoogle}>Register with Google</button>
+      <Button variant="secondary" onClick={handleWithGoogle}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={GoogleLogo.src} alt="" />
+        <span>Continue with Google</span>
+      </Button>
       <p>- or -</p>
       <p>
         Already have an account? <Link href={LOGIN_ROUTE}>Log in</Link>

@@ -11,18 +11,21 @@
   --font-family: 'Plus Jakarta Sans', sans-serif;
   --font-weight-bold: 700;
   --font-weight-medium: 500;
-  --color-black: #000112;
-  --color-grey-dark: #2b2c37;
-  --color-grey-dark-lines: #3e3f4e;
-  --color-grey-light-lines: #e4ebfa;
-  --color-grey-medium: #828fa3;
-  --color-grey-very-dark: #20212c;
-  --color-grey-very-light: #f4f7fd;
-  --color-purple: #635fc7;
-  --color-purple-hover: #a8a4ff;
-  --color-red: #ea5555;
-  --color-red-hover: #ff9898;
-  --color-white: #ffffff;
+  --color-black: rgb(0, 1, 18);
+  --color-grey-dark: rgb(43, 44, 55);
+  --color-grey-dark-lines: rgb(62, 63, 78);
+  --color-grey-light-lines: rgb(228, 235, 250);
+  --color-grey-medium: rgb(130, 143, 163);
+  --color-grey-very-dark: rgb(32, 33, 44);
+  --color-grey-very-light: rgb(244, 247, 253);
+  --color-purple: rgb(99, 95, 199);
+  --color-purple-hover: rgb(168, 164, 255);
+  --color-purple-light: rgba(99, 95, 199, 0.1);
+  --color-purple-light-hover: rgba(99, 95, 199, 0.25);
+  --color-red: rgb(234, 85, 85);
+  --color-red-hover: rgb(255, 152, 152);
+  --color-white: rgb(255, 255, 255);
+  --color-white-hover: rgb(255, 255, 255, 0.85);
 }
 
 html,

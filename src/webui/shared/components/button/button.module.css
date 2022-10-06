@@ -1,0 +1,66 @@
+.button {
+  display: flex;
+  gap: 0.5em;
+  justify-content: center;
+  align-items: center;
+  border: none;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.primary-l {
+  composes: heading-m from global;
+  min-height: 3rem;
+  border-radius: 1.5rem;
+  color: var(--color-white);
+  background-color: var(--color-purple);
+}
+.primary-l:hover {
+  background-color: var(--color-purple-hover);
+}
+
+.primary-s {
+  composes: body-l from global;
+  min-height: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  border-radius: 1.25rem;
+  color: var(--color-white);
+  background-color: var(--color-purple);
+}
+.primary-s:hover {
+  background-color: var(--color-purple-hover);
+}
+
+.secondary {
+  composes: body-l from global;
+  min-height: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  border-radius: 1.25rem;
+  color: var(--color-purple);
+}
+:global(.theme-light) .secondary {
+  background-color: var(--color-purple-light);
+}
+:global(.theme-light) .secondary:hover {
+  background-color: var(--color-purple-light-hover);
+}
+:global(.theme-dark) .secondary {
+  background-color: var(--color-white);
+}
+:global(.theme-dark) .secondary:hover {
+  background-color: var(--color-white-hover);
+}
+
+.destructive {
+  composes: body-l from global;
+  min-height: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  border-radius: 1.25rem;
+  color: var(--color-white);
+  background-color: var(--color-red);
+}
+.destructive:hover {
+  background-color: var(--color-red-hover);
+}
