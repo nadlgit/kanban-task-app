@@ -5,10 +5,6 @@ import { useTheme } from 'webui/theme';
 
 export const ThemedLogo = () => {
   const { theme } = useTheme();
-  return (
-    <span>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={theme === 'light' ? LogoBlack.src : LogoWhite.src} alt="Application logo" />
-    </span>
-  );
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={theme === 'light' ? LogoBlack.src : LogoWhite.src} alt="Application logo" />;
 };
