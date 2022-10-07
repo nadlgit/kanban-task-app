@@ -16,6 +16,7 @@
   --color-grey-dark-lines: rgb(62, 63, 78);
   --color-grey-light-lines: rgb(228, 235, 250);
   --color-grey-medium: rgb(130, 143, 163);
+  --color-grey-medium-border: rgba(130, 143, 163, 0.25);
   --color-grey-very-dark: rgb(32, 33, 44);
   --color-grey-very-light: rgb(244, 247, 253);
   --color-purple: rgb(99, 95, 199);

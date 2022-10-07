@@ -7,7 +7,7 @@ import type { FormEventHandler } from 'react';
 import { registerWithEmailInteractor, registerWithGoogleInteractor } from 'core/usecases';
 import { authRepository } from 'infrastructure/auth';
 import { Navigate, LOGIN_ROUTE } from 'webui/routes';
-import { Button } from 'webui/shared';
+import { Button, TextField } from 'webui/shared';
 
 export const Register = () => {
   const [navigateNow, setNavigateNow] = useState(false);
@@ -44,24 +44,12 @@ export const Register = () => {
     <Navigate to="/" />
   ) : (
     <div>
-      {testNav}
-      <form style={{ border: '1px solid black' }} onSubmit={handleWithEmail}>
-        <p>
-          <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" />
-        </p>
-        <p>
-          <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" />
-        </p>
-        <p>
-          <label htmlFor="confirmpwd">Confirm password</label>
-          <input id="confirmpwd" name="confirmpwd" type="password" />
-        </p>
-        <p>
-          <label htmlFor="username">Username</label>
-          <input id="username" name="username" type="text" />
-        </p>
+      <h1>Register</h1>
+      <form onSubmit={handleWithEmail}>
+        <TextField id="email" name="email" type="email" label="Email" />
+        <TextField id="password" name="password" type="password" label="Password" />
+        <TextField id="confirmpwd" name="confirmpwd" type="password" label="Confirm password" />
+        <TextField id="username" name="username" type="text" label="Username" />
         <Button variant="primary-s" type="submit">
           Continue with email
         </Button>
@@ -79,14 +67,3 @@ export const Register = () => {
     </div>
   );
 };
-
-const testNav = (
-  <>
-    <ul>
-      <li>
-        <Link href="/">Home</Link>
-      </li>
-    </ul>
-    <hr />
-  </>
-);

@@ -7,7 +7,7 @@ import type { FormEventHandler } from 'react';
 import { loginWithEmailInteractor, loginWithGoogleInteractor } from 'core/usecases';
 import { authRepository } from 'infrastructure/auth';
 import { Navigate, REGISTER_ROUTE } from 'webui/routes';
-import { Button } from 'webui/shared';
+import { Button, TextField } from 'webui/shared';
 
 export const Login = () => {
   const [navigateNow, setNavigateNow] = useState(false);
@@ -43,16 +43,10 @@ export const Login = () => {
     <Navigate to="/" />
   ) : (
     <div>
-      {testNav}
-      <form style={{ border: '1px solid black' }} onSubmit={handleWithEmail}>
-        <p>
-          <label htmlFor="email">Email</label>
-          <input id="email" name="email" type="email" />
-        </p>
-        <p>
-          <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" />
-        </p>
+      <h1>Log in</h1>
+      <form onSubmit={handleWithEmail}>
+        <TextField id="email" name="email" type="email" label="Email" />
+        <TextField id="password" name="password" type="password" label="Password" />
         <Button variant="primary-s" type="submit">
           Continue with email
         </Button>
@@ -70,14 +64,3 @@ export const Login = () => {
     </div>
   );
 };
-
-const testNav = (
-  <>
-    <ul>
-      <li>
-        <Link href="/">Home</Link>
-      </li>
-    </ul>
-    <hr />
-  </>
-);
