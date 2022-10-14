@@ -1,5 +1,4 @@
 import { logout } from 'core/usecases';
-import { authRepository } from 'infrastructure/auth';
 
 import Link from 'next/link';
 import { LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
@@ -7,7 +6,7 @@ import { LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
 export const Logout = () => {
   const handleClick = async () => {
     try {
-      await logout(authRepository);
+      await logout();
       alert('Successfull!');
     } catch (e) {
       alert(`Error: ${e}`);

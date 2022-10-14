@@ -1,3 +1,1 @@
-import { FirebaseAuthRepository } from './firebase-auth-repository';
-
-export const authRepository = new FirebaseAuthRepository();
+export * from './firebase-auth-repository';

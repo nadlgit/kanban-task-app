@@ -1,6 +1,5 @@
 import { LoginRegister } from './login-register';
 import { registerWithEmailInteractor, registerWithGoogleInteractor } from 'core/usecases';
-import { authRepository } from 'infrastructure/auth';
 import { LOGIN_ROUTE } from 'webui/routes';
 
 const emailFormFields = {
@@ -20,9 +19,9 @@ export const Register = () => {
           componentProps: value,
         })),
         onSubmit: (data: Record<keyof typeof emailFormFields, string>) =>
-          registerWithEmailInteractor(authRepository, data.email, data.password, data.username),
+          registerWithEmailInteractor(data.email, data.password, data.username),
       }}
-      googleMethod={{ onSubmit: () => registerWithGoogleInteractor(authRepository) }}
+      googleMethod={{ onSubmit: () => registerWithGoogleInteractor() }}
       alternative={{
         message: 'Already have an account?',
         linkLbl: 'Log in',

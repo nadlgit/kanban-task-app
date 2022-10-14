@@ -5,9 +5,13 @@ import Head from 'next/head';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { AuthContextProvider } from 'webui/auth';
+import { Dependencies } from 'core/dependencies';
+import { FirebaseAuthRepository } from 'infrastructure/auth';
 import { ErrorFallback } from 'webui/misc';
 import { AuthRouter } from 'webui/routes';
 import { ThemeContextProvider } from 'webui/theme';
+
+Dependencies.init({ authRepository: new FirebaseAuthRepository() });
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
