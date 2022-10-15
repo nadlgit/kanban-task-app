@@ -4,6 +4,7 @@ import GoogleLogo from './google-logo.svg';
 import Link from 'next/link';
 import { useState } from 'react';
 import type { FormEventHandler } from 'react';
+import { useForm } from 'react-hook-form';
 
 import { Navigate } from 'webui/routes';
 import { Button, TextField } from 'webui/shared';
@@ -25,22 +26,20 @@ export const LoginRegister = ({
   alternative,
 }: LoginRegisterProps) => {
   const [navigateNow, setNavigateNow] = useState(false);
+  const { register, handleSubmit } = useForm();
 
-  const handleWithEmail: FormEventHandler<HTMLFormElement> = async (e) => {
+  const handleWithEmail: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const rawData = new FormData(e.target as HTMLFormElement);
-    const data: { [fieldName: string]: string } = {};
-    for (const [key, value] of rawData) {
-      data[key] = value as string;
-    }
-    try {
-      await emailMethod.onSubmit(data);
-      alert('Successfull!');
-      setNavigateNow(true);
-    } catch (e) {
-      alert(`Error: ${e}`);
-    }
+    handleSubmit(async (data) => {
+      try {
+        await emailMethod.onSubmit(data);
+        alert('Successfull!');
+        setNavigateNow(true);
+      } catch (e) {
+        alert(`Error: ${e}`);
+      }
+    })(e);
   };
 
   const handleWithGoogle = async () => {
@@ -61,7 +60,11 @@ export const LoginRegister = ({
 
       <form onSubmit={handleWithEmail}>
         {emailMethod.fields.map((item) => (
-          <TextField key={item.fieldName} {...item.componentProps} />
+          <TextField
+            key={item.fieldName}
+            {...item.componentProps}
+            {...register(item.componentProps.name)}
+          />
         ))}
         <Button variant="primary-s" type="submit">
           Continue with email

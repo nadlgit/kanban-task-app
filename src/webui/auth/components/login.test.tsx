@@ -23,7 +23,7 @@ beforeEach(() => {
 
 let userEvt = userEvent.setup();
 
-const getMockNavigateElt = () => screen.queryByTestId('mock-navigate-component');
+const mockNavigateTestId = 'mock-navigate-component';
 const getEmailElt = () => screen.getByLabelText(/Email/, { selector: 'input' });
 const getPasswordElt = () => screen.getByLabelText(/Password/, { selector: 'input' });
 const getEmailSubmitBtnElt = () => screen.getByRole('button', { name: /Continue with email/ });
@@ -35,7 +35,7 @@ describe('Login component using email method', () => {
 
     userEvt = userEvent.setup();
     render(<Login />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.type(getEmailElt(), testCredential.email);
     await userEvt.type(getPasswordElt(), testCredential.password);
@@ -46,9 +46,9 @@ describe('Login component using email method', () => {
       testCredential.email,
       testCredential.password
     );
+    await screen.findByTestId(mockNavigateTestId);
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
-    expect(getMockNavigateElt()).toBeInTheDocument();
   });
 
   it('when fails', async () => {
@@ -60,7 +60,7 @@ describe('Login component using email method', () => {
 
     userEvt = userEvent.setup();
     render(<Login />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.type(getEmailElt(), testCredential.email);
     await userEvt.type(getPasswordElt(), testCredential.password);
@@ -71,11 +71,11 @@ describe('Login component using email method', () => {
       testCredential.email,
       testCredential.password
     );
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(
       expect.stringMatching(new RegExp(testError.message))
     );
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
   });
 
   it.skip('when inputs are invalid', async () => {
@@ -83,14 +83,14 @@ describe('Login component using email method', () => {
 
     userEvt = userEvent.setup();
     render(<Login />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.type(getEmailElt(), testCredential.email);
     await userEvt.type(getPasswordElt(), testCredential.password);
     await userEvt.click(getEmailSubmitBtnElt());
 
     expect(loginWithEmailInteractor).not.toHaveBeenCalled();
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
   });
 });
 
@@ -98,15 +98,15 @@ describe('Login component using Google method', () => {
   it('when succeeds', async () => {
     userEvt = userEvent.setup();
     render(<Login />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.click(getGoogleSubmitBtnElt());
 
     expect(loginWithGoogleInteractor).toHaveBeenCalledTimes(1);
     expect(loginWithGoogleInteractor).toHaveBeenLastCalledWith();
+    await screen.findByTestId(mockNavigateTestId);
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
-    expect(getMockNavigateElt()).toBeInTheDocument();
   });
 
   it('when fails', async () => {
@@ -117,16 +117,16 @@ describe('Login component using Google method', () => {
 
     userEvt = userEvent.setup();
     render(<Login />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.click(getGoogleSubmitBtnElt());
 
     expect(loginWithGoogleInteractor).toHaveBeenCalledTimes(1);
     expect(loginWithGoogleInteractor).toHaveBeenLastCalledWith();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(
       expect.stringMatching(new RegExp(testError.message))
     );
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
   });
 });

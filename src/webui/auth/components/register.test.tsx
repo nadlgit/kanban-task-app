@@ -23,7 +23,7 @@ beforeEach(() => {
 
 let userEvt = userEvent.setup();
 
-const getMockNavigateElt = () => screen.queryByTestId('mock-navigate-component');
+const mockNavigateTestId = 'mock-navigate-component';
 const getEmailElt = () => screen.getByLabelText(/Email/, { selector: 'input' });
 const getPasswordElt = () => screen.getByLabelText(/Password/, { selector: 'input' });
 const getConfirmPasswordElt = () =>
@@ -45,7 +45,7 @@ describe('Register component using email method', () => {
 
     userEvt = userEvent.setup();
     render(<Register />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.type(getEmailElt(), testCredential.email);
     await userEvt.type(getPasswordElt(), testCredential.password);
@@ -59,9 +59,9 @@ describe('Register component using email method', () => {
       testCredential.password,
       testCredential.username
     );
+    await screen.findByTestId(mockNavigateTestId);
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
-    expect(getMockNavigateElt()).toBeInTheDocument();
   });
 
   it('when fails', async () => {
@@ -81,7 +81,7 @@ describe('Register component using email method', () => {
 
     userEvt = userEvent.setup();
     render(<Register />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.type(getEmailElt(), testCredential.email);
     await userEvt.type(getPasswordElt(), testCredential.password);
@@ -95,11 +95,11 @@ describe('Register component using email method', () => {
       testCredential.password,
       testCredential.username
     );
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(
       expect.stringMatching(new RegExp(testError.message))
     );
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
   });
 
   it.skip('when inputs are invalid', async () => {
@@ -109,7 +109,7 @@ describe('Register component using email method', () => {
 
     userEvt = userEvent.setup();
     render(<Register />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.type(getEmailElt(), testCredential.email);
     await userEvt.type(getPasswordElt(), testCredential.password);
@@ -118,7 +118,7 @@ describe('Register component using email method', () => {
     await userEvt.click(getEmailSubmitBtnElt());
 
     expect(registerWithEmailInteractor).not.toHaveBeenCalled();
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
   });
 });
 
@@ -126,15 +126,15 @@ describe('Register component using Google method', () => {
   it('when succeeds', async () => {
     userEvt = userEvent.setup();
     render(<Register />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.click(getGoogleSubmitBtnElt());
 
     expect(registerWithGoogleInteractor).toHaveBeenCalledTimes(1);
     expect(registerWithGoogleInteractor).toHaveBeenLastCalledWith();
+    await screen.findByTestId(mockNavigateTestId);
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
-    expect(getMockNavigateElt()).toBeInTheDocument();
   });
 
   it('when fails', async () => {
@@ -145,16 +145,16 @@ describe('Register component using Google method', () => {
 
     userEvt = userEvent.setup();
     render(<Register />);
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
 
     await userEvt.click(getGoogleSubmitBtnElt());
 
     expect(registerWithGoogleInteractor).toHaveBeenCalledTimes(1);
     expect(registerWithGoogleInteractor).toHaveBeenLastCalledWith();
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     expect(window.alert).toHaveBeenCalledTimes(1);
     expect(window.alert).toHaveBeenLastCalledWith(
       expect.stringMatching(new RegExp(testError.message))
     );
-    expect(getMockNavigateElt()).not.toBeInTheDocument();
   });
 });
