@@ -142,6 +142,8 @@ describe('Login component using email method', () => {
 
       userEvt = userEvent.setup();
       render(<Login />);
+      expect(getEmailErrorElt()).toBeEmptyDOMElement();
+      expect(getPasswordErrorElt()).toBeEmptyDOMElement();
 
       testCredential.email && (await userEvt.type(getEmailElt(), testCredential.email));
       testCredential.password && (await userEvt.type(getPasswordElt(), testCredential.password));

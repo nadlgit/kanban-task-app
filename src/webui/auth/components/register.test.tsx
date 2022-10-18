@@ -205,6 +205,10 @@ describe('Register component using email method', () => {
 
       userEvt = userEvent.setup();
       render(<Register />);
+      expect(getEmailErrorElt()).toBeEmptyDOMElement();
+      expect(getPasswordErrorElt()).toBeEmptyDOMElement();
+      expect(getConfirmPwdErrorElt()).toBeEmptyDOMElement();
+      expect(getUsernameErrorElt()).toBeEmptyDOMElement();
 
       testCredential.email && (await userEvt.type(getEmailElt(), testCredential.email));
       testCredential.password && (await userEvt.type(getPasswordElt(), testCredential.password));
