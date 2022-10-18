@@ -10,23 +10,30 @@ const emailFormFields = {
     name: 'email',
     type: 'email',
     label: 'Email',
-    validationSchema: yup.string().label('Email').email().required(),
+    validationSchema: yup.string().label('Email').trim().email().required(),
   },
   password: {
     id: 'password',
     name: 'password',
-    type: 'password',
+    type: 'text',
     label: 'Password',
-    validationSchema: yup.string().label('Password').required().min(8),
+    validationSchema: yup
+      .string()
+      .label('Password')
+      .trim()
+      .required()
+      .min(8)
+      .matches(/^\S+$/, 'Password must not contain whitespaces'),
   },
   confirmpwd: {
     id: 'confirmpwd',
     name: 'confirmpwd',
-    type: 'password',
+    type: 'text',
     label: 'Confirm password',
     validationSchema: yup
       .string()
       .label('Confirm password')
+      .trim()
       .required()
       .oneOf([yup.ref('password'), null], 'Passwords must match'),
   },
@@ -35,7 +42,7 @@ const emailFormFields = {
     name: 'username',
     type: 'text',
     label: 'Username',
-    validationSchema: yup.string().label('Username').required(),
+    validationSchema: yup.string().label('Username').trim().required(),
   },
 };
 

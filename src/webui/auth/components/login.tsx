@@ -10,14 +10,14 @@ const emailFormFields = {
     name: 'email',
     type: 'email',
     label: 'Email',
-    validationSchema: yup.string().label('Email').email().required(),
+    validationSchema: yup.string().label('Email').trim().email().required(),
   },
   password: {
     id: 'password',
     name: 'password',
     type: 'password',
     label: 'Password',
-    validationSchema: yup.string().label('Password').required(),
+    validationSchema: yup.string().label('Password').trim().required(),
   },
 };
 

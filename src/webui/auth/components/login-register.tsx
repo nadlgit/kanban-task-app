@@ -87,7 +87,11 @@ export const LoginRegister = ({
           return (
             <TextField
               key={key}
-              {...register(name)}
+              {...register(name, {
+                onBlur: (e) => {
+                  e.target.value = e.target.value.trim();
+                },
+              })}
               {...textFieldProps}
               error={errors[name]?.message as string}
             />
