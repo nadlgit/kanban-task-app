@@ -14,7 +14,11 @@ import { ThemeContextProvider } from 'webui/theme';
 // Dependencies.init({ authRepository: new FirebaseAuthRepository() });
 
 import { FakeAuthRepository } from 'infrastructure/auth';
-Dependencies.init({ authRepository: new FakeAuthRepository() });
+import { FakeBoardRepository } from 'infrastructure/board';
+Dependencies.init({
+  authRepository: new FakeAuthRepository(),
+  boardRepository: new FakeBoardRepository(),
+});
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (

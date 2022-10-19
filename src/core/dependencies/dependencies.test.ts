@@ -17,15 +17,44 @@ const mockAuthRepositoryFactory = () => ({
   listenToAuthChange: jest.fn(),
 });
 
-type FakeDependenciesInit = { authRepository: ReturnType<typeof mockAuthRepositoryFactory> };
+const mockBoardRepositoryFactory = () => ({
+  getBoardList: jest.fn(),
+  getBoard: jest.fn(),
+
+  listenToBoardListChange: jest.fn(),
+  listenToBoardChange: jest.fn(),
+
+  addBoard: jest.fn(),
+  addColumn: jest.fn(),
+  addTask: jest.fn(),
+
+  updateBoard: jest.fn(),
+  updateColumn: jest.fn(),
+  updateTask: jest.fn(),
+
+  deleteBoard: jest.fn(),
+  deleteColumn: jest.fn(),
+  deleteTask: jest.fn(),
+});
+
+type FakeDependenciesInit = {
+  authRepository: ReturnType<typeof mockAuthRepositoryFactory>;
+  boardRepository: ReturnType<typeof mockBoardRepositoryFactory>;
+};
 
 const fakeDependencies: FakeDependenciesInit = {
   authRepository: mockAuthRepositoryFactory(),
+  boardRepository: mockBoardRepositoryFactory(),
 };
 
 const fakeDependenciesOtherAuthRepo: FakeDependenciesInit = {
   ...fakeDependencies,
   authRepository: mockAuthRepositoryFactory(),
+};
+
+const fakeDependenciesOtherBoardRepo: FakeDependenciesInit = {
+  ...fakeDependencies,
+  boardRepository: mockBoardRepositoryFactory(),
 };
 
 describe.each([
@@ -34,6 +63,12 @@ describe.each([
     testedFn: () => Dependencies.getAuthRepository(),
     expectedField: 'authRepository',
     otherTestDependencies: fakeDependenciesOtherAuthRepo,
+  },
+  {
+    desc: 'getBoardRepository()',
+    testedFn: () => Dependencies.getBoardRepository(),
+    expectedField: 'boardRepository',
+    otherTestDependencies: fakeDependenciesOtherBoardRepo,
   },
 ])('$desc', ({ testedFn, expectedField, otherTestDependencies }) => {
   it('should throw when not initialized', () => {
