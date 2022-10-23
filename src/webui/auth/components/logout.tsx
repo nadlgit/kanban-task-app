@@ -1,7 +1,5 @@
 import { logout } from 'core/usecases';
-
-import Link from 'next/link';
-import { LOGIN_ROUTE, REGISTER_ROUTE } from 'webui/routes';
+import { Button } from 'webui/shared';
 
 export const Logout = () => {
   const handleClick = async () => {
@@ -14,19 +12,8 @@ export const Logout = () => {
   };
 
   return (
-    <div>
-      <ul>
-        <li>
-          <Link href="/">Home</Link>
-        </li>
-        <li>
-          <Link href={LOGIN_ROUTE}>Log in</Link>
-        </li>
-        <li>
-          <Link href={REGISTER_ROUTE}>Register</Link>
-        </li>
-      </ul>
-      <button onClick={handleClick}>Log out</button>
-    </div>
+    <Button variant="primary-s" onClick={handleClick}>
+      Log out
+    </Button>
   );
 };
