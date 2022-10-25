@@ -27,13 +27,13 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
         <title>Frontend Mentor | Kanban task management web app</title>
       </Head>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <AuthContextProvider>
-          <AuthRouter>
-            <ThemeContextProvider>
+        <ThemeContextProvider>
+          <AuthContextProvider>
+            <AuthRouter>
               <Component {...pageProps} />
-            </ThemeContextProvider>
-          </AuthRouter>
-        </AuthContextProvider>
+            </AuthRouter>
+          </AuthContextProvider>
+        </ThemeContextProvider>
       </ErrorBoundary>
     </>
   );
