@@ -9,6 +9,9 @@
 .full-width {
   width: 100%;
 }
+.button:not(.full-width) {
+  padding-inline: 1.25em;
+}
 
 .primary-l {
   composes: heading-m from global;
