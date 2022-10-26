@@ -3,27 +3,26 @@ import IconHide from './icon-hide-sidebar.svg';
 import IconShow from './icon-show-sidebar.svg';
 
 import { Disclosure, DisclosureContent, useDisclosureState } from 'ariakit/disclosure';
-import { useEffect } from 'react';
 
 import { Logout } from 'webui/auth';
 import { BoardListNav } from 'webui/board';
 import { ThemedLogo } from 'webui/shared';
 import { ThemeSwitch } from 'webui/theme';
 
-type SideMenuProps = { onToggle: (isOpen: boolean) => void };
+type SideMenuProps = { defaultIsOpen: boolean; onToggle: (isOpen: boolean) => void };
 
-export const SideMenu = ({ onToggle }: SideMenuProps) => {
-  const state = useDisclosureState();
-
-  useEffect(() => {
-    if (state?.open !== undefined) {
-      onToggle(state.open);
-    }
-  }, [state?.open, onToggle]);
+export const SideMenu = ({ defaultIsOpen, onToggle }: SideMenuProps) => {
+  const state = useDisclosureState({
+    defaultOpen: defaultIsOpen,
+    setOpen: onToggle,
+  });
 
   return (
     <>
-      <Disclosure state={state}>
+      <Disclosure
+        state={state}
+        className={`${styles.trigger} ${state.open ? styles.ishide : styles.isshow}`}
+      >
         {state.open ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -35,7 +34,7 @@ export const SideMenu = ({ onToggle }: SideMenuProps) => {
           <img src={IconShow.src} alt="Show sidebar" />
         )}
       </Disclosure>
-      <DisclosureContent state={state}>
+      <DisclosureContent state={state} className={styles.content}>
         <ThemedLogo />
         <BoardListNav />
         <ThemeSwitch />

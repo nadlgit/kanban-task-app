@@ -1,0 +1,12 @@
+.button {
+  padding: 0.5em 1em;
+  border: none;
+  background-color: transparent;
+}
+
+:global(.theme-light) .menu {
+  background-color: var(--color-grey-very-light);
+}
+:global(.theme-dark) .menu {
+  background-color: var(--color-grey-very-dark);
+}

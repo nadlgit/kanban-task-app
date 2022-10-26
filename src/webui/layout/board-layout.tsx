@@ -15,12 +15,22 @@ type BoardLayoutProps = PropsWithChildren<{
 
 export const BoardLayout = ({ boardName, children }: BoardLayoutProps) => {
   const isMobile = useIsMobile();
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(true);
   return (
     <div className={styles.app}>
       <header className={styles.header}>
-        {isMobile ? <MobileLogo /> : !isSideMenuOpen && <ThemedLogo />}
-        <div>
+        {isMobile ? (
+          <span className={styles.logo}>
+            <MobileLogo />
+          </span>
+        ) : (
+          !isSideMenuOpen && (
+            <span className={styles.logowithborder}>
+              <ThemedLogo />
+            </span>
+          )
+        )}
+        <div className={styles.headercenter}>
           <h1 className={styles.title}>{boardName ?? '[No board]'}</h1>
           {isMobile && <MobileMenu />}
         </div>
@@ -28,7 +38,7 @@ export const BoardLayout = ({ boardName, children }: BoardLayoutProps) => {
       </header>
 
       <aside className={styles.sidebar}>
-        {!isMobile && <SideMenu onToggle={setIsSideMenuOpen} />}
+        {!isMobile && <SideMenu defaultIsOpen={isSideMenuOpen} onToggle={setIsSideMenuOpen} />}
       </aside>
 
       <main className={styles.main}>{children}</main>
