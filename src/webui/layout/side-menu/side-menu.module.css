@@ -14,8 +14,20 @@
 .trigger.ishide {
   background-color: transparent;
 }
+.trigger.ishide:hover {
+  color: var(--color-purple);
+}
+:global(.theme-light) .trigger.ishide:hover {
+  background-color: var(--color-purple-light-hover);
+}
+:global(.theme-dark) .trigger.ishide:hover {
+  background-color: var(--color-white);
+}
 .trigger.isshow {
   background-color: var(--color-purple);
+}
+.trigger.isshow:hover {
+  background-color: var(--color-purple-hover);
 }
 
 .content {
