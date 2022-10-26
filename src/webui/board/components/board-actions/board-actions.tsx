@@ -12,7 +12,7 @@ export const BoardActions = ({ isMobile }: BoardActionsProps) => {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {isMobile ? <img src={IconAdd.src} alt="Add new task" /> : '+ Add New Task'}
       </Button>
-      <Menu items={['Edit Board', 'Delete Board']} alignment="right" />
+      <Menu items={['Edit Board', 'Delete Board']} />
     </div>
   );
 };

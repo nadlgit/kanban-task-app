@@ -1,0 +1,17 @@
+.button {
+  padding-inline: 0.5em;
+  border: none;
+  background-color: transparent;
+}
+
+.menu {
+  min-width: 16.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
+}
+:global(.theme-light) .menu {
+  background-color: var(--color-white);
+}
+:global(.theme-dark) .menu {
+  background-color: var(--color-grey-dark);
+}

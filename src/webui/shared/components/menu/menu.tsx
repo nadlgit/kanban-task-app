@@ -3,10 +3,10 @@ import IconMenu from './icon-vertical-ellipsis.svg';
 
 import { Menu as BaseMenu, MenuButton, MenuItem, useMenuState } from 'ariakit/menu';
 
-type MenuProps = { items: string[]; alignment: 'right' | 'center' };
+type MenuProps = { items: string[] };
 
 export const Menu = ({ items }: MenuProps) => {
-  const state = useMenuState();
+  const state = useMenuState({ gutter: 16 });
   return (
     <>
       <MenuButton state={state} className={styles.button}>
