@@ -1,0 +1,3 @@
+.button {
+  width: clamp(14.6875rem, calc(13.545rem + 2.38vw), 15.6875rem);
+}

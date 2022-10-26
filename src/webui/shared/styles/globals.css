@@ -27,6 +27,8 @@
   --color-red-hover: rgb(255, 152, 152);
   --color-white: rgb(255, 255, 255);
   --color-white-hover: rgb(255, 255, 255, 0.85);
+  --backdrop-color: rgba(0, 0, 0, 0.5);
+  --header-height: clamp(4rem, calc(3rem + 4vw), 6rem);
 }
 
 html,

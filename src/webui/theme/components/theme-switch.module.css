@@ -1,5 +1,5 @@
 .container {
-  width: clamp(14.6875rem, 100%, 15.6875rem);
+  width: clamp(14.6875rem, calc(13.545rem + 2.38vw), 15.6875rem);
   height: 3rem;
   display: flex;
   justify-content: center;

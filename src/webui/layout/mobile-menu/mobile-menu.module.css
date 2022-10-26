@@ -4,8 +4,21 @@
   background-color: transparent;
 }
 
+.menuwrapper {
+  margin-top: var(--header-height);
+  padding-top: 1rem;
+  background-color: var(--backdrop-color);
+}
+
 .menu {
   min-width: 16.5rem;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin: auto;
+  padding-block: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
 }

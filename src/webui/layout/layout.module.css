@@ -1,5 +1,4 @@
 .app {
-  --header-height: clamp(4rem, calc(3rem + 4vw), 6rem);
   --header-padding-inline: clamp(1rem, calc(0.4rem + 2.54vw), 2rem);
   composes: body-l from global;
   width: 100%;
