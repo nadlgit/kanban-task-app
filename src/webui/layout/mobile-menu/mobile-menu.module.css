@@ -18,7 +18,7 @@
   gap: 1rem;
   align-items: center;
   margin: auto;
-  padding-block: 1rem;
+  padding-bottom: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
 }

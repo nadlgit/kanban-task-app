@@ -1,24 +1,26 @@
 import styles from './board-list-nav.module.css';
 
+import { IconBoard } from './icon-board';
+
 export const BoardListNav = () => {
   return (
     <div className={styles.container}>
-      <p>{`All boards (3)`}</p>
+      <p className={styles.title}>{`All boards (3)`}</p>
       <ul className={styles.list}>
         <li className={`${styles.item} ${styles.active}`}>
-          <i className={styles.icon} />
+          <IconBoard />
           <a href="#">Board #1</a>
         </li>
         <li className={styles.item}>
-          <i className={styles.icon} />
+          <IconBoard />
           <a href="#">Board #2</a>
         </li>
         <li className={styles.item}>
-          <i className={styles.icon} />
+          <IconBoard />
           <a href="#">Board #3</a>
         </li>
         <li className={`${styles.item} ${styles.create}`}>
-          <i className={styles.icon} />
+          <IconBoard />
           <button>+ Create New Board</button>
         </li>
       </ul>
