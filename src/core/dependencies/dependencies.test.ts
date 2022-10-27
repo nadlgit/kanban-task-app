@@ -9,6 +9,13 @@ beforeEach(() => {
   });
 });
 
+const mockAppNotificationFactory = () => ({
+  info: jest.fn(),
+  success: jest.fn(),
+  warning: jest.fn(),
+  error: jest.fn(),
+});
+
 const mockAuthRepositoryFactory = () => ({
   register: jest.fn(),
   login: jest.fn(),
@@ -38,13 +45,20 @@ const mockBoardRepositoryFactory = () => ({
 });
 
 type FakeDependenciesInit = {
+  appNotification: ReturnType<typeof mockAppNotificationFactory>;
   authRepository: ReturnType<typeof mockAuthRepositoryFactory>;
   boardRepository: ReturnType<typeof mockBoardRepositoryFactory>;
 };
 
 const fakeDependencies: FakeDependenciesInit = {
+  appNotification: mockAppNotificationFactory(),
   authRepository: mockAuthRepositoryFactory(),
   boardRepository: mockBoardRepositoryFactory(),
+};
+
+const fakeDependenciesOtherAppNotif: FakeDependenciesInit = {
+  ...fakeDependencies,
+  appNotification: mockAppNotificationFactory(),
 };
 
 const fakeDependenciesOtherAuthRepo: FakeDependenciesInit = {
@@ -58,6 +72,12 @@ const fakeDependenciesOtherBoardRepo: FakeDependenciesInit = {
 };
 
 describe.each([
+  {
+    desc: 'getAppNotification()',
+    testedFn: () => Dependencies.getAppNotification(),
+    expectedField: 'appNotification',
+    otherTestDependencies: fakeDependenciesOtherAppNotif,
+  },
   {
     desc: 'getAuthRepository()',
     testedFn: () => Dependencies.getAuthRepository(),

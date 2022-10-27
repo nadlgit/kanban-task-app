@@ -54,24 +54,14 @@ export const LoginRegister = ({
     e.preventDefault();
     e.stopPropagation();
     handleSubmit(async (data) => {
-      try {
-        await emailMethod.onSubmit(data);
-        alert('Successfull!');
-        setNavigateNow(true);
-      } catch (e) {
-        alert(`Error: ${e}`);
-      }
+      await emailMethod.onSubmit(data);
+      setNavigateNow(true);
     })(e);
   };
 
   const handleWithGoogle = async () => {
-    try {
-      await googleMethod.onSubmit();
-      alert('Successfull!');
-      setNavigateNow(true);
-    } catch (e) {
-      alert(`Error: ${e}`);
-    }
+    await googleMethod.onSubmit();
+    setNavigateNow(true);
   };
 
   return navigateNow ? (

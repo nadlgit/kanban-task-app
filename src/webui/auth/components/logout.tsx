@@ -5,12 +5,7 @@ import { Button } from 'webui/shared';
 
 export const Logout = () => {
   const handleClick = async () => {
-    try {
-      await logout();
-      alert('Successfull!');
-    } catch (e) {
-      alert(`Error: ${e}`);
-    }
+    await logout();
   };
 
   return (

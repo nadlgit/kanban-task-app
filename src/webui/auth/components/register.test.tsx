@@ -4,21 +4,31 @@ import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
 import { Register } from './register';
-import { registerWithEmailInteractor, registerWithGoogleInteractor } from 'core/usecases';
+import {
+  notifyError,
+  notifySuccess,
+  registerWithEmailInteractor,
+  registerWithGoogleInteractor,
+} from 'core/usecases';
 
 jest.mock('core/usecases');
+(registerWithEmailInteractor as jest.MockedFunction<typeof registerWithEmailInteractor>)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  .mockImplementation((email, password, username) => {
+    notifySuccess();
+    return Promise.resolve();
+  });
+(
+  registerWithGoogleInteractor as jest.MockedFunction<typeof registerWithGoogleInteractor>
+).mockImplementation(() => {
+  notifySuccess();
+  return Promise.resolve();
+});
+
 jest.mock('webui/routes/components/navigate');
 
-const originalAlert = window.alert;
-beforeAll(() => {
-  window.alert = jest.fn();
-});
-afterAll(() => {
-  window.alert = originalAlert;
-});
-
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
 });
 
 let userEvt = userEvent.setup();
@@ -104,8 +114,7 @@ describe('Register component using email method', () => {
     await userEvt.click(getEmailSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
+    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle interactor error', async () => {
@@ -117,10 +126,13 @@ describe('Register component using email method', () => {
       username: faker.internet.userName(),
     };
 
-    const testError = new Error('Unable to register');
+    const testError = 'Unable to register';
     (registerWithEmailInteractor as jest.MockedFunction<typeof registerWithEmailInteractor>)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .mockImplementation((email, password, username) => Promise.reject(testError));
+      .mockImplementationOnce((email, password, username) => {
+        notifyError(testError);
+        return Promise.resolve();
+      });
 
     userEvt = userEvent.setup();
     render(<Register />);
@@ -137,10 +149,8 @@ describe('Register component using email method', () => {
     } catch (e) {
       expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     }
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(
-      expect.stringMatching(new RegExp(testError.message))
-    );
+    expect(notifyError).toHaveBeenCalledTimes(1);
+    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 
   it.each([
@@ -264,15 +274,17 @@ describe('Register component using Google method', () => {
     await userEvt.click(getGoogleSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
+    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle interactor error', async () => {
-    const testError = new Error('Google error');
+    const testError = 'Google error';
     (
       registerWithGoogleInteractor as jest.MockedFunction<typeof registerWithGoogleInteractor>
-    ).mockImplementation(() => Promise.reject(testError));
+    ).mockImplementationOnce(() => {
+      notifyError(testError);
+      return Promise.resolve();
+    });
 
     userEvt = userEvent.setup();
     render(<Register />);
@@ -285,9 +297,7 @@ describe('Register component using Google method', () => {
     } catch (e) {
       expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     }
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(
-      expect.stringMatching(new RegExp(testError.message))
-    );
+    expect(notifyError).toHaveBeenCalledTimes(1);
+    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 });

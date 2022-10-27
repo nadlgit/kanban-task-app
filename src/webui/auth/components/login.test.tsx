@@ -4,21 +4,31 @@ import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
 import { Login } from './login';
-import { loginWithEmailInteractor, loginWithGoogleInteractor } from 'core/usecases';
+import {
+  notifyError,
+  notifySuccess,
+  loginWithEmailInteractor,
+  loginWithGoogleInteractor,
+} from 'core/usecases';
 
 jest.mock('core/usecases');
+(loginWithEmailInteractor as jest.MockedFunction<typeof loginWithEmailInteractor>)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  .mockImplementation((email, password) => {
+    notifySuccess();
+    return Promise.resolve();
+  });
+(
+  loginWithGoogleInteractor as jest.MockedFunction<typeof loginWithGoogleInteractor>
+).mockImplementation(() => {
+  notifySuccess();
+  return Promise.resolve();
+});
+
 jest.mock('webui/routes/components/navigate');
 
-const originalAlert = window.alert;
-beforeAll(() => {
-  window.alert = jest.fn();
-});
-afterAll(() => {
-  window.alert = originalAlert;
-});
-
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
 });
 
 let userEvt = userEvent.setup();
@@ -81,8 +91,7 @@ describe('Login component using email method', () => {
     await userEvt.click(getEmailSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
+    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle interactor error', async () => {
@@ -91,10 +100,13 @@ describe('Login component using email method', () => {
       password: faker.internet.password(),
     };
 
-    const testError = new Error('Invalid credentials');
+    const testError = 'Invalid credentials';
     (loginWithEmailInteractor as jest.MockedFunction<typeof loginWithEmailInteractor>)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .mockImplementation((email, password) => Promise.reject(testError));
+      .mockImplementationOnce((email, password) => {
+        notifyError(testError);
+        return Promise.resolve();
+      });
 
     userEvt = userEvent.setup();
     render(<Login />);
@@ -109,10 +121,8 @@ describe('Login component using email method', () => {
     } catch (e) {
       expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     }
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(
-      expect.stringMatching(new RegExp(testError.message))
-    );
+    expect(notifyError).toHaveBeenCalledTimes(1);
+    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 
   it.each([
@@ -186,15 +196,17 @@ describe('Login component using Google method', () => {
     await userEvt.click(getGoogleSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(expect.stringMatching(/Successfull/));
+    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle interactor error', async () => {
-    const testError = new Error('Google error');
+    const testError = 'Google error';
     (
       loginWithGoogleInteractor as jest.MockedFunction<typeof loginWithGoogleInteractor>
-    ).mockImplementation(() => Promise.reject(testError));
+    ).mockImplementationOnce(() => {
+      notifyError(testError);
+      return Promise.resolve();
+    });
 
     userEvt = userEvent.setup();
     render(<Login />);
@@ -207,9 +219,7 @@ describe('Login component using Google method', () => {
     } catch (e) {
       expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     }
-    expect(window.alert).toHaveBeenCalledTimes(1);
-    expect(window.alert).toHaveBeenLastCalledWith(
-      expect.stringMatching(new RegExp(testError.message))
-    );
+    expect(notifyError).toHaveBeenCalledTimes(1);
+    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 });

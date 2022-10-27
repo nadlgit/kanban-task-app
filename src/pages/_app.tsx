@@ -15,7 +15,9 @@ import { ThemeContextProvider } from 'webui/theme';
 
 import { FakeAuthRepository } from 'infrastructure/auth';
 import { FakeBoardRepository } from 'infrastructure/board';
+import { UINotification } from 'webui/notification';
 Dependencies.init({
+  appNotification: new UINotification(),
   authRepository: new FakeAuthRepository(),
   boardRepository: new FakeBoardRepository(),
 });
