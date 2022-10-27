@@ -8,7 +8,7 @@
 }
 
 .title {
-  composes: body-m from global;
+  composes: heading-s from global;
   padding-block: 1.25rem;
   text-transform: uppercase;
 }
