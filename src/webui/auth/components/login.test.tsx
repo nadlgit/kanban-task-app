@@ -12,15 +12,18 @@ import {
 } from 'core/usecases';
 
 jest.mock('core/usecases');
-(loginWithEmailInteractor as jest.MockedFunction<typeof loginWithEmailInteractor>)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .mockImplementation((email, password) => {
-    notifySuccess();
-    return Promise.resolve();
-  });
-(
-  loginWithGoogleInteractor as jest.MockedFunction<typeof loginWithGoogleInteractor>
-).mockImplementation(() => {
+const mockLoginWithEmailInteractor = loginWithEmailInteractor as jest.MockedFunction<
+  typeof loginWithEmailInteractor
+>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+mockLoginWithEmailInteractor.mockImplementation((email, password) => {
+  notifySuccess();
+  return Promise.resolve();
+});
+const mockLoginWithGoogleInteractor = loginWithGoogleInteractor as jest.MockedFunction<
+  typeof loginWithGoogleInteractor
+>;
+mockLoginWithGoogleInteractor.mockImplementation(() => {
   notifySuccess();
   return Promise.resolve();
 });
@@ -101,12 +104,11 @@ describe('Login component using email method', () => {
     };
 
     const testError = 'Invalid credentials';
-    (loginWithEmailInteractor as jest.MockedFunction<typeof loginWithEmailInteractor>)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .mockImplementationOnce((email, password) => {
-        notifyError(testError);
-        return Promise.resolve();
-      });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mockLoginWithEmailInteractor.mockImplementationOnce((email, password) => {
+      notifyError(testError);
+      return Promise.resolve();
+    });
 
     userEvt = userEvent.setup();
     render(<Login />);
@@ -201,9 +203,7 @@ describe('Login component using Google method', () => {
 
   it('should handle interactor error', async () => {
     const testError = 'Google error';
-    (
-      loginWithGoogleInteractor as jest.MockedFunction<typeof loginWithGoogleInteractor>
-    ).mockImplementationOnce(() => {
+    mockLoginWithGoogleInteractor.mockImplementationOnce(() => {
       notifyError(testError);
       return Promise.resolve();
     });

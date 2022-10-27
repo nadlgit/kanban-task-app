@@ -12,15 +12,18 @@ import {
 } from 'core/usecases';
 
 jest.mock('core/usecases');
-(registerWithEmailInteractor as jest.MockedFunction<typeof registerWithEmailInteractor>)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  .mockImplementation((email, password, username) => {
-    notifySuccess();
-    return Promise.resolve();
-  });
-(
-  registerWithGoogleInteractor as jest.MockedFunction<typeof registerWithGoogleInteractor>
-).mockImplementation(() => {
+const mockRegisterWithEmailInteractor = registerWithEmailInteractor as jest.MockedFunction<
+  typeof registerWithEmailInteractor
+>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+mockRegisterWithEmailInteractor.mockImplementation((email, password, username) => {
+  notifySuccess();
+  return Promise.resolve();
+});
+const mockRegisterWithGoogleInteractor = registerWithGoogleInteractor as jest.MockedFunction<
+  typeof registerWithGoogleInteractor
+>;
+mockRegisterWithGoogleInteractor.mockImplementation(() => {
   notifySuccess();
   return Promise.resolve();
 });
@@ -127,12 +130,11 @@ describe('Register component using email method', () => {
     };
 
     const testError = 'Unable to register';
-    (registerWithEmailInteractor as jest.MockedFunction<typeof registerWithEmailInteractor>)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .mockImplementationOnce((email, password, username) => {
-        notifyError(testError);
-        return Promise.resolve();
-      });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mockRegisterWithEmailInteractor.mockImplementationOnce((email, password, username) => {
+      notifyError(testError);
+      return Promise.resolve();
+    });
 
     userEvt = userEvent.setup();
     render(<Register />);
@@ -279,9 +281,7 @@ describe('Register component using Google method', () => {
 
   it('should handle interactor error', async () => {
     const testError = 'Google error';
-    (
-      registerWithGoogleInteractor as jest.MockedFunction<typeof registerWithGoogleInteractor>
-    ).mockImplementationOnce(() => {
+    mockRegisterWithGoogleInteractor.mockImplementationOnce(() => {
       notifyError(testError);
       return Promise.resolve();
     });
