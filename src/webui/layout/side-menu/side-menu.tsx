@@ -1,9 +1,9 @@
 import styles from './side-menu.module.css';
-import IconHide from './icon-hide-sidebar.svg';
 import IconShow from './icon-show-sidebar.svg';
 
 import { Disclosure, DisclosureContent, useDisclosureState } from 'ariakit/disclosure';
 
+import { IconHide } from './icon-hide-sidebar';
 import { Logout } from 'webui/auth';
 import { BoardListNav } from 'webui/board';
 import { ThemedLogo } from 'webui/shared';
@@ -25,8 +25,7 @@ export const SideMenu = ({ defaultIsOpen, onToggle }: SideMenuProps) => {
       >
         {state.open ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={IconHide.src} alt="Hide sidebar" />
+            <IconHide />
             <span>Hide Sidebar</span>
           </>
         ) : (
@@ -35,7 +34,9 @@ export const SideMenu = ({ defaultIsOpen, onToggle }: SideMenuProps) => {
         )}
       </Disclosure>
       <DisclosureContent state={state} className={styles.content}>
-        <ThemedLogo />
+        <div className={styles.logo}>
+          <ThemedLogo />
+        </div>
         <BoardListNav />
         <ThemeSwitch />
         <Logout />

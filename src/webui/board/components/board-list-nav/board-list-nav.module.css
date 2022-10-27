@@ -19,7 +19,7 @@
 
 .item {
   composes: heading-m from global;
-  width: clamp(15rem, calc(13.57rem + 2.98vw), 16.25rem);
+  width: clamp(15rem, calc(12.714rem + 4.8vw), 17rem);
   height: 3rem;
   display: flex;
   align-items: center;
