@@ -7,6 +7,7 @@ export async function logout() {
 
   if (!repository.getUser()) {
     notifyError(AUTH_NOT_LOGGED_IN_ERROR.message);
+    return;
   }
 
   try {
