@@ -182,7 +182,7 @@ describe('Register component using email method', () => {
     {
       desc: 'password with spaces',
       testEmail: faker.internet.email(),
-      testPassword: faker.lorem.words(2),
+      testPassword: faker.internet.password() + ' ' + faker.lorem.word(),
       testUsername: faker.internet.userName(),
       expectedPasswordError: new RegExp('Password must .*spaces'),
     },
