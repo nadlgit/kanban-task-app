@@ -1,12 +1,10 @@
-import type { NextPage } from 'next';
-
 import { Register } from 'webui/auth';
 import { BaseLayout } from 'webui/layout';
+import { setNextPageLayout } from 'webui/shared';
+import type { NextPageWithLayout } from 'webui/shared';
 
-const RegisterPage: NextPage = () => (
-  <BaseLayout>
-    <Register />
-  </BaseLayout>
-);
+const RegisterPage: NextPageWithLayout = () => <Register />;
+
+RegisterPage.getLayout = setNextPageLayout(BaseLayout);
 
 export default RegisterPage;

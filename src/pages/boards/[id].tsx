@@ -1,18 +1,21 @@
-import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
 import { BoardContent } from 'webui/board';
 import { BoardLayout } from 'webui/layout';
+import { setNextPageLayout } from 'webui/shared';
+import type { NextPageWithLayout } from 'webui/shared';
 
-const BoardPage: NextPage = () => {
+const BoardPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { id } = router.query;
   return (
-    <BoardLayout>
+    <>
       <div> {`Board "${id}"`}</div>
       <BoardContent />
-    </BoardLayout>
+    </>
   );
 };
+
+BoardPage.getLayout = setNextPageLayout(BoardLayout);
 
 export default BoardPage;

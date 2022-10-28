@@ -1,8 +1,7 @@
-import type { NextPage } from 'next';
-
 import { Navigate, BOARDS_ROUTE } from 'webui/routes';
+import type { NextPageWithLayout } from 'webui/shared';
 
-const BoardIndexPage: NextPage = () => {
+const BoardIndexPage: NextPageWithLayout = () => {
   return <Navigate to={`${BOARDS_ROUTE}/tmp_first_or_new`} />;
 };
 
