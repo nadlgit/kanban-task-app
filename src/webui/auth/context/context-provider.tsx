@@ -10,13 +10,13 @@ type AuthContextProviderProps = PropsWithChildren;
 export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<AuthUser>(null);
-  const updateUser = () => {
-    setLoading(true);
-    setUser(getUser());
-    setLoading(false);
-  };
 
   useEffect(() => {
+    const updateUser = () => {
+      setLoading(true);
+      setUser(getUser());
+      setLoading(false);
+    };
     updateUser();
     return onAuthChange(updateUser);
   }, []);
