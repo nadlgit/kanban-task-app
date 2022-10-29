@@ -5,25 +5,27 @@ import { useBoardList } from 'webui/board';
 
 export const BoardListNav = () => {
   const { boardList, activeBoardId, setActiveBoardId } = useBoardList();
+  const boardCount = boardList.length;
   return (
     <div className={styles.container}>
-      <p className={styles.title}>{`All boards (3)`}</p>
+      <p className={styles.title}>{`All boards (${boardCount})`}</p>
       <ul className={styles.list}>
-        <li className={`${styles.item} ${styles.active}`}>
-          <IconBoard />
-          <a href="#">Board #1</a>
-        </li>
-        <li className={styles.item}>
-          <IconBoard />
-          <a href="#">Board #2</a>
-        </li>
-        <li className={styles.item}>
-          <IconBoard />
-          <a href="#">Board #3</a>
-        </li>
+        {boardList.map((item) => (
+          <li
+            key={item.id}
+            className={`${styles.item} ${item.id === activeBoardId ? styles.active : ''}`}
+          >
+            <button onClick={() => setActiveBoardId(item.id)}>
+              <IconBoard />
+              <span>{item.name}</span>
+            </button>
+          </li>
+        ))}
         <li className={`${styles.item} ${styles.create}`}>
-          <IconBoard />
-          <button>+ Create New Board</button>
+          <button>
+            <IconBoard />
+            <span>+ Create New Board</span>
+          </button>
         </li>
       </ul>
     </div>

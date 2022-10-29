@@ -23,7 +23,6 @@
   height: 3rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
   border-top-right-radius: 6.25rem;
   border-bottom-right-radius: 6.25rem;
 }
@@ -37,11 +36,10 @@
   background-color: var(--color-white);
 }
 
-.item a {
-  color: inherit;
-}
-
-.item button {
+.item > * {
+  width: 100%;
+  display: flex;
+  gap: 1rem;
   color: inherit;
   background-color: transparent;
   border: none;
