@@ -3,9 +3,9 @@ import styles from './layout.module.css';
 import { useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
+import { BoardMobileMenu } from './board-mobile-menu';
+import { BoardSideMenu } from './board-side-menu';
 import { ChallengeAttribution } from './challenge-attribution';
-import { MobileMenu } from './mobile-menu';
-import { SideMenu } from './side-menu';
 import { BoardActions } from 'webui/board';
 import { MobileLogo, ThemedLogo, useIsMobile } from 'webui/shared';
 
@@ -32,13 +32,13 @@ export const BoardLayout = ({ boardName, children }: BoardLayoutProps) => {
         )}
         <div className={styles.headercenter}>
           <h1 className={styles.title}>{boardName ?? '[No board]'}</h1>
-          {isMobile && <MobileMenu />}
+          {isMobile && <BoardMobileMenu />}
         </div>
         <BoardActions isMobile={isMobile} />
       </header>
 
       <aside className={styles.sidebar}>
-        {!isMobile && <SideMenu defaultIsOpen={isSideMenuOpen} onToggle={setIsSideMenuOpen} />}
+        {!isMobile && <BoardSideMenu defaultIsOpen={isSideMenuOpen} onToggle={setIsSideMenuOpen} />}
       </aside>
 
       <main className={styles.main}>{children}</main>

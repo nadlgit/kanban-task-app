@@ -1,4 +1,4 @@
-import styles from './side-menu.module.css';
+import styles from './board-side-menu.module.css';
 import IconShow from './icon-show-sidebar.svg';
 
 import { Disclosure, DisclosureContent, useDisclosureState } from 'ariakit/disclosure';
@@ -9,9 +9,9 @@ import { BoardListNav } from 'webui/board';
 import { ThemedLogo } from 'webui/shared';
 import { ThemeSwitch } from 'webui/theme';
 
-type SideMenuProps = { defaultIsOpen: boolean; onToggle: (isOpen: boolean) => void };
+type BoardSideMenuProps = { defaultIsOpen: boolean; onToggle: (isOpen: boolean) => void };
 
-export const SideMenu = ({ defaultIsOpen, onToggle }: SideMenuProps) => {
+export const BoardSideMenu = ({ defaultIsOpen, onToggle }: BoardSideMenuProps) => {
   const state = useDisclosureState({
     defaultOpen: defaultIsOpen,
     setOpen: onToggle,

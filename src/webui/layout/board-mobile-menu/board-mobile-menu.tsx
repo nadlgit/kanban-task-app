@@ -1,4 +1,4 @@
-import styles from './mobile-menu.module.css';
+import styles from './board-mobile-menu.module.css';
 import IconDown from './icon-chevron-down.svg';
 import IconUp from './icon-chevron-up.svg';
 
@@ -8,7 +8,7 @@ import { Logout } from 'webui/auth';
 import { BoardListNav } from 'webui/board';
 import { ThemeSwitch } from 'webui/theme';
 
-export const MobileMenu = () => {
+export const BoardMobileMenu = () => {
   const state = useDialogState();
   return (
     <>
