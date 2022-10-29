@@ -1,6 +1,5 @@
-import type { BoardEntity, ColumnEntity, TaskEntity, UniqueId } from 'core/entities';
+import type { BoardEntity, BoardList, ColumnEntity, TaskEntity, UniqueId } from 'core/entities';
 
-type BoardList = Pick<BoardEntity, 'id' | 'name'>[];
 type BoardInfo = Omit<BoardEntity, 'id' | 'columns'>;
 type ColumnInfo = Omit<ColumnEntity, 'id' | 'tasks'>;
 type TaskInfo = Omit<TaskEntity, 'id'>;

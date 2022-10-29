@@ -6,3 +6,5 @@ export type BoardEntity = {
   name: string;
   columns: ColumnEntity[];
 };
+
+export type BoardList = Pick<BoardEntity, 'id' | 'name'>[];
