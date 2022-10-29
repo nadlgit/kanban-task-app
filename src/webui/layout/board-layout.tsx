@@ -1,21 +1,26 @@
 import styles from './layout.module.css';
 
 import { useState } from 'react';
-import type { PropsWithChildren } from 'react';
 
+import { ActiveBoard } from './active-board';
 import { BoardMobileMenu } from './board-mobile-menu';
 import { BoardSideMenu } from './board-side-menu';
+import { BoardTopMenu } from './board-top-menu';
 import { ChallengeAttribution } from './challenge-attribution';
-import { BoardActions } from 'webui/board';
+import { useBoardList } from 'webui/board';
+import { Loading } from 'webui/misc';
 import { MobileLogo, ThemedLogo, useIsMobile } from 'webui/shared';
 
-type BoardLayoutProps = PropsWithChildren<{
-  boardName?: string;
-}>;
-
-export const BoardLayout = ({ boardName, children }: BoardLayoutProps) => {
+export const BoardLayout = () => {
+  const { loading, boardList, activeBoardId } = useBoardList();
+  const boardName = boardList.find((item) => item.id === activeBoardId)?.name ?? '[No board]';
   const isMobile = useIsMobile();
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(true);
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <div className={styles.app}>
       <header className={styles.header}>
@@ -31,17 +36,19 @@ export const BoardLayout = ({ boardName, children }: BoardLayoutProps) => {
           )
         )}
         <div className={styles.headercenter}>
-          <h1 className={styles.title}>{boardName ?? '[No board]'}</h1>
+          <h1 className={styles.title}>{boardName}</h1>
           {isMobile && <BoardMobileMenu />}
         </div>
-        <BoardActions isMobile={isMobile} />
+        <BoardTopMenu />
       </header>
 
       <aside className={styles.sidebar}>
         {!isMobile && <BoardSideMenu defaultIsOpen={isSideMenuOpen} onToggle={setIsSideMenuOpen} />}
       </aside>
 
-      <main className={styles.main}>{children}</main>
+      <main className={styles.main}>
+        <ActiveBoard />
+      </main>
 
       <footer className={styles.footer}>
         <ChallengeAttribution />

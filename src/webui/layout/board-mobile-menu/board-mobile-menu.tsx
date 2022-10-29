@@ -4,8 +4,8 @@ import IconUp from './icon-chevron-up.svg';
 
 import { Dialog, DialogDisclosure, useDialogState } from 'ariakit/dialog';
 
+import { BoardListNav } from '../board-list-nav';
 import { Logout } from 'webui/auth';
-import { BoardListNav } from 'webui/board';
 import { ThemeSwitch } from 'webui/theme';
 
 export const BoardMobileMenu = () => {

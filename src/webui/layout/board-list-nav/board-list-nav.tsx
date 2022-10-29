@@ -1,8 +1,10 @@
 import styles from './board-list-nav.module.css';
 
 import { IconBoard } from './icon-board';
+import { useBoardList } from 'webui/board';
 
 export const BoardListNav = () => {
+  const { boardList, activeBoardId, setActiveBoardId } = useBoardList();
   return (
     <div className={styles.container}>
       <p className={styles.title}>{`All boards (3)`}</p>

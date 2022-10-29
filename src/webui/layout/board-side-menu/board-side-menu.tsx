@@ -4,8 +4,8 @@ import IconShow from './icon-show-sidebar.svg';
 import { Disclosure, DisclosureContent, useDisclosureState } from 'ariakit/disclosure';
 
 import { IconHide } from './icon-hide-sidebar';
+import { BoardListNav } from '../board-list-nav';
 import { Logout } from 'webui/auth';
-import { BoardListNav } from 'webui/board';
 import { ThemedLogo } from 'webui/shared';
 import { ThemeSwitch } from 'webui/theme';
 
