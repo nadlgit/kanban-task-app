@@ -1,5 +1,7 @@
 import styles from './board-list-nav.module.css';
 
+import { useEffect } from 'react';
+
 import { IconBoard } from './icon-board';
 import { AddBoard, useBoardList } from 'webui/board';
 import { Modal, useModalToggle } from 'webui/shared';
@@ -13,6 +15,12 @@ export const BoardListNav = () => {
     closeModal: closeAddBoard,
     openModal: openAddBoard,
   } = useModalToggle();
+
+  useEffect(() => {
+    if (!boardList.length) {
+      openAddBoard();
+    }
+  }, [boardList, openAddBoard]);
 
   return (
     <>
