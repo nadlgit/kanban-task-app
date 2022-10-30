@@ -19,6 +19,7 @@ export const useActiveBoard = () => {
       updateBoard();
       return onBoardChange(activeBoardId, updateBoard);
     }
+    setLoading(loadingBoardList);
   }, [activeBoardId, loadingBoardList]);
 
   return { loading, board };
