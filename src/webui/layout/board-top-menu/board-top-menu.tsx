@@ -1,15 +1,24 @@
 import styles from './board-top-menu.module.css';
 
-import { AddTaskBtn, useBoardList } from 'webui/board';
+import { AddTaskBtn, useActiveBoard } from 'webui/board';
 import { Menu, useIsMobile } from 'webui/shared';
 
 export const BoardTopMenu = () => {
-  const { activeBoardId } = useBoardList();
   const isMobile = useIsMobile();
+  const { loading, board } = useActiveBoard();
   return (
     <div className={styles.container}>
       <AddTaskBtn isMobile={isMobile} />
-      <Menu items={['Edit Board', 'Delete Board']} />
+      <Menu
+        items={[
+          { label: 'Edit Board', onClick: () => alert(`Edit active board`) },
+          {
+            label: 'Delete Board',
+            onClick: () => alert(`Delete active board`),
+            variant: 'destructive',
+          },
+        ]}
+      />
     </div>
   );
 };

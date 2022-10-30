@@ -1,10 +1,14 @@
 .button {
   padding: 0.5em 1em;
+  line-height: 1em;
   border: none;
   background-color: transparent;
 }
 
 .menu {
+  min-width: 12rem;
+  width: fit-content;
+  overflow: hidden;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
 }
@@ -13,4 +17,22 @@
 }
 :global(.theme-dark) .menu {
   background-color: var(--color-grey-very-dark);
+}
+
+.item {
+  composes: body-l from global;
+  min-height: 1.5rem;
+  padding: 0.5rem 1rem;
+  color: var(--color-grey-medium);
+  cursor: pointer;
+}
+:global(.theme-light) .item:hover {
+  background-color: var(--color-purple-light);
+}
+:global(.theme-dark) .item:hover {
+  background-color: var(--color-white-hover);
+}
+
+.destructive {
+  color: var(--color-red);
 }
