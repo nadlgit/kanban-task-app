@@ -3,7 +3,12 @@ import IconMenu from './icon-vertical-ellipsis.svg';
 
 import { Menu as BaseMenu, MenuButton, MenuItem, useMenuState } from 'ariakit/menu';
 
-type MenuItemInfo = { label: string; onClick: () => void; variant?: 'destructive' };
+type MenuItemInfo = {
+  label: string;
+  onClick: () => void;
+  variant?: 'destructive';
+  disabled?: boolean;
+};
 type MenuProps = { items: MenuItemInfo[] };
 
 export const Menu = ({ items }: MenuProps) => {
@@ -20,6 +25,7 @@ export const Menu = ({ items }: MenuProps) => {
             key={item.label}
             onClick={item.onClick}
             className={`${styles.item} ${item?.variant ? styles[item.variant] : ''}`}
+            disabled={item?.disabled}
           >
             {item.label}
           </MenuItem>

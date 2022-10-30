@@ -20,8 +20,11 @@
   color: var(--color-white);
   background-color: var(--color-purple);
 }
-.primary-l:hover {
+.primary-l:hover:not(:disabled) {
   background-color: var(--color-purple-hover);
+}
+.primary-l:disabled {
+  background-color: var(--color-purple-light-hover);
 }
 
 .primary-s {
@@ -32,8 +35,11 @@
   color: var(--color-white);
   background-color: var(--color-purple);
 }
-.primary-s:hover {
+.primary-s:hover:not(:disabled) {
   background-color: var(--color-purple-hover);
+}
+.primary-s:disabled {
+  background-color: var(--color-purple-light-hover);
 }
 
 .secondary {
@@ -46,13 +52,13 @@
 :global(.theme-light) .secondary {
   background-color: var(--color-purple-light);
 }
-:global(.theme-light) .secondary:hover {
+:global(.theme-light) .secondary:hover:not(:disabled) {
   background-color: var(--color-purple-light-hover);
 }
 :global(.theme-dark) .secondary {
   background-color: var(--color-white);
 }
-:global(.theme-dark) .secondary:hover {
+:global(.theme-dark) .secondary:hover:not(:disabled) {
   background-color: var(--color-white-hover);
 }
 
@@ -64,6 +70,6 @@
   color: var(--color-white);
   background-color: var(--color-red);
 }
-.destructive:hover {
+.destructive:hover:not(:disabled) {
   background-color: var(--color-red-hover);
 }

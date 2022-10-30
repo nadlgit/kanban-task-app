@@ -51,9 +51,9 @@ body.theme-dark {
   color: var(--color-white);
 }
 
-button,
-input,
-textarea {
+button:not(:disabled),
+input:not(:disabled),
+textarea:not(:disabled) {
   cursor: pointer;
 }
 

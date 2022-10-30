@@ -30,7 +30,7 @@
   background-color: var(--color-purple-light);
 }
 :global(.theme-dark) .item:hover {
-  background-color: var(--color-white-hover);
+  background-color: var(--color-grey-dark);
 }
 
 .destructive {
