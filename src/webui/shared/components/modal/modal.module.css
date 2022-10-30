@@ -1,0 +1,12 @@
+.backdrop {
+  background-color: var(--backdrop-color);
+}
+
+.modal {
+}
+:global(.theme-light) .modal {
+  background-color: var(--color-white);
+}
+:global(.theme-dark) .modal {
+  background-color: var(--color-grey-dark);
+}
