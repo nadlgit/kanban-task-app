@@ -46,8 +46,9 @@ export class FakeBoardRepository implements BoardRepository {
       callback();
     };
     this.#onBoardChangeCallback.set(boardId, boardCallback);
+    const clearPeriodicCallback = setPeriodicCallback(boardCallback);
     return () => {
-      setPeriodicCallback(boardCallback);
+      clearPeriodicCallback();
       this.#onBoardChangeCallback.delete(boardId);
     };
   }
