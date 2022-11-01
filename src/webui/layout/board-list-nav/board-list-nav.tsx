@@ -39,7 +39,7 @@ export const BoardListNav = () => {
       </div>
 
       <Modal isOpen={isAddBoardOpen} onClose={closeAddBoard}>
-        <AddBoard />
+        <AddBoard onSubmit={closeAddBoard} />
       </Modal>
     </>
   );
