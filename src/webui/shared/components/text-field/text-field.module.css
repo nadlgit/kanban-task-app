@@ -1,15 +1,27 @@
+.base {
+  margin-block: 0.25rem;
+}
+
 .full-width {
   width: 100%;
 }
 
 .label {
   composes: body-m from global;
-  line-height: normal;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.inputcontainer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
 }
 
 .input {
   composes: body-l from global;
   width: 100%;
+  display: block;
   min-height: 2.5rem;
   padding-inline: 1rem;
   border: 1px solid var(--color-grey-medium-border);
@@ -28,12 +40,24 @@
   outline-color: var(--color-red);
 }
 
+.delete {
+  margin-left: 0.5rem;
+  padding: 0;
+  color: var(--color-grey-medium);
+  border: none;
+  background-color: transparent;
+}
+.delete:hover {
+  color: var(--color-red);
+}
+
 .errormsg {
+  grid-row: 2;
   width: 100%;
-  display: inline-block;
+  min-height: 1em;
+  display: block;
   font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
-  line-height: normal;
   text-align: right;
   color: var(--color-red);
 }
