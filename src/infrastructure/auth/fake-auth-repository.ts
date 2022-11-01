@@ -37,7 +37,7 @@ export class FakeAuthRepository implements AuthRepository {
       callback();
     };
     const POLL_FREQUENCY_MILLISECONDS = 60 * 1000;
-    const intervalId = setInterval(() => this.#onAuthChangeCallback(), POLL_FREQUENCY_MILLISECONDS);
+    const intervalId = setInterval(this.#onAuthChangeCallback, POLL_FREQUENCY_MILLISECONDS);
     return () => clearTimeout(intervalId);
   }
 }

@@ -4,9 +4,7 @@ import type { BoardEntity, ColumnEntity, TaskEntity, UniqueId } from 'core/entit
 
 export function setPeriodicCallback(callback: () => void) {
   const POLL_FREQUENCY_MILLISECONDS = 60 * 1000;
-  const intervalId = setInterval(() => {
-    callback();
-  }, POLL_FREQUENCY_MILLISECONDS);
+  const intervalId = setInterval(callback, POLL_FREQUENCY_MILLISECONDS);
   return () => clearTimeout(intervalId);
 }
 
