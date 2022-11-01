@@ -15,11 +15,13 @@ export const Button = ({
   children,
   ...otherprops
 }: ButtonProps) => {
-  const cssClass = `${styles.button} ${styles[variant] ?? ''} ${
-    fullWidth ? styles['full-width'] : ''
-  } ${className ?? ''}`;
+  const cssClasses = [styles.button];
+  styles[variant] && cssClasses.push(styles[variant]);
+  fullWidth && cssClasses.push(styles['full-width']);
+  className && cssClasses.push(className);
+
   return (
-    <button type={type ?? 'button'} className={cssClass} {...otherprops}>
+    <button type={type ?? 'button'} className={cssClasses.join(' ')} {...otherprops}>
       {children}
     </button>
   );

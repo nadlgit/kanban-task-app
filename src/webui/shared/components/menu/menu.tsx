@@ -20,16 +20,20 @@ export const Menu = ({ items }: MenuProps) => {
         <img src={IconMenu.src} alt="Toggle menu" />
       </MenuButton>
       <BaseMenu state={state} className={styles.menu}>
-        {items.map((item) => (
-          <MenuItem
-            key={item.label}
-            onClick={item.onClick}
-            className={`${styles.item} ${item?.variant ? styles[item.variant] : ''}`}
-            disabled={item?.disabled}
-          >
-            {item.label}
-          </MenuItem>
-        ))}
+        {items.map((item) => {
+          const cssClasses = [styles.item];
+          item?.variant && cssClasses.push(styles[item.variant]);
+          return (
+            <MenuItem
+              key={item.label}
+              onClick={item.onClick}
+              className={cssClasses.join(' ')}
+              disabled={item?.disabled}
+            >
+              {item.label}
+            </MenuItem>
+          );
+        })}
       </BaseMenu>
     </>
   );

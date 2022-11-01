@@ -17,11 +17,14 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   ref
 ) {
   const htmlId = id ?? name;
-  const cssClass = `${fullWidth ? styles['full-width'] : ''} ${error ? styles.invalid : ''} ${
-    className ?? ''
-  }`;
+
+  const cssClasses = [] as string[];
+  fullWidth && cssClasses.push(styles['full-width']);
+  error && cssClasses.push(styles.invalid);
+  className && cssClasses.push(className);
+
   return (
-    <p className={cssClass}>
+    <p className={cssClasses.join(' ')}>
       {label && (
         <label htmlFor={htmlId} className={styles.label}>
           {label}
