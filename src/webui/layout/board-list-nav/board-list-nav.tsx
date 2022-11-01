@@ -2,13 +2,12 @@ import styles from './board-list-nav.module.css';
 
 import { useEffect } from 'react';
 
-import { IconBoard } from './icon-board';
+import { BoardListNavItem } from './board-list-nav-item';
 import { AddBoard, useBoardList } from 'webui/board';
 import { Modal, useModalToggle } from 'webui/shared';
 
 export const BoardListNav = () => {
   const { boardList, activeBoardId, setActiveBoardId } = useBoardList();
-  const boardCount = boardList.length;
 
   const {
     isModalOpen: isAddBoardOpen,
@@ -25,25 +24,17 @@ export const BoardListNav = () => {
   return (
     <>
       <div className={styles.container}>
-        <p className={styles.title}>{`All boards (${boardCount})`}</p>
+        <p className={styles.title}>{`All boards (${boardList.length})`}</p>
         <ul className={styles.list}>
           {boardList.map((item) => (
-            <li
+            <BoardListNavItem
               key={item.id}
-              className={`${styles.item} ${item.id === activeBoardId ? styles.active : ''}`}
-            >
-              <button onClick={() => setActiveBoardId(item.id)}>
-                <IconBoard />
-                <span>{item.name}</span>
-              </button>
-            </li>
+              label={item.name}
+              onClick={() => setActiveBoardId(item.id)}
+              isActive={item.id === activeBoardId}
+            />
           ))}
-          <li className={`${styles.item} ${styles.create}`}>
-            <button onClick={openAddBoard}>
-              <IconBoard />
-              <span>+ Create New Board</span>
-            </button>
-          </li>
+          <BoardListNavItem label="+ Create New Board" onClick={openAddBoard} isCreate />
         </ul>
       </div>
 
