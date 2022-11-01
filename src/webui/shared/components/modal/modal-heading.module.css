@@ -1,0 +1,10 @@
+.heading {
+  composes: heading-l from global;
+  margin-bottom: 1em;
+}
+:global(.theme-light) .heading {
+  color: var(--color-black);
+}
+:global(.theme-dark) .heading {
+  color: var(--color-white);
+}
