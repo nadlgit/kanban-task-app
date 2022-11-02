@@ -1,27 +1,29 @@
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import { boardListReducer } from './board-list-reducer';
 import { BoardContext } from './context';
-import type { UniqueId } from 'core/entities';
+import type { BoardList, UniqueId } from 'core/entities';
 import { getBoardList, onBoardListChange } from 'core/usecases';
 
 type BoardContextProviderProps = PropsWithChildren;
 
 export const BoardContextProvider = ({ children }: BoardContextProviderProps) => {
   const [loading, setLoading] = useState(true);
-  const [{ boardList, activeBoardId }, dispatchBoardList] = useReducer(boardListReducer, {
-    boardList: [],
-    activeBoardId: null,
-  });
-  const setActiveBoardId = useCallback((id: UniqueId | null) => {
-    dispatchBoardList({ type: 'SET_ACTIVE_ID', id });
-  }, []);
+  const [boardList, setBoardList] = useState<BoardList>([]);
+  const [activeBoardId, setActiveBoardId] = useState<UniqueId | null>(null);
 
   useEffect(() => {
     const updateBoardList = async () => {
       setLoading(true);
-      dispatchBoardList({ type: 'SET_LIST', list: await getBoardList() });
+      const list = await getBoardList();
+      setBoardList(list);
+      setActiveBoardId((activeId) => {
+        if (list.find((board) => board.id === activeId)) {
+          return activeId;
+        } else {
+          return list.length > 0 ? list[0].id : null;
+        }
+      });
       setLoading(false);
     };
     updateBoardList();
