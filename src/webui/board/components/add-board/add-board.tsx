@@ -3,7 +3,13 @@ import styles from './add-board.module.css';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Button, ModalHeading, TextField, TextFieldGroup, TextFieldGroupItem } from 'webui/shared';
+import {
+  Button,
+  ModalHeading,
+  TextField,
+  TextFieldGroup,
+  useTextFieldGroupInputList,
+} from 'webui/shared';
 
 type AddBoardProps = { onSubmit: () => void };
 
@@ -13,6 +19,22 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  const {
+    list: columns,
+    addItem: addColumnItem,
+    deleteItem: deleteColumnItem,
+    newItemName: newColumnItemName,
+  } = useTextFieldGroupInputList([
+    {
+      ...register(`addBoardColumnFirst`, {
+        onBlur: (e) => {
+          e.target.value = e.target.value.trim();
+        },
+      }),
+      defaultValue: 'valFirst',
+    },
+  ]);
 
   const handleTBD: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -39,30 +61,21 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
         />
         <TextFieldGroup
           groupLabel="Board Columns"
+          inputList={columns}
           addLabel="+ Add New Column"
-          onAdd={() => console.log('onAdd')}
-        >
-          <TextFieldGroupItem
-            {...register('addBoardColumn1', {
-              onBlur: (e) => {
-                e.target.value = e.target.value.trim();
-              },
-            })}
-            defaultValue="val1"
-            onDelete={() => console.log('onDelete1')}
-            // error="test"
-          />
-          <TextFieldGroupItem
-            {...register('addBoardColumn2', {
-              onBlur: (e) => {
-                e.target.value = e.target.value.trim();
-              },
-            })}
-            defaultValue="val2"
-            onDelete={() => console.log('onDelete2')}
-            // error="test"
-          />
-        </TextFieldGroup>
+          onAdd={() => {
+            addColumnItem({
+              ...register(newColumnItemName('addBoardColumn'), {
+                onBlur: (e) => {
+                  e.target.value = e.target.value.trim();
+                },
+              }),
+            });
+          }}
+          onDelete={(index: number) => {
+            deleteColumnItem(index);
+          }}
+        />
         <Button variant="primary-s" type="submit">
           Create New Board
         </Button>

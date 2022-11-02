@@ -4,11 +4,11 @@ import type { PropsWithoutRef } from 'react';
 import { TextField } from '../text-field';
 import type { TextFieldProps } from '../text-field';
 
-type TextFieldGroupItemProps = Required<Pick<TextFieldProps, 'onDelete'>> &
+export type TextFieldGroupInputProps = Required<Pick<TextFieldProps, 'onDelete'>> &
   Omit<PropsWithoutRef<TextFieldProps>, 'onDelete' | 'label'>;
 
-export const TextFieldGroupItem = forwardRef<HTMLInputElement, TextFieldGroupItemProps>(
-  function TextFieldGroupItem(props, ref) {
+export const TextFieldGroupInput = forwardRef<HTMLInputElement, TextFieldGroupInputProps>(
+  function TextFieldGroupInput(props, ref) {
     return <TextField ref={ref} {...props} />;
   }
 );

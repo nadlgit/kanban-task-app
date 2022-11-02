@@ -1,2 +1,2 @@
 export * from './text-field-group';
-export * from './text-field-group-item';
+export * from './use-text-field-group-input-list';
