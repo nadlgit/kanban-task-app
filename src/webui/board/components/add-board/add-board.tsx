@@ -16,7 +16,7 @@ import {
 type AddBoardProps = { onSubmit: () => void };
 
 export const AddBoard = ({ onSubmit }: AddBoardProps) => {
-  const { register, handleSubmit, formState } = useForm();
+  const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
 
   const registerOptions: Parameters<typeof register>[1] = {
     onBlur: (e) => {
@@ -28,19 +28,27 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
 
   const newColumnItemName = () => newItemName('newcolumn');
 
+  const initializeColumns = () => [{ ...register(newColumnItemName(), registerOptions) }];
+
   const {
     list: columns,
     addItem: addColumnItem,
     deleteItem: deleteColumnItem,
     setError: setColumnItemError,
-  } = useTextFieldGroupInputList([{ ...register(newColumnItemName(), registerOptions) }]);
+  } = useTextFieldGroupInputList(initializeColumns);
 
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    handleSubmit(async (data) => {
-      onSubmit();
-    })(e);
+    handleSubmit(
+      async (data) => {
+        console.log('\x1b[43mdata', data);
+        onSubmit();
+      },
+      (error) => {
+        console.log('\x1b[43merror', error);
+      }
+    )(e);
   };
 
   useEffect(() => {
