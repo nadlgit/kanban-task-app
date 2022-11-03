@@ -9,13 +9,19 @@ export const useTextFieldGroupInputList = (initialList: TextFieldGroupInputDef[]
     setList((l) => [...l, item]);
   }, []);
 
-  const deleteItem = useCallback((index: number) => {
-    setList((l) => [...l.slice(0, index), ...l.slice(index + 1)]);
+  const deleteItem = useCallback((itemName: string) => {
+    setList((l) => [...l.filter((item) => item.name !== itemName)]);
   }, []);
 
-  const newItemName = useCallback((prefix: string) => {
-    return `${prefix}${Date.now()}`;
+  const setError = useCallback((itemName: string, errorMsg: string | undefined) => {
+    setList((l) => {
+      const targetItem = l.find((item) => item.name === itemName);
+      if (targetItem) {
+        targetItem.error = errorMsg;
+      }
+      return [...l];
+    });
   }, []);
 
-  return { list, addItem, deleteItem, newItemName };
+  return { list, addItem, deleteItem, setError };
 };

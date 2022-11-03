@@ -13,7 +13,7 @@ type TextFieldGroupProps = {
   inputList: TextFieldGroupInputDef[];
   addLabel: string;
   onAdd: () => void;
-  onDelete: (index: number) => void;
+  onDelete: (inputName: string) => void;
 };
 
 export const TextFieldGroup = ({
@@ -26,8 +26,8 @@ export const TextFieldGroup = ({
   return (
     <>
       <p className={styles.label}>{groupLabel}</p>
-      {inputList.map((input, index) => (
-        <TextFieldGroupInput key={input.name} onDelete={() => onDelete(index)} {...input} />
+      {inputList.map((input) => (
+        <TextFieldGroupInput key={input.name} onDelete={() => onDelete(input.name)} {...input} />
       ))}
       <Button variant="secondary" onClick={onAdd}>
         {addLabel}

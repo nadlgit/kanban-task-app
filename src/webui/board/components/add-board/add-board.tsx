@@ -1,11 +1,13 @@
 import styles from './add-board.module.css';
 
+import { useEffect } from 'react';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
   Button,
   ModalHeading,
+  newItemName,
   TextField,
   TextFieldGroup,
   useTextFieldGroupInputList,
@@ -14,29 +16,26 @@ import {
 type AddBoardProps = { onSubmit: () => void };
 
 export const AddBoard = ({ onSubmit }: AddBoardProps) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, formState } = useForm();
+
+  const registerOptions: Parameters<typeof register>[1] = {
+    onBlur: (e) => {
+      e.target.value = e.target.value.trim();
+    },
+    required: "Can't be empty",
+    pattern: { value: /\S/, message: "Can't be empty" },
+  };
+
+  const newColumnItemName = () => newItemName('newcolumn');
 
   const {
     list: columns,
     addItem: addColumnItem,
     deleteItem: deleteColumnItem,
-    newItemName: newColumnItemName,
-  } = useTextFieldGroupInputList([
-    {
-      ...register(`addBoardColumnFirst`, {
-        onBlur: (e) => {
-          e.target.value = e.target.value.trim();
-        },
-      }),
-      defaultValue: 'valFirst',
-    },
-  ]);
+    setError: setColumnItemError,
+  } = useTextFieldGroupInputList([{ ...register(newColumnItemName(), registerOptions) }]);
 
-  const handleTBD: FormEventHandler<HTMLFormElement> = (e) => {
+  const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
     handleSubmit(async (data) => {
@@ -44,36 +43,38 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
     })(e);
   };
 
+  useEffect(() => {
+    const columnErrors = columns.map(({ name, error }) => ({ name, error }));
+    const formColumnErrors = Object.entries(formState.errors).map(([key, value]) => ({
+      name: key,
+      error: value?.message as string | undefined,
+    }));
+    columnErrors.forEach(({ name, error }) => {
+      const formError = formColumnErrors.find((form) => form.name === name)?.error;
+      if (formError !== error) {
+        setColumnItemError(name, formError);
+      }
+    });
+  }, [formState, columns, setColumnItemError]);
+
   return (
     <>
       <ModalHeading>Add New Board</ModalHeading>
-      <form onSubmit={handleTBD} noValidate>
+      <form onSubmit={handleFormSubmit} noValidate>
         <TextField
-          {...register('boardname', {
-            onBlur: (e) => {
-              e.target.value = e.target.value.trim();
-            },
-          })}
-          id="boardname"
-          type="text"
+          {...register('boardname', registerOptions)}
           label="Board Name"
-          error={errors['boardname']?.message as string}
+          error={formState.errors['boardname']?.message as string | undefined}
         />
         <TextFieldGroup
           groupLabel="Board Columns"
           inputList={columns}
           addLabel="+ Add New Column"
           onAdd={() => {
-            addColumnItem({
-              ...register(newColumnItemName('addBoardColumn'), {
-                onBlur: (e) => {
-                  e.target.value = e.target.value.trim();
-                },
-              }),
-            });
+            addColumnItem({ ...register(newColumnItemName(), registerOptions) });
           }}
-          onDelete={(index: number) => {
-            deleteColumnItem(index);
+          onDelete={(inputName: string) => {
+            deleteColumnItem(inputName);
           }}
         />
         <Button variant="primary-s" type="submit">
