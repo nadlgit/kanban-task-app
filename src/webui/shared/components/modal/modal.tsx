@@ -16,7 +16,7 @@ export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   });
   return (
     <Dialog state={state} className={styles.modal} backdropProps={{ className: styles.backdrop }}>
-      {children}
+      {isOpen && children}
     </Dialog>
   );
 };
