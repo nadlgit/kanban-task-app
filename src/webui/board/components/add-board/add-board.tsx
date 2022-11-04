@@ -25,8 +25,11 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
   };
 
   const newColumnItemName = () => generateId('newcolumn');
+  const newColumnPlaceholder = 'e.g. Todo';
 
-  const initializeColumns = () => [{ ...register(newColumnItemName(), registerOptions) }];
+  const initializeColumns = () => [
+    { ...register(newColumnItemName(), registerOptions), placeholder: newColumnPlaceholder },
+  ];
 
   const {
     list: columns,
@@ -70,6 +73,7 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
         <TextField
           {...register('boardname', registerOptions)}
           label="Board Name"
+          placeholder="e.g. Web Design"
           error={formState.errors['boardname']?.message as string | undefined}
         />
         <TextFieldGroup
@@ -77,7 +81,10 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
           inputList={columns}
           addLabel="+ Add New Column"
           onAdd={() => {
-            addColumnItem({ ...register(newColumnItemName(), registerOptions) });
+            addColumnItem({
+              ...register(newColumnItemName(), registerOptions),
+              placeholder: newColumnPlaceholder,
+            });
           }}
           onDelete={(inputName: string) => {
             deleteColumnItem(inputName);
