@@ -15,7 +15,7 @@ export type BoardRepository = {
     userId: UniqueId,
     board: BoardInfo & { columns: ColumnInfo[] },
     index?: number
-  ) => Promise<void>;
+  ) => Promise<UniqueId>;
   addColumn: (
     userId: UniqueId,
     boardId: UniqueId,

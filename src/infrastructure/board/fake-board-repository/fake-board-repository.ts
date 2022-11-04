@@ -64,13 +64,17 @@ export class FakeBoardRepository implements BoardRepository {
       columns: board.columns.map((column) => ({ ...newEmptyColumn(), ...column })),
     };
     addEntity(this.#boards, newBoard, index);
+    this.#onBoardListChangeCallback();
     console.log('addBoard', { userId, board, index }, this.#boards);
+    return newBoard.id;
   }
 
   async addColumn(userId: string, boardId: string, column: { name: string }, index?: number) {
     const newColumn = { ...newEmptyColumn(), ...column };
     const board = findEntity(this.#boards, boardId);
     addEntity(board.columns, newColumn, index);
+    const listenerCallback = this.#onBoardChangeCallback.get(boardId);
+    listenerCallback && listenerCallback();
     console.log('addColumn', { userId, boardId, column, index }, board);
   }
 
@@ -89,6 +93,8 @@ export class FakeBoardRepository implements BoardRepository {
     const board = findEntity(this.#boards, boardId);
     const column = findEntity(board.columns, columnId);
     addEntity(column.tasks, newTask, index);
+    const listenerCallback = this.#onBoardChangeCallback.get(boardId);
+    listenerCallback && listenerCallback();
     console.log('addTask', { userId, boardId, columnId, task, index }, column);
   }
 
@@ -98,6 +104,9 @@ export class FakeBoardRepository implements BoardRepository {
     if (index !== undefined) {
       moveEntity(this.#boards, board.id, index);
     }
+    //this.#onBoardListChangeCallback();
+    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
+    listenerCallback && listenerCallback();
     console.log('updateBoard', { userId, boardParam, index }, this.#boards);
   }
 
@@ -113,6 +122,8 @@ export class FakeBoardRepository implements BoardRepository {
     if (index !== undefined) {
       moveEntity(board.columns, column.id, index);
     }
+    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
+    listenerCallback && listenerCallback();
     console.log('updateColumn', { userId, boardId, columnParam, index }, board);
   }
 
@@ -141,17 +152,22 @@ export class FakeBoardRepository implements BoardRepository {
       const newColumn = findEntity(board.columns, columnId);
       changeTaskColumn(column.tasks, newColumn.tasks, task.id, index);
     }
+    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
+    listenerCallback && listenerCallback();
     console.log('updateTask', { userId, boardId, columnId, taskParam, index, oldColumnId }, board);
   }
 
   async deleteBoard(userId: string, boardId: string) {
     deleteEntity(this.#boards, boardId);
+    this.#onBoardListChangeCallback();
     console.log('deleteBoard', { userId, boardId }, this.#boards);
   }
 
   async deleteColumn(userId: string, boardId: string, columnId: string) {
     const board = findEntity(this.#boards, boardId);
     deleteEntity(board.columns, columnId);
+    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
+    listenerCallback && listenerCallback();
     console.log('deleteColumn', { userId, boardId, columnId }, board);
   }
 
@@ -159,6 +175,8 @@ export class FakeBoardRepository implements BoardRepository {
     const board = findEntity(this.#boards, boardId);
     const column = findEntity(board.columns, columnId);
     deleteEntity(column.tasks, taskId);
+    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
+    listenerCallback && listenerCallback();
     console.log('deleteTask', { userId, boardId, columnId, taskId }, column);
   }
 }

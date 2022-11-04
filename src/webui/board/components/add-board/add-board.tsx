@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
+import type { UniqueId } from 'core/entities';
+import { addBoard } from 'core/usecases';
 import { generateId } from 'infrastructure/utils';
 import {
   Button,
@@ -11,7 +13,7 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-type AddBoardProps = { onSubmit: () => void };
+type AddBoardProps = { onSubmit: (newBoardId: UniqueId) => void };
 
 export const AddBoard = ({ onSubmit }: AddBoardProps) => {
   const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
@@ -41,15 +43,16 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    handleSubmit(
-      async (data) => {
-        console.log('\x1b[43mdata', data);
-        onSubmit();
-      },
-      (error) => {
-        console.log('\x1b[43merror', error);
+    handleSubmit(async (data) => {
+      const board = {
+        name: data.boardname,
+        columns: columns.map(({ name }) => ({ name: data[name] })),
+      };
+      const result = await addBoard(board);
+      if (result.ok) {
+        onSubmit(result.boardId);
       }
-    )(e);
+    })(e);
   };
 
   useEffect(() => {
