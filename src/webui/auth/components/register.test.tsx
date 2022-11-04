@@ -18,14 +18,14 @@ const mockRegisterWithEmailInteractor = registerWithEmailInteractor as jest.Mock
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 mockRegisterWithEmailInteractor.mockImplementation((email, password, username) => {
   notifySuccess();
-  return Promise.resolve();
+  return Promise.resolve({ ok: true });
 });
 const mockRegisterWithGoogleInteractor = registerWithGoogleInteractor as jest.MockedFunction<
   typeof registerWithGoogleInteractor
 >;
 mockRegisterWithGoogleInteractor.mockImplementation(() => {
   notifySuccess();
-  return Promise.resolve();
+  return Promise.resolve({ ok: true });
 });
 
 jest.mock('webui/routes/components/navigate');
@@ -133,7 +133,7 @@ describe('Register component using email method', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mockRegisterWithEmailInteractor.mockImplementationOnce((email, password, username) => {
       notifyError(testError);
-      return Promise.resolve();
+      return Promise.resolve({ ok: false });
     });
 
     userEvt = userEvent.setup();
@@ -149,8 +149,9 @@ describe('Register component using email method', () => {
     try {
       await screen.findByTestId(mockNavigateTestId);
     } catch (e) {
-      expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
+      //Do nothing
     }
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     expect(notifyError).toHaveBeenCalledTimes(1);
     expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
@@ -283,7 +284,7 @@ describe('Register component using Google method', () => {
     const testError = 'Google error';
     mockRegisterWithGoogleInteractor.mockImplementationOnce(() => {
       notifyError(testError);
-      return Promise.resolve();
+      return Promise.resolve({ ok: false });
     });
 
     userEvt = userEvent.setup();
@@ -295,8 +296,9 @@ describe('Register component using Google method', () => {
     try {
       await screen.findByTestId(mockNavigateTestId);
     } catch (e) {
-      expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
+      //Do nothing
     }
+    expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
     expect(notifyError).toHaveBeenCalledTimes(1);
     expect(notifyError).toHaveBeenLastCalledWith(testError);
   });

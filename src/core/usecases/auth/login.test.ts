@@ -23,8 +23,9 @@ describe('loginWithEmailInteractor()', () => {
       password: faker.internet.password(),
     };
 
-    await loginWithEmailInteractor(testCredential.email, testCredential.password);
+    const result = await loginWithEmailInteractor(testCredential.email, testCredential.password);
 
+    expect(result).toEqual({ ok: true });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
     expect(authRepository.login).toHaveBeenLastCalledWith({
       method: 'email',
@@ -46,8 +47,9 @@ describe('loginWithEmailInteractor()', () => {
       throw new Error(testError);
     });
 
-    await loginWithEmailInteractor(testCredential.email, testCredential.password);
+    const result = await loginWithEmailInteractor(testCredential.email, testCredential.password);
 
+    expect(result).toEqual({ ok: false });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
     expect(authRepository.login).toHaveBeenLastCalledWith({
       method: 'email',
@@ -71,8 +73,9 @@ describe('loginWithEmailInteractor()', () => {
       username: faker.internet.userName(),
     }));
 
-    await loginWithEmailInteractor(testCredential.email, testCredential.password);
+    const result = await loginWithEmailInteractor(testCredential.email, testCredential.password);
 
+    expect(result).toEqual({ ok: false });
     expect(authRepository.login).not.toHaveBeenCalled();
     expect(notifySuccess).not.toHaveBeenCalled();
     expect(notifyError).toHaveBeenCalledTimes(1);
@@ -82,8 +85,9 @@ describe('loginWithEmailInteractor()', () => {
 
 describe('loginWithGoogleInteractor()', () => {
   it('should handle success', async () => {
-    await loginWithGoogleInteractor();
+    const result = await loginWithGoogleInteractor();
 
+    expect(result).toEqual({ ok: true });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
     expect(authRepository.login).toHaveBeenLastCalledWith({
       method: 'google',
@@ -98,8 +102,9 @@ describe('loginWithGoogleInteractor()', () => {
       throw new Error(testError);
     });
 
-    await loginWithGoogleInteractor();
+    const result = await loginWithGoogleInteractor();
 
+    expect(result).toEqual({ ok: false });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
     expect(authRepository.login).toHaveBeenLastCalledWith({
       method: 'google',
@@ -116,8 +121,9 @@ describe('loginWithGoogleInteractor()', () => {
       username: faker.internet.userName(),
     }));
 
-    await loginWithGoogleInteractor();
+    const result = await loginWithGoogleInteractor();
 
+    expect(result).toEqual({ ok: false });
     expect(authRepository.login).not.toHaveBeenCalled();
     expect(notifySuccess).not.toHaveBeenCalled();
     expect(notifyError).toHaveBeenCalledTimes(1);

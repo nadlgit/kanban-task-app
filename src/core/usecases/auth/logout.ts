@@ -7,13 +7,16 @@ export async function logout() {
 
   if (!repository.getUser()) {
     notifyError(AUTH_NOT_LOGGED_IN_ERROR.message);
-    return;
+    return { ok: false };
   }
 
   try {
     await repository.logout();
-    notifySuccess();
   } catch (err) {
     notifyError((err as Error).message);
+    return { ok: false };
   }
+
+  notifySuccess();
+  return { ok: true };
 }

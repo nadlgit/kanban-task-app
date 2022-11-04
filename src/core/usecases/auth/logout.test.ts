@@ -22,8 +22,9 @@ const mockLogoutFn = authRepository.logout as jest.MockedFunction<typeof authRep
 
 describe('logout()', () => {
   it('should handle success', async () => {
-    await logout();
+    const result = await logout();
 
+    expect(result).toEqual({ ok: true });
     expect(authRepository.logout).toHaveBeenCalledTimes(1);
     expect(authRepository.logout).toHaveBeenLastCalledWith();
     expect(notifySuccess).toHaveBeenCalledTimes(1);
@@ -36,8 +37,9 @@ describe('logout()', () => {
       throw new Error(testError);
     });
 
-    await logout();
+    const result = await logout();
 
+    expect(result).toEqual({ ok: false });
     expect(authRepository.logout).toHaveBeenCalledTimes(1);
     expect(authRepository.logout).toHaveBeenLastCalledWith();
     expect(notifySuccess).not.toHaveBeenCalled();
@@ -49,8 +51,9 @@ describe('logout()', () => {
     const testError = AUTH_NOT_LOGGED_IN_ERROR.message;
     mockGetUserFn.mockImplementationOnce(jest.fn());
 
-    await logout();
+    const result = await logout();
 
+    expect(result).toEqual({ ok: false });
     expect(authRepository.logout).not.toHaveBeenCalled();
     expect(notifySuccess).not.toHaveBeenCalled();
     expect(notifyError).toHaveBeenCalledTimes(1);

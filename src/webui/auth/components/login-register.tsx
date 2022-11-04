@@ -23,9 +23,9 @@ type LoginRegisterProps = {
         validationSchema: yup.StringSchema;
       };
     };
-    onSubmit: (data: Record<string, string>) => Promise<void>;
+    onSubmit: (data: Record<string, string>) => Promise<{ ok: boolean }>;
   };
-  googleMethod: { onSubmit: () => Promise<void> };
+  googleMethod: { onSubmit: () => Promise<{ ok: boolean }> };
   alternative: { message: string; linkLbl: string; linkTo: string };
 };
 
@@ -54,14 +54,18 @@ export const LoginRegister = ({
     e.preventDefault();
     e.stopPropagation();
     handleSubmit(async (data) => {
-      await emailMethod.onSubmit(data);
-      setNavigateNow(true);
+      const { ok } = await emailMethod.onSubmit(data);
+      if (ok) {
+        setNavigateNow(true);
+      }
     })(e);
   };
 
   const handleWithGoogle = async () => {
-    await googleMethod.onSubmit();
-    setNavigateNow(true);
+    const { ok } = await googleMethod.onSubmit();
+    if (ok) {
+      setNavigateNow(true);
+    }
   };
 
   return navigateNow ? (

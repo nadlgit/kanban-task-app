@@ -7,15 +7,18 @@ async function registerGeneric(callback: () => Promise<void>) {
 
   if (repository.getUser()) {
     notifyError(AUTH_ALREADY_LOGGED_IN_ERROR.message);
-    return;
+    return { ok: false };
   }
 
   try {
     await callback();
-    notifySuccess();
   } catch (err) {
     notifyError((err as Error).message);
+    return { ok: false };
   }
+
+  notifySuccess();
+  return { ok: true };
 }
 
 export async function registerWithEmailInteractor(
@@ -24,10 +27,12 @@ export async function registerWithEmailInteractor(
   username: string
 ) {
   const repository = Dependencies.getAuthRepository();
-  await registerGeneric(() => repository.register({ method: 'email', email, password, username }));
+  return await registerGeneric(() =>
+    repository.register({ method: 'email', email, password, username })
+  );
 }
 
 export async function registerWithGoogleInteractor() {
   const repository = Dependencies.getAuthRepository();
-  await registerGeneric(() => repository.register({ method: 'google' }));
+  return await registerGeneric(() => repository.register({ method: 'google' }));
 }
