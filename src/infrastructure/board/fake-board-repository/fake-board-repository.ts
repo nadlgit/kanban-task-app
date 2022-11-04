@@ -16,7 +16,7 @@ import type { BoardRepository } from 'core/ports';
 export class FakeBoardRepository implements BoardRepository {
   #boards: BoardEntity[] = getInitialBoards();
   #onBoardListChangeCallback: () => void = () => {
-    console.log('onBoardListChangeCallback');
+    console.log('onBoardListChangeCallback', { boards: this.#boards });
   };
   #onBoardChangeCallback: Map<UniqueId, () => void> = new Map();
 
@@ -34,7 +34,7 @@ export class FakeBoardRepository implements BoardRepository {
 
   listenToBoardListChange(userId: string, callback: () => void) {
     this.#onBoardListChangeCallback = () => {
-      console.log('onBoardListChangeCallback+cb', { userId });
+      console.log('onBoardListChangeCallback+cb', { userId, boards: this.#boards });
       callback();
     };
     return setPeriodicCallback(this.#onBoardListChangeCallback);
@@ -42,7 +42,11 @@ export class FakeBoardRepository implements BoardRepository {
 
   listenToBoardChange(userId: string, boardId: string, callback: () => void) {
     const boardCallback = () => {
-      console.log('onBoardChangeCallback+cb', { userId, boardId });
+      console.log('onBoardChangeCallback+cb', {
+        userId,
+        boardId,
+        board: this.#boards.find((b) => b.id === boardId),
+      });
       callback();
     };
     this.#onBoardChangeCallback.set(boardId, boardCallback);
