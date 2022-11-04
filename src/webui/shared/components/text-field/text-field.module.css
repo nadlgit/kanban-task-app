@@ -51,6 +51,11 @@
   color: var(--color-red);
 }
 
+.delete .icon {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
 .errormsg {
   grid-row: 2;
   width: 100%;

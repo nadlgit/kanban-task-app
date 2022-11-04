@@ -1,7 +1,10 @@
 import styles from './text-field.module.css';
+import IconCross from './icon-cross.svg';
 
 import { forwardRef } from 'react';
 import type { DetailedHTMLProps, InputHTMLAttributes } from 'react';
+
+import { Icon } from '../icon';
 
 export type TextFieldProps = {
   label?: string;
@@ -42,7 +45,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         />
         {onDelete && (
           <button type="button" onClick={onDelete} className={styles.delete}>
-            <SVGIconCross />
+            <Icon imgSrc={IconCross.src} imgAccessibleName="Delete item" className={styles.icon} />
           </button>
         )}
         <span role="status" className={styles.errormsg}>
@@ -52,13 +55,3 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
     </p>
   );
 });
-
-const SVGIconCross = () => (
-  <svg role="img" width="15" height="15" xmlns="http://www.w3.org/2000/svg">
-    <title>Delete item</title>
-    <g fill="currentColor" fillRule="evenodd">
-      <path d="m12.728 0 2.122 2.122L2.122 14.85 0 12.728z" />
-      <path d="M0 2.122 2.122 0 14.85 12.728l-2.122 2.122z" />
-    </g>
-  </svg>
-);
