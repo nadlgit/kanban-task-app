@@ -1,6 +1,10 @@
-import { nextBoardId, nextColumnId, nextTaskId } from './id-generator';
 import { initialBoards } from './initial-boards';
 import type { BoardEntity, ColumnEntity, TaskEntity, UniqueId } from 'core/entities';
+import { generateId } from 'infrastructure/utils';
+
+const nextBoardId = () => generateId('board');
+const nextColumnId = () => generateId('column');
+const nextTaskId = () => generateId('task');
 
 export function setPeriodicCallback(callback: () => void) {
   const POLL_FREQUENCY_MILLISECONDS = 60 * 1000;

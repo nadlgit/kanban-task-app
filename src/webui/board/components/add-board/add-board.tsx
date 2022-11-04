@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { generateId } from 'infrastructure/utils';
 import {
   Button,
   ModalHeading,
-  newItemName,
   TextField,
   TextFieldGroup,
   useTextFieldGroupInputList,
@@ -26,7 +26,7 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
     pattern: { value: /\S/, message: "Can't be empty" },
   };
 
-  const newColumnItemName = () => newItemName('newcolumn');
+  const newColumnItemName = () => generateId('newcolumn');
 
   const initializeColumns = () => [{ ...register(newColumnItemName(), registerOptions) }];
 
