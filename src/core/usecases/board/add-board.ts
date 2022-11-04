@@ -1,5 +1,5 @@
-import { notifyError } from '../notification';
 import { getUserId } from './helpers';
+import { notifyError } from '../notification';
 import { Dependencies } from 'core/dependencies';
 import type { UniqueId } from 'core/entities';
 
