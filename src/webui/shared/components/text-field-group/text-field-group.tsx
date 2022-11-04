@@ -29,7 +29,7 @@ export const TextFieldGroup = ({
       {inputList.map((input) => (
         <TextFieldGroupInput key={input.name} onDelete={() => onDelete(input.name)} {...input} />
       ))}
-      <Button variant="secondary" onClick={onAdd}>
+      <Button variant="secondary" onClick={onAdd} className={styles.button}>
         {addLabel}
       </Button>
     </>

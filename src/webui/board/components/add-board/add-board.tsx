@@ -1,5 +1,3 @@
-import styles from './add-board.module.css';
-
 import { useEffect } from 'react';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';

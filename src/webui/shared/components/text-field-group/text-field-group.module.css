@@ -2,3 +2,7 @@
   composes: body-m from global;
   margin-bottom: 0.5rem;
 }
+
+.button {
+  margin-bottom: 1.5rem;
+}
