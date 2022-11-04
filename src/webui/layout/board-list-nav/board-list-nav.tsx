@@ -1,9 +1,8 @@
 import styles from './board-list-nav.module.css';
 
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { BoardListNavItem } from './board-list-nav-item';
-import type { UniqueId } from 'core/entities';
 import { AddBoard, useBoardList } from 'webui/board';
 import { Modal, useModalToggle } from 'webui/shared';
 
@@ -15,14 +14,6 @@ export const BoardListNav = () => {
     closeModal: closeAddBoard,
     openModal: openAddBoard,
   } = useModalToggle();
-
-  const onSubmitAddBoard = useCallback(
-    (newBoardId: UniqueId) => {
-      closeAddBoard();
-      setActiveBoardId(newBoardId);
-    },
-    [closeAddBoard, setActiveBoardId]
-  );
 
   useEffect(() => {
     if (!boardList.length) {
@@ -48,7 +39,7 @@ export const BoardListNav = () => {
       </div>
 
       <Modal isOpen={isAddBoardOpen} onClose={closeAddBoard}>
-        <AddBoard onSubmit={onSubmitAddBoard} />
+        <AddBoard close={closeAddBoard} onAdd={setActiveBoardId} />
       </Modal>
     </>
   );

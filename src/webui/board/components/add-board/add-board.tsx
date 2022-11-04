@@ -13,9 +13,12 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-type AddBoardProps = { onSubmit: (newBoardId: UniqueId) => void };
+type AddBoardProps = {
+  close: () => void;
+  onAdd?: (newBoardId: UniqueId) => void;
+};
 
-export const AddBoard = ({ onSubmit }: AddBoardProps) => {
+export const AddBoard = ({ close, onAdd }: AddBoardProps) => {
   const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
 
   const registerOptions: Parameters<typeof register>[1] = {
@@ -49,9 +52,10 @@ export const AddBoard = ({ onSubmit }: AddBoardProps) => {
         columns: columns.map(({ name }) => ({ name: data[name] })),
       };
       const result = await addBoard(board);
-      if (result.ok) {
-        onSubmit(result.boardId);
+      if (result.ok && onAdd) {
+        onAdd(result.boardId);
       }
+      close();
     })(e);
   };
 
