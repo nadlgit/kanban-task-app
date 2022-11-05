@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { loginWithEmailInteractor, loginWithGoogleInteractor } from './login';
+import { loginWithEmail, loginWithGoogle } from './login';
 import { notifyError, notifySuccess } from '../notification';
 import { Dependencies } from 'core/dependencies';
 import { AUTH_ALREADY_LOGGED_IN_ERROR } from 'core/ports';
@@ -16,14 +16,14 @@ const authRepository = Dependencies.getAuthRepository();
 const mockGetUserFn = authRepository.getUser as jest.MockedFunction<typeof authRepository.getUser>;
 const mockLoginFn = authRepository.login as jest.MockedFunction<typeof authRepository.login>;
 
-describe('loginWithEmailInteractor()', () => {
+describe('loginWithEmail()', () => {
   it('should handle success', async () => {
     const testCredential = {
       email: faker.internet.email(),
       password: faker.internet.password(),
     };
 
-    const result = await loginWithEmailInteractor(testCredential.email, testCredential.password);
+    const result = await loginWithEmail(testCredential.email, testCredential.password);
 
     expect(result).toEqual({ ok: true });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
@@ -47,7 +47,7 @@ describe('loginWithEmailInteractor()', () => {
       throw new Error(testError);
     });
 
-    const result = await loginWithEmailInteractor(testCredential.email, testCredential.password);
+    const result = await loginWithEmail(testCredential.email, testCredential.password);
 
     expect(result).toEqual({ ok: false });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
@@ -73,7 +73,7 @@ describe('loginWithEmailInteractor()', () => {
       username: faker.internet.userName(),
     }));
 
-    const result = await loginWithEmailInteractor(testCredential.email, testCredential.password);
+    const result = await loginWithEmail(testCredential.email, testCredential.password);
 
     expect(result).toEqual({ ok: false });
     expect(authRepository.login).not.toHaveBeenCalled();
@@ -83,9 +83,9 @@ describe('loginWithEmailInteractor()', () => {
   });
 });
 
-describe('loginWithGoogleInteractor()', () => {
+describe('loginWithGoogle()', () => {
   it('should handle success', async () => {
-    const result = await loginWithGoogleInteractor();
+    const result = await loginWithGoogle();
 
     expect(result).toEqual({ ok: true });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('loginWithGoogleInteractor()', () => {
       throw new Error(testError);
     });
 
-    const result = await loginWithGoogleInteractor();
+    const result = await loginWithGoogle();
 
     expect(result).toEqual({ ok: false });
     expect(authRepository.login).toHaveBeenCalledTimes(1);
@@ -121,7 +121,7 @@ describe('loginWithGoogleInteractor()', () => {
       username: faker.internet.userName(),
     }));
 
-    const result = await loginWithGoogleInteractor();
+    const result = await loginWithGoogle();
 
     expect(result).toEqual({ ok: false });
     expect(authRepository.login).not.toHaveBeenCalled();

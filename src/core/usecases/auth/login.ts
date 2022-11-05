@@ -21,12 +21,12 @@ async function loginGeneric(callback: () => Promise<void>) {
   return { ok: true };
 }
 
-export async function loginWithEmailInteractor(email: string, password: string) {
+export async function loginWithEmail(email: string, password: string) {
   const repository = Dependencies.getAuthRepository();
   return await loginGeneric(() => repository.login({ method: 'email', email, password }));
 }
 
-export async function loginWithGoogleInteractor() {
+export async function loginWithGoogle() {
   const repository = Dependencies.getAuthRepository();
   return await loginGeneric(() => repository.login({ method: 'google' }));
 }

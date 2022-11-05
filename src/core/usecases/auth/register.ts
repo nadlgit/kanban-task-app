@@ -21,18 +21,14 @@ async function registerGeneric(callback: () => Promise<void>) {
   return { ok: true };
 }
 
-export async function registerWithEmailInteractor(
-  email: string,
-  password: string,
-  username: string
-) {
+export async function registerWithEmail(email: string, password: string, username: string) {
   const repository = Dependencies.getAuthRepository();
   return await registerGeneric(() =>
     repository.register({ method: 'email', email, password, username })
   );
 }
 
-export async function registerWithGoogleInteractor() {
+export async function registerWithGoogle() {
   const repository = Dependencies.getAuthRepository();
   return await registerGeneric(() => repository.register({ method: 'google' }));
 }

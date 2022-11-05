@@ -4,26 +4,17 @@ import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
 import { Login } from './login';
-import {
-  notifyError,
-  notifySuccess,
-  loginWithEmailInteractor,
-  loginWithGoogleInteractor,
-} from 'core/usecases';
+import { notifyError, notifySuccess, loginWithEmail, loginWithGoogle } from 'core/usecases';
 
 jest.mock('core/usecases');
-const mockLoginWithEmailInteractor = loginWithEmailInteractor as jest.MockedFunction<
-  typeof loginWithEmailInteractor
->;
+const mockLoginWithEmail = loginWithEmail as jest.MockedFunction<typeof loginWithEmail>;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-mockLoginWithEmailInteractor.mockImplementation((email, password) => {
+mockLoginWithEmail.mockImplementation((email, password) => {
   notifySuccess();
   return Promise.resolve({ ok: true });
 });
-const mockLoginWithGoogleInteractor = loginWithGoogleInteractor as jest.MockedFunction<
-  typeof loginWithGoogleInteractor
->;
-mockLoginWithGoogleInteractor.mockImplementation(() => {
+const mockLoginWithGoogle = loginWithGoogle as jest.MockedFunction<typeof loginWithGoogle>;
+mockLoginWithGoogle.mockImplementation(() => {
   notifySuccess();
   return Promise.resolve({ ok: true });
 });
@@ -56,7 +47,7 @@ describe('Login component using email method', () => {
       testEmail: `   ${faker.internet.email()}     `,
       testPassword: `   ${faker.internet.password()}   `,
     },
-  ])('should call interactor with trimmed values: $desc', async ({ testEmail, testPassword }) => {
+  ])('should call usecase with trimmed values: $desc', async ({ testEmail, testPassword }) => {
     const testCredential = {
       email: testEmail,
       password: testPassword,
@@ -72,14 +63,14 @@ describe('Login component using email method', () => {
     expect(getEmailElt()).toHaveDisplayValue(testCredential.email.trim());
     expect(getPasswordElt()).toHaveDisplayValue(testCredential.password.trim());
 
-    expect(loginWithEmailInteractor).toHaveBeenCalledTimes(1);
-    expect(loginWithEmailInteractor).toHaveBeenLastCalledWith(
+    expect(loginWithEmail).toHaveBeenCalledTimes(1);
+    expect(loginWithEmail).toHaveBeenLastCalledWith(
       testCredential.email.trim(),
       testCredential.password.trim()
     );
   });
 
-  it('should handle interactor success', async () => {
+  it('should handle usecase success', async () => {
     const testCredential = {
       email: faker.internet.email(),
       password: faker.internet.password(),
@@ -97,7 +88,7 @@ describe('Login component using email method', () => {
     expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle interactor error', async () => {
+  it('should handle usecase error', async () => {
     const testCredential = {
       email: faker.internet.email(),
       password: faker.internet.password(),
@@ -105,7 +96,7 @@ describe('Login component using email method', () => {
 
     const testError = 'Invalid credentials';
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockLoginWithEmailInteractor.mockImplementationOnce((email, password) => {
+    mockLoginWithEmail.mockImplementationOnce((email, password) => {
       notifyError(testError);
       return Promise.resolve({ ok: false });
     });
@@ -162,7 +153,7 @@ describe('Login component using email method', () => {
       testCredential.password && (await userEvt.type(getPasswordElt(), testCredential.password));
       await userEvt.click(getEmailSubmitBtnElt());
 
-      expect(loginWithEmailInteractor).not.toHaveBeenCalled();
+      expect(loginWithEmail).not.toHaveBeenCalled();
 
       expect(getEmailElt()).toHaveDisplayValue(testCredential.email.trim());
       expect(getPasswordElt()).toHaveDisplayValue(testCredential.password.trim());
@@ -181,17 +172,17 @@ describe('Login component using email method', () => {
 });
 
 describe('Login component using Google method', () => {
-  it('should call interactor', async () => {
+  it('should call usecase', async () => {
     userEvt = userEvent.setup();
     render(<Login />);
 
     await userEvt.click(getGoogleSubmitBtnElt());
 
-    expect(loginWithGoogleInteractor).toHaveBeenCalledTimes(1);
-    expect(loginWithGoogleInteractor).toHaveBeenLastCalledWith();
+    expect(loginWithGoogle).toHaveBeenCalledTimes(1);
+    expect(loginWithGoogle).toHaveBeenLastCalledWith();
   });
 
-  it('should handle interactor success', async () => {
+  it('should handle usecase success', async () => {
     userEvt = userEvent.setup();
     render(<Login />);
     expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
@@ -202,9 +193,9 @@ describe('Login component using Google method', () => {
     expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle interactor error', async () => {
+  it('should handle usecase error', async () => {
     const testError = 'Google error';
-    mockLoginWithGoogleInteractor.mockImplementationOnce(() => {
+    mockLoginWithGoogle.mockImplementationOnce(() => {
       notifyError(testError);
       return Promise.resolve({ ok: false });
     });

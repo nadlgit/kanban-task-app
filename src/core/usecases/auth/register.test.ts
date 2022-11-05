@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { registerWithEmailInteractor, registerWithGoogleInteractor } from './register';
+import { registerWithEmail, registerWithGoogle } from './register';
 import { notifyError, notifySuccess } from '../notification';
 import { Dependencies } from 'core/dependencies';
 import { AUTH_ALREADY_LOGGED_IN_ERROR } from 'core/ports';
@@ -18,7 +18,7 @@ const mockRegisterFn = authRepository.register as jest.MockedFunction<
   typeof authRepository.register
 >;
 
-describe('registerWithEmailInteractor()', () => {
+describe('registerWithEmail()', () => {
   it('should handle success', async () => {
     const testCredential = {
       email: faker.internet.email(),
@@ -26,7 +26,7 @@ describe('registerWithEmailInteractor()', () => {
       username: faker.internet.userName(),
     };
 
-    const result = await registerWithEmailInteractor(
+    const result = await registerWithEmail(
       testCredential.email,
       testCredential.password,
       testCredential.username
@@ -56,7 +56,7 @@ describe('registerWithEmailInteractor()', () => {
       throw new Error(testError);
     });
 
-    const result = await registerWithEmailInteractor(
+    const result = await registerWithEmail(
       testCredential.email,
       testCredential.password,
       testCredential.username
@@ -88,7 +88,7 @@ describe('registerWithEmailInteractor()', () => {
       username: faker.internet.userName(),
     }));
 
-    const result = await registerWithEmailInteractor(
+    const result = await registerWithEmail(
       testCredential.email,
       testCredential.password,
       testCredential.username
@@ -102,9 +102,9 @@ describe('registerWithEmailInteractor()', () => {
   });
 });
 
-describe('registerWithGoogleInteractor()', () => {
+describe('registerWithGoogle()', () => {
   it('should handle success', async () => {
-    const result = await registerWithGoogleInteractor();
+    const result = await registerWithGoogle();
 
     expect(result).toEqual({ ok: true });
     expect(authRepository.register).toHaveBeenCalledTimes(1);
@@ -121,7 +121,7 @@ describe('registerWithGoogleInteractor()', () => {
       throw new Error(testError);
     });
 
-    const result = await registerWithGoogleInteractor();
+    const result = await registerWithGoogle();
 
     expect(result).toEqual({ ok: false });
     expect(authRepository.register).toHaveBeenCalledTimes(1);
@@ -140,7 +140,7 @@ describe('registerWithGoogleInteractor()', () => {
       username: faker.internet.userName(),
     }));
 
-    const result = await registerWithGoogleInteractor();
+    const result = await registerWithGoogle();
 
     expect(result).toEqual({ ok: false });
     expect(authRepository.register).not.toHaveBeenCalled();

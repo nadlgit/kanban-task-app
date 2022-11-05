@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 import { LoginRegister } from './login-register';
-import { loginWithEmailInteractor, loginWithGoogleInteractor } from 'core/usecases';
+import { loginWithEmail, loginWithGoogle } from 'core/usecases';
 import { REGISTER_ROUTE } from 'webui/routes';
 
 const emailFormFields = {
@@ -28,9 +28,9 @@ export const Login = () => {
       emailMethod={{
         fields: emailFormFields,
         onSubmit: (data: Record<keyof typeof emailFormFields, string>) =>
-          loginWithEmailInteractor(data.email, data.password),
+          loginWithEmail(data.email, data.password),
       }}
-      googleMethod={{ onSubmit: () => loginWithGoogleInteractor() }}
+      googleMethod={{ onSubmit: () => loginWithGoogle() }}
       alternative={{
         message: "Don't have an account?",
         linkLbl: 'Register',

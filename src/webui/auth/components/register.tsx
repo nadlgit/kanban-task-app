@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 import { LoginRegister } from './login-register';
-import { registerWithEmailInteractor, registerWithGoogleInteractor } from 'core/usecases';
+import { registerWithEmail, registerWithGoogle } from 'core/usecases';
 import { LOGIN_ROUTE } from 'webui/routes';
 
 const emailFormFields = {
@@ -53,9 +53,9 @@ export const Register = () => {
       emailMethod={{
         fields: emailFormFields,
         onSubmit: (data: Record<keyof typeof emailFormFields, string>) =>
-          registerWithEmailInteractor(data.email, data.password, data.username),
+          registerWithEmail(data.email, data.password, data.username),
       }}
-      googleMethod={{ onSubmit: () => registerWithGoogleInteractor() }}
+      googleMethod={{ onSubmit: () => registerWithGoogle() }}
       alternative={{
         message: 'Already have an account?',
         linkLbl: 'Log in',

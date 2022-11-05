@@ -4,26 +4,17 @@ import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
 import { Register } from './register';
-import {
-  notifyError,
-  notifySuccess,
-  registerWithEmailInteractor,
-  registerWithGoogleInteractor,
-} from 'core/usecases';
+import { notifyError, notifySuccess, registerWithEmail, registerWithGoogle } from 'core/usecases';
 
 jest.mock('core/usecases');
-const mockRegisterWithEmailInteractor = registerWithEmailInteractor as jest.MockedFunction<
-  typeof registerWithEmailInteractor
->;
+const mockRegisterWithEmail = registerWithEmail as jest.MockedFunction<typeof registerWithEmail>;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-mockRegisterWithEmailInteractor.mockImplementation((email, password, username) => {
+mockRegisterWithEmail.mockImplementation((email, password, username) => {
   notifySuccess();
   return Promise.resolve({ ok: true });
 });
-const mockRegisterWithGoogleInteractor = registerWithGoogleInteractor as jest.MockedFunction<
-  typeof registerWithGoogleInteractor
->;
-mockRegisterWithGoogleInteractor.mockImplementation(() => {
+const mockRegisterWithGoogle = registerWithGoogle as jest.MockedFunction<typeof registerWithGoogle>;
+mockRegisterWithGoogle.mockImplementation(() => {
   notifySuccess();
   return Promise.resolve({ ok: true });
 });
@@ -65,7 +56,7 @@ describe('Register component using email method', () => {
       testUsername: `   ${faker.internet.userName()}     `,
     },
   ])(
-    'should call interactor with trimmed values: $desc',
+    'should call usecase with trimmed values: $desc',
     async ({ testEmail, testPassword, testConfirmpwd, testUsername }) => {
       const testCredential = {
         email: testEmail,
@@ -88,8 +79,8 @@ describe('Register component using email method', () => {
       expect(getConfirmPasswordElt()).toHaveDisplayValue(testCredential.confirmpwd.trim());
       expect(getUsernameElt()).toHaveDisplayValue(testCredential.username.trim());
 
-      expect(registerWithEmailInteractor).toHaveBeenCalledTimes(1);
-      expect(registerWithEmailInteractor).toHaveBeenLastCalledWith(
+      expect(registerWithEmail).toHaveBeenCalledTimes(1);
+      expect(registerWithEmail).toHaveBeenLastCalledWith(
         testCredential.email.trim(),
         testCredential.password.trim(),
         testCredential.username.trim()
@@ -97,7 +88,7 @@ describe('Register component using email method', () => {
     }
   );
 
-  it('should handle interactor success', async () => {
+  it('should handle usecase success', async () => {
     const testPassword = faker.internet.password();
     const testCredential = {
       email: faker.internet.email(),
@@ -120,7 +111,7 @@ describe('Register component using email method', () => {
     expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle interactor error', async () => {
+  it('should handle usecase error', async () => {
     const testPassword = faker.internet.password();
     const testCredential = {
       email: faker.internet.email(),
@@ -131,7 +122,7 @@ describe('Register component using email method', () => {
 
     const testError = 'Unable to register';
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockRegisterWithEmailInteractor.mockImplementationOnce((email, password, username) => {
+    mockRegisterWithEmail.mockImplementationOnce((email, password, username) => {
       notifyError(testError);
       return Promise.resolve({ ok: false });
     });
@@ -230,7 +221,7 @@ describe('Register component using email method', () => {
       testCredential.username && (await userEvt.type(getUsernameElt(), testCredential.username));
       await userEvt.click(getEmailSubmitBtnElt());
 
-      expect(registerWithEmailInteractor).not.toHaveBeenCalled();
+      expect(registerWithEmail).not.toHaveBeenCalled();
 
       expect(getEmailElt()).toHaveDisplayValue(testCredential.email.trim());
       expect(getPasswordElt()).toHaveDisplayValue(testCredential.password.trim());
@@ -259,17 +250,17 @@ describe('Register component using email method', () => {
 });
 
 describe('Register component using Google method', () => {
-  it('should call interactor', async () => {
+  it('should call usecase', async () => {
     userEvt = userEvent.setup();
     render(<Register />);
 
     await userEvt.click(getGoogleSubmitBtnElt());
 
-    expect(registerWithGoogleInteractor).toHaveBeenCalledTimes(1);
-    expect(registerWithGoogleInteractor).toHaveBeenLastCalledWith();
+    expect(registerWithGoogle).toHaveBeenCalledTimes(1);
+    expect(registerWithGoogle).toHaveBeenLastCalledWith();
   });
 
-  it('should handle interactor success', async () => {
+  it('should handle usecase success', async () => {
     userEvt = userEvent.setup();
     render(<Register />);
     expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
@@ -280,9 +271,9 @@ describe('Register component using Google method', () => {
     expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle interactor error', async () => {
+  it('should handle usecase error', async () => {
     const testError = 'Google error';
-    mockRegisterWithGoogleInteractor.mockImplementationOnce(() => {
+    mockRegisterWithGoogle.mockImplementationOnce(() => {
       notifyError(testError);
       return Promise.resolve({ ok: false });
     });
