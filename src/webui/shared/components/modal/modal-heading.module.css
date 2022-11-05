@@ -8,3 +8,7 @@
 :global(.theme-dark) .heading {
   color: var(--color-white);
 }
+
+.heading.destructive {
+  color: var(--color-red);
+}

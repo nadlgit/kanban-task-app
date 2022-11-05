@@ -69,7 +69,10 @@ export function deleteEntity<T extends BoardEntity | ColumnEntity | TaskEntity>(
   entities: T[],
   entityId: UniqueId
 ) {
-  entities = entities.filter(({ id }) => id === entityId);
+  const index = entities.findIndex(({ id }) => id === entityId);
+  if (index >= 0) {
+    entities.splice(index, 1);
+  }
 }
 
 export function moveEntity<T extends BoardEntity | ColumnEntity | TaskEntity>(

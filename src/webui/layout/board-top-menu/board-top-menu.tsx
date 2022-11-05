@@ -45,15 +45,19 @@ export const BoardTopMenu = () => {
         />
       </div>
 
-      <Modal isOpen={isAddTaskOpen} onClose={closeAddTask}>
-        <AddTask board={board} />
-      </Modal>
-      <Modal isOpen={isEditBoardOpen} onClose={closeEditBoard}>
-        <EditBoard board={board} />
-      </Modal>
-      <Modal isOpen={isDeleteBoardOpen} onClose={closeDeleteBoard}>
-        <DeleteBoard board={board} />
-      </Modal>
+      {!disabled && (
+        <>
+          <Modal isOpen={isAddTaskOpen} onClose={closeAddTask}>
+            <AddTask board={board} />
+          </Modal>
+          <Modal isOpen={isEditBoardOpen} onClose={closeEditBoard}>
+            <EditBoard board={board} />
+          </Modal>
+          <Modal isOpen={isDeleteBoardOpen} onClose={closeDeleteBoard}>
+            <DeleteBoard board={board} close={closeDeleteBoard} />
+          </Modal>
+        </>
+      )}
     </>
   );
 };
