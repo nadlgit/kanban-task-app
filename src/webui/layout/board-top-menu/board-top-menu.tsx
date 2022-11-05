@@ -51,7 +51,7 @@ export const BoardTopMenu = () => {
             <AddTask board={board} />
           </Modal>
           <Modal isOpen={isEditBoardOpen} onClose={closeEditBoard}>
-            <EditBoard board={board} />
+            <EditBoard board={board} close={closeEditBoard} />
           </Modal>
           <Modal isOpen={isDeleteBoardOpen} onClose={closeDeleteBoard}>
             <DeleteBoard board={board} close={closeDeleteBoard} />
