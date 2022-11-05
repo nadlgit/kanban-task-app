@@ -6,10 +6,12 @@ import type { BoardEntity } from 'core/entities';
 // import { TBD } from 'core/usecases';
 import { generateId } from 'infrastructure/utils';
 import {
+  boardTextInputRegisterOptions,
   Button,
   ModalHeading,
   TextField,
   TextFieldGroup,
+  updateTextInputErrors,
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
@@ -18,20 +20,12 @@ type EditBoardProps = { board: BoardEntity; close: () => void };
 export const EditBoard = ({ board, close }: EditBoardProps) => {
   const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
 
-  const registerOptions: Parameters<typeof register>[1] = {
-    onBlur: (e) => {
-      e.target.value = e.target.value.trim();
-    },
-    required: "Can't be empty",
-    pattern: { value: /\S/, message: "Can't be empty" },
-  };
-
   const newColumnItemName = () => generateId('newcolumn');
   const newColumnPlaceholder = 'e.g. Todo';
 
   const initializeColumns = () =>
     board.columns.map((column) => ({
-      ...register(column.id, registerOptions),
+      ...register(column.id, boardTextInputRegisterOptions),
       placeholder: newColumnPlaceholder,
       defaultValue: column.name,
     }));
@@ -54,17 +48,11 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
   };
 
   useEffect(() => {
-    const columnErrors = columns.map(({ name, error }) => ({ name, error }));
-    const formColumnErrors = Object.entries(formState.errors).map(([key, value]) => ({
-      name: key,
-      error: value?.message as string | undefined,
-    }));
-    columnErrors.forEach(({ name, error }) => {
-      const formError = formColumnErrors.find((form) => form.name === name)?.error;
-      if (formError !== error) {
-        setColumnItemError(name, formError);
-      }
-    });
+    updateTextInputErrors(
+      formState,
+      columns.map(({ name, error }) => ({ name, error })),
+      setColumnItemError
+    );
   }, [formState, columns, setColumnItemError]);
 
   return (
@@ -72,7 +60,7 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
       <ModalHeading>Edit Board</ModalHeading>
       <form onSubmit={handleFormSubmit} noValidate>
         <TextField
-          {...register('boardname', registerOptions)}
+          {...register('boardname', boardTextInputRegisterOptions)}
           label="Board Name"
           placeholder="e.g. Web Design"
           defaultValue={board.name}
@@ -84,7 +72,7 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
           addLabel="+ Add New Column"
           onAdd={() => {
             addColumnItem({
-              ...register(newColumnItemName(), registerOptions),
+              ...register(newColumnItemName(), boardTextInputRegisterOptions),
               placeholder: newColumnPlaceholder,
             });
           }}
