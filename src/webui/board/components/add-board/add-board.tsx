@@ -45,8 +45,8 @@ export const AddBoard = ({ close, onAdd }: AddBoardProps) => {
     e.stopPropagation();
     handleSubmit(async (data) => {
       const board = {
-        name: data.boardname,
-        columns: columns.map(({ name }) => ({ name: data[name] })),
+        name: data.boardname as string,
+        columns: columns.map(({ name }) => ({ name: data[name] as string })),
       };
       const result = await addBoard(board);
       if (result.ok && onAdd) {
