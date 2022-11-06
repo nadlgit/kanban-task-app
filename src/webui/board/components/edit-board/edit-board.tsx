@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { BoardEntity } from 'core/entities';
-// import { TBD } from 'core/usecases';
+import type { BoardEntity, UniqueId } from 'core/entities';
+import { editBoard } from 'core/usecases';
 import { generateId } from 'infrastructure/utils';
 import {
   boardTextInputRegisterOptions,
@@ -41,8 +41,33 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
     e.preventDefault();
     e.stopPropagation();
     handleSubmit(async (data) => {
-      console.log('editboard data', data);
-      // TODO
+      const boardUpdate: Parameters<typeof editBoard>[0] = {
+        id: board.id,
+        nameUpdate: data.boardname === board.name ? undefined : (data.boardname as string),
+        columnsUpdate: [],
+        columnsAdd: [],
+        columnsDelete: [],
+      };
+      const listBefore = board.columns;
+      const listAfter = columns.map(({ name }) => ({
+        id: name as UniqueId,
+        name: data[name] as string,
+      }));
+      boardUpdate.columnsUpdate = listAfter
+        .filter(({ id: idAfter, name: nameAfter }) =>
+          listBefore.find(
+            ({ id: idBefore, name: nameBefore }) => idBefore === idAfter && nameBefore !== nameAfter
+          )
+        )
+        .map(({ id, name }) => ({ id, nameUpdate: name }));
+      boardUpdate.columnsAdd = listAfter
+        .filter(({ id: afterId }) => !listBefore.find(({ id: idBefore }) => idBefore === afterId))
+        .map(({ name }) => ({ name }));
+      boardUpdate.columnsDelete = listBefore
+        .filter(({ id: idBefore }) => !listAfter.find(({ id: idAfter }) => idBefore === idAfter))
+        .map(({ id }) => ({ id }));
+
+      await editBoard(boardUpdate);
       close();
     })(e);
   };
