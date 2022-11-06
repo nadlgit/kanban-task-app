@@ -43,29 +43,27 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
     handleSubmit(async (data) => {
       const boardUpdate: Parameters<typeof editBoard>[0] = {
         id: board.id,
-        nameUpdate: data.boardname === board.name ? undefined : (data.boardname as string),
-        columnsUpdate: [],
-        columnsAdd: [],
-        columnsDelete: [],
+        name: data.boardname === board.name ? undefined : (data.boardname as string),
+        columnsAdded: [],
+        columnsDeleted: [],
+        columnsUpdated: [],
       };
       const listBefore = board.columns;
       const listAfter = columns.map(({ name }) => ({
         id: name as UniqueId,
         name: data[name] as string,
       }));
-      boardUpdate.columnsUpdate = listAfter
-        .filter(({ id: idAfter, name: nameAfter }) =>
-          listBefore.find(
-            ({ id: idBefore, name: nameBefore }) => idBefore === idAfter && nameBefore !== nameAfter
-          )
-        )
-        .map(({ id, name }) => ({ id, nameUpdate: name }));
-      boardUpdate.columnsAdd = listAfter
+      boardUpdate.columnsAdded = listAfter
         .filter(({ id: afterId }) => !listBefore.find(({ id: idBefore }) => idBefore === afterId))
         .map(({ name }) => ({ name }));
-      boardUpdate.columnsDelete = listBefore
+      boardUpdate.columnsDeleted = listBefore
         .filter(({ id: idBefore }) => !listAfter.find(({ id: idAfter }) => idBefore === idAfter))
         .map(({ id }) => ({ id }));
+      boardUpdate.columnsUpdated = listAfter.filter(({ id: idAfter, name: nameAfter }) =>
+        listBefore.find(
+          ({ id: idBefore, name: nameBefore }) => idBefore === idAfter && nameBefore !== nameAfter
+        )
+      );
 
       await editBoard(boardUpdate);
       close();

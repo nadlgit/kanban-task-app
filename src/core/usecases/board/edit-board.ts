@@ -5,15 +5,13 @@ import type { UniqueId } from 'core/entities';
 
 type BoardUpdate = {
   id: UniqueId;
-  nameUpdate?: string;
-  columnsUpdate: { id: UniqueId; nameUpdate: string }[];
-  columnsAdd: { name: string }[];
-  columnsDelete: { id: UniqueId }[];
+  name?: string;
+  columnsAdded: { name: string }[];
+  columnsDeleted: { id: UniqueId }[];
+  columnsUpdated: { id: UniqueId; name: string }[];
 };
 
-export async function editBoard(board: BoardUpdate) {
-  console.log('editBoard usecase', board);
-
+export async function editBoard(boardUpdate: BoardUpdate) {
   const userId = getUserId();
   if (!userId) {
     return { ok: false };
@@ -22,7 +20,7 @@ export async function editBoard(board: BoardUpdate) {
   const repository = Dependencies.getBoardRepository();
 
   try {
-    //  await repository.TBD(userId,);
+    await repository.updateBoard(userId, boardUpdate);
   } catch (err) {
     notifyError((err as Error).message);
     return { ok: false };
