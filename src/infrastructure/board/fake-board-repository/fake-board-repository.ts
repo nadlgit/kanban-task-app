@@ -59,7 +59,7 @@ export class FakeBoardRepository implements BoardRepository {
 
   async addBoard(
     userId: string,
-    board: { name: string } & { columns: { name: string }[] },
+    board: { name: string; columns: { name: string }[] },
     index?: number
   ) {
     const newBoard = {
@@ -68,24 +68,71 @@ export class FakeBoardRepository implements BoardRepository {
       columns: board.columns.map((column) => ({ ...newEmptyColumn(), ...column })),
     };
     addEntity(this.#boards, newBoard, index);
+
     this.#onBoardListChangeCallback();
     console.log('addBoard', { userId, board, index }, this.#boards);
     return newBoard.id;
   }
 
-  async addColumn(userId: string, boardId: string, column: { name: string }, index?: number) {
-    const newColumn = { ...newEmptyColumn(), ...column };
-    const board = findEntity(this.#boards, boardId);
-    addEntity(board.columns, newColumn, index);
-    const listenerCallback = this.#onBoardChangeCallback.get(boardId);
+  async updateBoard(
+    userId: UniqueId,
+    board: {
+      id: string;
+      name?: string;
+      columnsAdded?: { name: string; index?: number }[];
+      columnsDeleted?: { id: UniqueId }[];
+      columnsUpdated?: { id: UniqueId; name?: string; index?: number }[];
+    },
+    index?: number
+  ) {
+    const boardUpdate = findEntity(this.#boards, board.id);
+    if (board.name) {
+      boardUpdate.name = board.name;
+    }
+    if (board.columnsAdded) {
+      board.columnsAdded.forEach((newColumn) => {
+        addEntity(boardUpdate.columns, { ...newEmptyColumn(), ...newColumn }, newColumn.index);
+      });
+    }
+    if (board.columnsDeleted) {
+      board.columnsDeleted.forEach(({ id }) => {
+        deleteEntity(boardUpdate.columns, id);
+      });
+    }
+    if (board.columnsUpdated) {
+      board.columnsUpdated.forEach((column) => {
+        const columnUpdate = findEntity(boardUpdate.columns, column.id);
+        if (column.name) {
+          columnUpdate.name = column.name;
+        }
+        if (column.index !== undefined) {
+          moveEntity(boardUpdate.columns, columnUpdate.id, column.index);
+        }
+      });
+    }
+    if (index !== undefined) {
+      moveEntity(this.#boards, boardUpdate.id, index);
+    }
+
+    const listenerCallback = this.#onBoardChangeCallback.get(boardUpdate.id);
     listenerCallback && listenerCallback();
-    console.log('addColumn', { userId, boardId, column, index }, board);
+    if (board.name) {
+      this.#onBoardListChangeCallback();
+    }
+    console.log('updateBoard', { userId, board, index }, this.#boards);
+  }
+
+  async deleteBoard(userId: string, boardId: string) {
+    deleteEntity(this.#boards, boardId);
+
+    this.#onBoardListChangeCallback();
+    console.log('deleteBoard', { userId, boardId }, this.#boards);
   }
 
   async addTask(
-    userId: string,
-    boardId: string,
-    columnId: string,
+    userId: UniqueId,
+    boardId: UniqueId,
+    columnId: UniqueId,
     task: {
       title: string;
       description: string;
@@ -97,88 +144,56 @@ export class FakeBoardRepository implements BoardRepository {
     const board = findEntity(this.#boards, boardId);
     const column = findEntity(board.columns, columnId);
     addEntity(column.tasks, newTask, index);
+
     const listenerCallback = this.#onBoardChangeCallback.get(boardId);
     listenerCallback && listenerCallback();
     console.log('addTask', { userId, boardId, columnId, task, index }, column);
-  }
-
-  async updateBoard(userId: string, boardParam: { id: string } & { name: string }, index?: number) {
-    const board = findEntity(this.#boards, boardParam.id);
-    board.name = boardParam.name;
-    if (index !== undefined) {
-      moveEntity(this.#boards, board.id, index);
-    }
-    //this.#onBoardListChangeCallback();
-    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
-    listenerCallback && listenerCallback();
-    console.log('updateBoard', { userId, boardParam, index }, this.#boards);
-  }
-
-  async updateColumn(
-    userId: string,
-    boardId: string,
-    columnParam: { id: string } & { name: string },
-    index?: number
-  ) {
-    const board = findEntity(this.#boards, boardId);
-    const column = findEntity(board.columns, columnParam.id);
-    column.name = columnParam.name;
-    if (index !== undefined) {
-      moveEntity(board.columns, column.id, index);
-    }
-    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
-    listenerCallback && listenerCallback();
-    console.log('updateColumn', { userId, boardId, columnParam, index }, board);
+    return newTask.id;
   }
 
   async updateTask(
-    userId: string,
-    boardId: string,
-    columnId: string,
-    taskParam: { id: string } & {
-      title: string;
-      description: string;
-      subtasks: { title: string; isCompleted: boolean }[];
+    userId: UniqueId,
+    boardId: UniqueId,
+    columnId: UniqueId,
+    task: {
+      id: UniqueId;
+      title?: string;
+      description?: string;
+      subtasks?: { title: string; isCompleted: boolean }[];
     },
     index?: number,
-    oldColumnId?: string
+    oldColumnId?: UniqueId
   ) {
     const board = findEntity(this.#boards, boardId);
     const column = findEntity(board.columns, oldColumnId ?? columnId);
-    const task = findEntity(column.tasks, taskParam.id);
-    task.title = taskParam.title;
-    task.description = taskParam.description;
-    task.subtasks = [...taskParam.subtasks];
+    const taskUpdate = findEntity(column.tasks, task.id);
+    if (task.title) {
+      taskUpdate.title = task.title;
+    }
+    if (task.description) {
+      taskUpdate.description = task.description;
+    }
+    if (task.subtasks) {
+      taskUpdate.subtasks = [...task.subtasks];
+    }
     if (index !== undefined && oldColumnId === undefined) {
-      moveEntity(column.tasks, task.id, index);
+      moveEntity(column.tasks, taskUpdate.id, index);
     }
     if (oldColumnId) {
       const newColumn = findEntity(board.columns, columnId);
-      changeTaskColumn(column.tasks, newColumn.tasks, task.id, index);
+      changeTaskColumn(column.tasks, newColumn.tasks, taskUpdate.id, index);
     }
+
     const listenerCallback = this.#onBoardChangeCallback.get(board.id);
     listenerCallback && listenerCallback();
-    console.log('updateTask', { userId, boardId, columnId, taskParam, index, oldColumnId }, board);
-  }
-
-  async deleteBoard(userId: string, boardId: string) {
-    deleteEntity(this.#boards, boardId);
-    this.#onBoardListChangeCallback();
-    console.log('deleteBoard', { userId, boardId }, this.#boards);
-  }
-
-  async deleteColumn(userId: string, boardId: string, columnId: string) {
-    const board = findEntity(this.#boards, boardId);
-    deleteEntity(board.columns, columnId);
-    const listenerCallback = this.#onBoardChangeCallback.get(board.id);
-    listenerCallback && listenerCallback();
-    console.log('deleteColumn', { userId, boardId, columnId }, board);
+    console.log('updateTask', { userId, boardId, columnId, task, index, oldColumnId }, board);
   }
 
   async deleteTask(userId: string, boardId: string, columnId: string, taskId: string) {
     const board = findEntity(this.#boards, boardId);
     const column = findEntity(board.columns, columnId);
     deleteEntity(column.tasks, taskId);
+
     const listenerCallback = this.#onBoardChangeCallback.get(board.id);
     listenerCallback && listenerCallback();
     console.log('deleteTask', { userId, boardId, columnId, taskId }, column);
