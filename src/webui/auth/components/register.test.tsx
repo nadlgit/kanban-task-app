@@ -8,8 +8,7 @@ import { notifyError, notifySuccess, registerWithEmail, registerWithGoogle } fro
 
 jest.mock('core/usecases');
 const mockRegisterWithEmail = registerWithEmail as jest.MockedFunction<typeof registerWithEmail>;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-mockRegisterWithEmail.mockImplementation((email, password, username) => {
+mockRegisterWithEmail.mockImplementation(() => {
   notifySuccess();
   return Promise.resolve({ ok: true });
 });
@@ -121,8 +120,7 @@ describe('Register component using email method', () => {
     };
 
     const testError = 'Unable to register';
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockRegisterWithEmail.mockImplementationOnce((email, password, username) => {
+    mockRegisterWithEmail.mockImplementationOnce(() => {
       notifyError(testError);
       return Promise.resolve({ ok: false });
     });

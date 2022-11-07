@@ -8,8 +8,7 @@ import { notifyError, notifySuccess, loginWithEmail, loginWithGoogle } from 'cor
 
 jest.mock('core/usecases');
 const mockLoginWithEmail = loginWithEmail as jest.MockedFunction<typeof loginWithEmail>;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-mockLoginWithEmail.mockImplementation((email, password) => {
+mockLoginWithEmail.mockImplementation(() => {
   notifySuccess();
   return Promise.resolve({ ok: true });
 });
@@ -95,8 +94,7 @@ describe('Login component using email method', () => {
     };
 
     const testError = 'Invalid credentials';
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    mockLoginWithEmail.mockImplementationOnce((email, password) => {
+    mockLoginWithEmail.mockImplementationOnce(() => {
       notifyError(testError);
       return Promise.resolve({ ok: false });
     });
