@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 import { BoardListNavItem } from './board-list-nav-item';
 import { AddBoard, useBoardList } from 'webui/board';
-import { Modal, useModalToggle } from 'webui/shared';
+import { useModalToggle } from 'webui/shared';
 
 export const BoardListNav = () => {
   const { boardList, activeBoardId, setActiveBoardId } = useBoardList();
@@ -38,9 +38,7 @@ export const BoardListNav = () => {
         </ul>
       </div>
 
-      <Modal isOpen={isAddBoardOpen} onClose={closeAddBoard}>
-        <AddBoard close={closeAddBoard} onAdd={setActiveBoardId} />
-      </Modal>
+      <AddBoard isOpen={isAddBoardOpen} close={closeAddBoard} onAdd={setActiveBoardId} />
     </>
   );
 };

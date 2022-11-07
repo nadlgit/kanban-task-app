@@ -8,6 +8,7 @@ import { generateId } from 'infrastructure/utils';
 import {
   boardTextInputRegisterOptions,
   Button,
+  Modal,
   ModalHeading,
   TextField,
   TextFieldGroup,
@@ -15,12 +16,9 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-type AddBoardProps = {
-  close: () => void;
-  onAdd?: (newBoardId: UniqueId) => void;
-};
+type AddBoardProps = { isOpen: boolean; close: () => void; onAdd?: (newBoardId: UniqueId) => void };
 
-export const AddBoard = ({ close, onAdd }: AddBoardProps) => {
+export const AddBoard = ({ isOpen, close, onAdd }: AddBoardProps) => {
   const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
 
   const newColumnItemName = () => generateId('newcolumn');
@@ -65,7 +63,7 @@ export const AddBoard = ({ close, onAdd }: AddBoardProps) => {
   }, [formState, columns, setColumnItemError]);
 
   return (
-    <>
+    <Modal isOpen={isOpen} onClose={close}>
       <ModalHeading>Add New Board</ModalHeading>
       <form onSubmit={handleFormSubmit} noValidate>
         <TextField
@@ -92,6 +90,6 @@ export const AddBoard = ({ close, onAdd }: AddBoardProps) => {
           Create New Board
         </Button>
       </form>
-    </>
+    </Modal>
   );
 };

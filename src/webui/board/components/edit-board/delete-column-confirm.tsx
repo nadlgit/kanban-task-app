@@ -1,48 +1,30 @@
-import styles from './delete-column-confirm.module.css';
-
-import { Button, ModalHeading } from 'webui/shared';
+import { ConfirmDelete } from '../confirm-delete';
 
 export type DeleteColumnConfirmProps = {
+  isOpen: boolean;
   close: () => void;
   columnName: string;
   onDelete: () => void;
 };
 
-export const DeleteColumnConfirm = ({ close, columnName, onDelete }: DeleteColumnConfirmProps) => {
-  const handleCancel = () => {
-    close();
+export const DeleteColumnConfirm = ({
+  isOpen,
+  close,
+  columnName,
+  onDelete,
+}: DeleteColumnConfirmProps) => {
+  const confirmProps = {
+    isOpen,
+    title: 'Delete this column?',
+    message:
+      `Are you sure you want to delete the ‘${columnName}’ column` +
+      ' and all of its tasks? This action cannot be undone.',
+    onClose: async (shouldDelete: boolean) => {
+      if (shouldDelete) {
+        onDelete();
+      }
+      close();
+    },
   };
-
-  const handleDelete = () => {
-    onDelete();
-    close();
-  };
-
-  return (
-    <>
-      <ModalHeading variant="destructive">Delete this column?</ModalHeading>
-      <p className={styles.msg}>
-        {`Are you sure you want to delete the ‘${columnName}’ column?` +
-          ' This action will remove all of its tasks and cannot be undone.'}
-      </p>
-      <div className={styles.buttonswrapper}>
-        <Button
-          variant="destructive"
-          fullWidth={false}
-          className={styles.button}
-          onClick={handleDelete}
-        >
-          Delete
-        </Button>
-        <Button
-          variant="secondary"
-          fullWidth={false}
-          className={styles.button}
-          onClick={handleCancel}
-        >
-          Cancel
-        </Button>
-      </div>
-    </>
-  );
+  return <ConfirmDelete {...confirmProps} />;
 };

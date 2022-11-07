@@ -2,7 +2,7 @@ import styles from './board-top-menu.module.css';
 import IconAdd from './icon-add-task-mobile.svg';
 
 import { AddTask, DeleteBoard, EditBoard, useActiveBoard } from 'webui/board';
-import { Button, Menu, Modal, useIsMobile, useModalToggle } from 'webui/shared';
+import { Button, Menu, useIsMobile, useModalToggle } from 'webui/shared';
 
 export const BoardTopMenu = () => {
   const isMobile = useIsMobile();
@@ -47,15 +47,9 @@ export const BoardTopMenu = () => {
 
       {!disabled && (
         <>
-          <Modal isOpen={isAddTaskOpen} onClose={closeAddTask}>
-            <AddTask board={board} close={closeAddTask} />
-          </Modal>
-          <Modal isOpen={isEditBoardOpen} onClose={closeEditBoard}>
-            <EditBoard board={board} close={closeEditBoard} />
-          </Modal>
-          <Modal isOpen={isDeleteBoardOpen} onClose={closeDeleteBoard}>
-            <DeleteBoard board={board} close={closeDeleteBoard} />
-          </Modal>
+          <AddTask isOpen={isAddTaskOpen} close={closeAddTask} board={board} />
+          <EditBoard isOpen={isEditBoardOpen} close={closeEditBoard} board={board} />
+          <DeleteBoard isOpen={isDeleteBoardOpen} close={closeDeleteBoard} board={board} />
         </>
       )}
     </>
