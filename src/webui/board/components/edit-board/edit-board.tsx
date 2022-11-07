@@ -1,24 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { DeleteColumnConfirm } from './delete-column-confirm';
+import type { DeleteColumnConfirmProps } from './delete-column-confirm';
 import type { BoardEntity, UniqueId } from 'core/entities';
 import { editBoard } from 'core/usecases';
 import { generateId } from 'infrastructure/utils';
 import {
   boardTextInputRegisterOptions,
   Button,
+  Modal,
   ModalHeading,
   TextField,
   TextFieldGroup,
   updateTextInputErrors,
+  useModalToggle,
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
 type EditBoardProps = { board: BoardEntity; close: () => void };
 
 export const EditBoard = ({ board, close }: EditBoardProps) => {
-  const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
+  const { register, handleSubmit, formState, watch } = useForm({ shouldUnregister: true });
 
   const newColumnItemName = () => generateId('newcolumn');
   const newColumnPlaceholder = 'e.g. Todo';
@@ -36,6 +40,19 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
     deleteItem: deleteColumnItem,
     setError: setColumnItemError,
   } = useTextFieldGroupInputList(initializeColumns);
+
+  const {
+    isModalOpen: isDeleteColumnConfirmOpen,
+    closeModal: closeDeleteColumnConfirm,
+    openModal: openDeleteColumnConfirm,
+  } = useModalToggle();
+  const [deleteColumnConfirmProps, setDeleteColumnConfirmProps] = useState<
+    Omit<DeleteColumnConfirmProps, 'close'>
+  >({
+    columnName: '',
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onDelete: () => {},
+  });
 
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -80,33 +97,52 @@ export const EditBoard = ({ board, close }: EditBoardProps) => {
 
   return (
     <>
-      <ModalHeading>Edit Board</ModalHeading>
-      <form onSubmit={handleFormSubmit} noValidate>
-        <TextField
-          {...register('boardname', boardTextInputRegisterOptions)}
-          label="Board Name"
-          placeholder="e.g. Web Design"
-          defaultValue={board.name}
-          error={formState.errors['boardname']?.message as string | undefined}
-        />
-        <TextFieldGroup
-          groupLabel="Board Columns"
-          inputList={columns}
-          addLabel="+ Add New Column"
-          onAdd={() => {
-            addColumnItem({
-              ...register(newColumnItemName(), boardTextInputRegisterOptions),
-              placeholder: newColumnPlaceholder,
-            });
-          }}
-          onDelete={(inputName: string) => {
-            deleteColumnItem(inputName);
-          }}
-        />
-        <Button variant="primary-s" type="submit">
-          Save Changes
-        </Button>
-      </form>
+      <>
+        <ModalHeading>Edit Board</ModalHeading>
+        <form onSubmit={handleFormSubmit} noValidate>
+          <TextField
+            {...register('boardname', boardTextInputRegisterOptions)}
+            label="Board Name"
+            placeholder="e.g. Web Design"
+            defaultValue={board.name}
+            error={formState.errors['boardname']?.message as string | undefined}
+          />
+          <TextFieldGroup
+            groupLabel="Board Columns"
+            inputList={columns}
+            addLabel="+ Add New Column"
+            onAdd={() => {
+              addColumnItem({
+                ...register(newColumnItemName(), boardTextInputRegisterOptions),
+                placeholder: newColumnPlaceholder,
+              });
+            }}
+            onDelete={(inputName: string) => {
+              const hasTasks =
+                (board.columns.find(({ id }) => id === inputName)?.tasks?.length ?? 0) > 0;
+              const columnName = watch(inputName) as string;
+              const onDelete = () => {
+                deleteColumnItem(inputName);
+              };
+              if (hasTasks) {
+                setDeleteColumnConfirmProps({
+                  columnName,
+                  onDelete,
+                });
+                openDeleteColumnConfirm();
+              } else {
+                onDelete();
+              }
+            }}
+          />
+          <Button variant="primary-s" type="submit">
+            Save Changes
+          </Button>
+        </form>
+      </>
+      <Modal isOpen={isDeleteColumnConfirmOpen} onClose={closeDeleteColumnConfirm}>
+        <DeleteColumnConfirm {...deleteColumnConfirmProps} close={closeDeleteColumnConfirm} />
+      </Modal>
     </>
   );
 };
