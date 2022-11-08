@@ -1,0 +1,110 @@
+import { faker } from '@faker-js/faker';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
+
+import { BoardContextProvider } from './context-provider';
+import { resetActiveBoardId } from './reset-active-board-id';
+import { useBoardList } from './use-board-list';
+import { getBoardList, onBoardListChange } from 'core/usecases';
+
+jest.mock('./reset-active-board-id');
+const mockResetActiveBoardId = resetActiveBoardId as jest.MockedFunction<typeof resetActiveBoardId>;
+
+jest.mock('core/usecases');
+const mockGetBoardList = getBoardList as jest.MockedFunction<typeof getBoardList>;
+mockGetBoardList.mockImplementation(() => {
+  return Promise.resolve([]);
+});
+const mockOnBoardListChange = onBoardListChange as jest.MockedFunction<typeof onBoardListChange>;
+mockOnBoardListChange.mockImplementation(() => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  return () => {};
+});
+
+const Wrapper = ({ children }: PropsWithChildren) => (
+  <BoardContextProvider>{children}</BoardContextProvider>
+);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+describe('useBoardList()', () => {
+  it('should handle loading state and call resetActiveBoardId', async () => {
+    const testBoardList = [
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+    ];
+    const testActiveBoardId = testBoardList[0].id;
+    mockGetBoardList.mockImplementationOnce(() => {
+      return Promise.resolve(testBoardList);
+    });
+    mockResetActiveBoardId.mockImplementationOnce(() => {
+      return testActiveBoardId;
+    });
+
+    const { result } = renderHook(() => useBoardList(), { wrapper: Wrapper });
+
+    expect(result.current.loading).toBeTruthy();
+    expect(result.current.boardList).toEqual([]);
+    expect(result.current.activeBoardId).toBeNull();
+    expect(typeof result.current.setActiveBoardId).toBe('function');
+    await waitFor(() => expect(result.current.loading).toBeFalsy());
+    expect(getBoardList).toHaveBeenCalledTimes(1);
+    expect(resetActiveBoardId).toHaveBeenCalledTimes(1);
+    expect(resetActiveBoardId).toHaveBeenCalledWith(testBoardList, null);
+    expect(result.current.boardList).toEqual(testBoardList);
+    expect(result.current.activeBoardId).toEqual(testActiveBoardId);
+    expect(typeof result.current.setActiveBoardId).toBe('function');
+  });
+
+  it('setActiveBoardId() should update activeBoardId when valid value', async () => {
+    const testBoardList = [
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+    ];
+    const testActiveBoardIdFirst = testBoardList[0].id;
+    mockGetBoardList.mockImplementationOnce(() => {
+      return Promise.resolve(testBoardList);
+    });
+    mockResetActiveBoardId.mockImplementationOnce(() => {
+      return testActiveBoardIdFirst;
+    });
+    const testActiveBoardIdSecond = testBoardList[testBoardList.length - 1].id;
+    expect(testActiveBoardIdSecond).not.toEqual(testActiveBoardIdFirst);
+
+    const { result } = renderHook(() => useBoardList(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.loading).toBeFalsy());
+    act(() => {
+      result.current.setActiveBoardId(testActiveBoardIdSecond);
+    });
+    expect(result.current.activeBoardId).toEqual(testActiveBoardIdSecond);
+  });
+
+  it('setActiveBoardId() should keep activeBoardId unchanged when invalid value', async () => {
+    const testBoardList = [
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+    ];
+    const testActiveBoardIdFirst = testBoardList[0].id;
+    mockGetBoardList.mockImplementationOnce(() => {
+      return Promise.resolve(testBoardList);
+    });
+    mockResetActiveBoardId.mockImplementationOnce(() => {
+      return testActiveBoardIdFirst;
+    });
+    const testActiveBoardIdSecond = faker.datatype.uuid();
+    expect(testActiveBoardIdSecond).not.toEqual(testActiveBoardIdFirst);
+
+    const { result } = renderHook(() => useBoardList(), { wrapper: Wrapper });
+
+    await waitFor(() => expect(result.current.loading).toBeFalsy());
+    act(() => {
+      result.current.setActiveBoardId(testActiveBoardIdSecond);
+    });
+    expect(result.current.activeBoardId).toEqual(testActiveBoardIdFirst);
+  });
+});
