@@ -54,7 +54,7 @@ const Choice = ({ value, iconUrl, alt, currentTheme, onChange }: ChoiceProps) =>
         id={htmlId}
         type="radio"
         name="app-theme"
-        className={styles.input}
+        className={`visually-hidden ${styles.input}`}
         value={value}
         checked={currentTheme === value}
         onChange={onChange}

@@ -14,12 +14,6 @@
   background-color: var(--color-grey-very-dark);
 }
 
-.input {
-  position: absolute;
-  top: -100vh;
-  opacity: 0;
-}
-
 .input:focus + .label {
   outline-style: auto;
 }

@@ -7,6 +7,18 @@
   font: inherit;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 :root {
   --font-family: 'Plus Jakarta Sans', sans-serif;
   --font-weight-bold: 700;
