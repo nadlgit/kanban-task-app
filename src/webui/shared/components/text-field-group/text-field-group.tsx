@@ -24,14 +24,14 @@ export const TextFieldGroup = ({
   onDelete,
 }: TextFieldGroupProps) => {
   return (
-    <>
-      <p className={styles.label}>{groupLabel}</p>
+    <fieldset className={styles.container}>
+      <legend className={styles.label}>{groupLabel}</legend>
       {inputList.map((input) => (
         <TextFieldGroupInput key={input.name} onDelete={() => onDelete(input.name)} {...input} />
       ))}
       <Button variant="secondary" onClick={onAdd} className={styles.button}>
         {addLabel}
       </Button>
-    </>
+    </fieldset>
   );
 };

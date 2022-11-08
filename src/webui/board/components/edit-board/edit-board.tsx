@@ -24,12 +24,14 @@ type EditBoardProps = { isOpen: boolean; close: () => void; board: BoardEntity }
 export const EditBoard = ({ isOpen, close, board }: EditBoardProps) => {
   const { register, handleSubmit, formState, watch } = useForm({ shouldUnregister: true });
 
+  const columnItemLabel = 'Column Name';
   const newColumnItemName = () => generateId('newcolumn');
   const newColumnPlaceholder = 'e.g. Todo';
 
   const initializeColumns = () =>
     board.columns.map((column) => ({
       ...register(column.id, boardTextInputRegisterOptions),
+      label: columnItemLabel,
       placeholder: newColumnPlaceholder,
       defaultValue: column.name,
     }));
@@ -113,6 +115,7 @@ export const EditBoard = ({ isOpen, close, board }: EditBoardProps) => {
           onAdd={() => {
             addColumnItem({
               ...register(newColumnItemName(), boardTextInputRegisterOptions),
+              label: columnItemLabel,
               placeholder: newColumnPlaceholder,
             });
           }}

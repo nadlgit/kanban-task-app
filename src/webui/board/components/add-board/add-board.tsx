@@ -21,12 +21,14 @@ type AddBoardProps = { isOpen: boolean; close: () => void; onAdd?: (newBoardId: 
 export const AddBoard = ({ isOpen, close, onAdd }: AddBoardProps) => {
   const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
 
+  const columnItemLabel = 'Column Name';
   const newColumnItemName = () => generateId('newcolumn');
   const newColumnPlaceholder = 'e.g. Todo';
 
   const initializeColumns = () => [
     {
       ...register(newColumnItemName(), boardTextInputRegisterOptions),
+      label: columnItemLabel,
       placeholder: newColumnPlaceholder,
     },
   ];
@@ -79,6 +81,7 @@ export const AddBoard = ({ isOpen, close, onAdd }: AddBoardProps) => {
           onAdd={() => {
             addColumnItem({
               ...register(newColumnItemName(), boardTextInputRegisterOptions),
+              label: columnItemLabel,
               placeholder: newColumnPlaceholder,
             });
           }}

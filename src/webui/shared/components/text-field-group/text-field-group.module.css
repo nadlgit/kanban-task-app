@@ -1,6 +1,11 @@
+.container {
+  border: none;
+}
+
 .label {
   composes: body-m from global;
-  margin-bottom: 0.5rem;
+  display: block;
+  margin-bottom: 0.25rem;
 }
 
 .button {

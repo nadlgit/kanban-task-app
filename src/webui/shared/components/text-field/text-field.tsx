@@ -7,7 +7,8 @@ import type { DetailedHTMLProps, InputHTMLAttributes } from 'react';
 import { Icon } from '../icon';
 
 export type TextFieldProps = {
-  label?: string;
+  label: string;
+  hideLabel?: boolean;
   error?: string;
   fullWidth?: boolean;
   onDelete?: () => void;
@@ -17,7 +18,18 @@ export type TextFieldProps = {
   Omit<DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, 'name'>;
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, error, fullWidth = true, onDelete, name, id, type, className, ...otherProps },
+  {
+    label,
+    hideLabel = false,
+    error,
+    fullWidth = true,
+    onDelete,
+    name,
+    id,
+    type,
+    className,
+    ...otherProps
+  },
   ref
 ) {
   const htmlId = id ?? name;
@@ -29,11 +41,9 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
 
   return (
     <p className={cssClasses.join(' ')}>
-      {label && (
-        <label htmlFor={htmlId} className={styles.label}>
-          {label}
-        </label>
-      )}
+      <label htmlFor={htmlId} className={hideLabel ? 'visually-hidden' : styles.label}>
+        {label}
+      </label>
       <span className={styles.inputcontainer}>
         <input
           ref={ref}
