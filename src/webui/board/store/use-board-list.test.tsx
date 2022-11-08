@@ -29,12 +29,17 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const testBoardListFactory = (length: number) => {
+  const list = [] as { id: string; name: string }[];
+  for (let i = 0; i < Math.max(1, length); i++) {
+    list.push({ id: faker.datatype.uuid(), name: faker.lorem.words() });
+  }
+  return list;
+};
+
 describe('useBoardList()', () => {
   it('should handle loading state and call resetActiveBoardId', async () => {
-    const testBoardList = [
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-    ];
+    const testBoardList = testBoardListFactory(2);
     const testActiveBoardId = testBoardList[0].id;
     mockGetBoardList.mockImplementationOnce(() => {
       return Promise.resolve(testBoardList);
@@ -59,11 +64,7 @@ describe('useBoardList()', () => {
   });
 
   it('setActiveBoardId() should update activeBoardId when valid value', async () => {
-    const testBoardList = [
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-    ];
+    const testBoardList = testBoardListFactory(3);
     const testActiveBoardIdFirst = testBoardList[0].id;
     mockGetBoardList.mockImplementationOnce(() => {
       return Promise.resolve(testBoardList);
@@ -84,11 +85,7 @@ describe('useBoardList()', () => {
   });
 
   it('setActiveBoardId() should keep activeBoardId unchanged when invalid value', async () => {
-    const testBoardList = [
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-    ];
+    const testBoardList = testBoardListFactory(3);
     const testActiveBoardIdFirst = testBoardList[0].id;
     mockGetBoardList.mockImplementationOnce(() => {
       return Promise.resolve(testBoardList);
