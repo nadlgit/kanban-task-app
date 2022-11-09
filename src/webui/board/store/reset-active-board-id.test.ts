@@ -3,10 +3,6 @@ import { faker } from '@faker-js/faker';
 import { resetActiveBoardId } from './reset-active-board-id';
 import type { BoardList } from 'core/entities';
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('resetActiveBoardId()', () => {
   it('should keep activeId when it exists', () => {
     const testList = [
