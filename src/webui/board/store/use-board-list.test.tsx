@@ -5,7 +5,7 @@ import type { PropsWithChildren } from 'react';
 import { BoardContextProvider } from './context-provider';
 import { resetActiveBoardId } from './reset-active-board-id';
 import { useBoardList } from './use-board-list';
-import { getBoardList, onBoardListChange } from 'core/usecases';
+import { getBoardList } from 'core/usecases';
 
 jest.mock('./reset-active-board-id');
 const mockResetActiveBoardId = resetActiveBoardId as jest.MockedFunction<typeof resetActiveBoardId>;
@@ -14,11 +14,6 @@ jest.mock('core/usecases');
 const mockGetBoardList = getBoardList as jest.MockedFunction<typeof getBoardList>;
 mockGetBoardList.mockImplementation(() => {
   return Promise.resolve([]);
-});
-const mockOnBoardListChange = onBoardListChange as jest.MockedFunction<typeof onBoardListChange>;
-mockOnBoardListChange.mockImplementation(() => {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  return () => {};
 });
 
 const Wrapper = ({ children }: PropsWithChildren) => (
