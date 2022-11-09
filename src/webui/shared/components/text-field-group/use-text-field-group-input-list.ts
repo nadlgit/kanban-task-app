@@ -2,9 +2,8 @@ import { useCallback, useState } from 'react';
 
 import type { TextFieldGroupInputDef } from './text-field-group';
 
-export const useTextFieldGroupInputList = (initialize: () => TextFieldGroupInputDef[]) => {
-  //NB: Don't know exactly why, but forcing lazy initialization avoids some weird side effects
-  const [list, setList] = useState<TextFieldGroupInputDef[]>(initialize);
+export const useTextFieldGroupInputList = (initialList: TextFieldGroupInputDef[]) => {
+  const [list, setList] = useState<TextFieldGroupInputDef[]>(initialList);
 
   const addItem = useCallback((item: TextFieldGroupInputDef) => {
     setList((l) => [...l, item]);

@@ -1,98 +1,28 @@
-import { useEffect } from 'react';
-import type { FormEventHandler } from 'react';
-import { useForm } from 'react-hook-form';
-
+import { AddBoardForm } from './add-board-form';
+import type { AddBoardFormProps } from './add-board-form';
 import type { UniqueId } from 'core/entities';
 import { addBoard } from 'core/usecases';
-import { generateId } from 'infrastructure/utils';
-import {
-  boardTextInputRegisterOptions,
-  Button,
-  Modal,
-  ModalHeading,
-  TextField,
-  TextFieldGroup,
-  updateTextInputErrors,
-  useTextFieldGroupInputList,
-} from 'webui/shared';
+import { Modal, ModalHeading } from 'webui/shared';
 
 type AddBoardProps = { isOpen: boolean; close: () => void; onAdd?: (newBoardId: UniqueId) => void };
 
 export const AddBoard = ({ isOpen, close, onAdd }: AddBoardProps) => {
-  const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
-
-  const columnItemLabel = 'Column Name';
-  const newColumnItemName = () => generateId('newcolumn');
-  const newColumnPlaceholder = 'e.g. Todo';
-
-  const initializeColumns = () => [
-    {
-      ...register(newColumnItemName(), boardTextInputRegisterOptions),
-      label: columnItemLabel,
-      placeholder: newColumnPlaceholder,
-    },
-  ];
-
-  const {
-    list: columns,
-    addItem: addColumnItem,
-    deleteItem: deleteColumnItem,
-    setError: setColumnItemError,
-  } = useTextFieldGroupInputList(initializeColumns);
-
-  const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    handleSubmit(async (data) => {
-      const board = {
-        name: data.boardname as string,
-        columns: columns.map(({ name }) => ({ name: data[name] as string })),
-      };
-      const result = await addBoard(board);
-      if (result.ok && onAdd) {
-        onAdd(result.boardId);
-      }
-      close();
-    })(e);
+  const onSubmit: AddBoardFormProps['onSubmit'] = async (boardName, boardColumns) => {
+    const board = {
+      name: boardName,
+      columns: boardColumns.map(({ name }) => ({ name })),
+    };
+    const result = await addBoard(board);
+    if (result.ok && onAdd) {
+      onAdd(result.boardId);
+    }
+    close();
   };
-
-  useEffect(() => {
-    updateTextInputErrors(
-      formState,
-      columns.map(({ name, error }) => ({ name, error })),
-      setColumnItemError
-    );
-  }, [formState, columns, setColumnItemError]);
 
   return (
     <Modal isOpen={isOpen} onClose={close}>
       <ModalHeading>Add New Board</ModalHeading>
-      <form onSubmit={handleFormSubmit} noValidate>
-        <TextField
-          {...register('boardname', boardTextInputRegisterOptions)}
-          label="Board Name"
-          placeholder="e.g. Web Design"
-          error={formState.errors['boardname']?.message as string | undefined}
-        />
-        <TextFieldGroup
-          groupLabel="Board Columns"
-          inputList={columns}
-          addLabel="+ Add New Column"
-          onAdd={() => {
-            addColumnItem({
-              ...register(newColumnItemName(), boardTextInputRegisterOptions),
-              label: columnItemLabel,
-              placeholder: newColumnPlaceholder,
-            });
-          }}
-          onDelete={(inputName: string) => {
-            deleteColumnItem(inputName);
-          }}
-        />
-        <Button variant="primary-s" type="submit">
-          Create New Board
-        </Button>
-      </form>
+      <AddBoardForm onSubmit={onSubmit} />
     </Modal>
   );
 };
