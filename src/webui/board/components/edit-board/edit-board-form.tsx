@@ -9,6 +9,7 @@ import { generateId } from 'infrastructure/utils';
 import {
   boardTextInputRegisterOptions,
   Button,
+  doNothing,
   TextField,
   TextFieldGroup,
   updateTextInputErrors,
@@ -30,13 +31,13 @@ export const EditBoardForm = ({ board, onSubmit }: EditBoardFormProps) => {
 
   const initialColumns = useMemo(
     () =>
-      board.columns.map((column) => ({
-        ...register(column.id, boardTextInputRegisterOptions),
+      board.columns.map(({ id, name }) => ({
+        ...register(id, boardTextInputRegisterOptions),
         label: columnItemLabel,
         placeholder: newColumnPlaceholder,
-        defaultValue: column.name,
+        defaultValue: name,
       })),
-    [board, register]
+    [board.columns, register]
   );
 
   const {
@@ -55,8 +56,7 @@ export const EditBoardForm = ({ board, onSubmit }: EditBoardFormProps) => {
     Omit<DeleteColumnConfirmProps, 'isOpen' | 'close'>
   >({
     columnName: '',
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    onDelete: () => {},
+    onDelete: doNothing,
   });
 
   const handleFormSubmit: FormEventHandler<HTMLFormElement> = (e) => {
