@@ -64,8 +64,8 @@ export const EditBoardForm = ({ board, onSubmit }: EditBoardFormProps) => {
     e.stopPropagation();
     handleSubmit((data) => {
       onSubmit(
-        data.boardname,
-        columns.map(({ name }) => ({ id: name, name: data[name] }))
+        data.boardname.trim(),
+        columns.map(({ name }) => ({ id: name, name: data[name].trim() }))
       );
     })(e);
   };
