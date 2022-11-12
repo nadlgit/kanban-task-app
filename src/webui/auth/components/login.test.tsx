@@ -44,7 +44,7 @@ describe('Login component using email method', () => {
       testEmail: `   ${faker.internet.email()}     `,
       testPassword: `   ${faker.internet.password()}   `,
     },
-  ])('should call usecase with trimmed values: $desc', async ({ testEmail, testPassword }) => {
+  ])('should trim text input values: $desc', async ({ testEmail, testPassword }) => {
     const testCredential = {
       email: testEmail,
       password: testPassword,

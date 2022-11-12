@@ -53,7 +53,7 @@ describe('Register component using email method', () => {
       testUsername: `   ${faker.internet.userName()}     `,
     },
   ])(
-    'should call usecase with trimmed values: $desc',
+    'should trim text input values: $desc',
     async ({ testEmail, testPassword, testConfirmpwd, testUsername }) => {
       const testCredential = {
         email: testEmail,

@@ -40,10 +40,10 @@ describe('AddBoard component', () => {
     userEvt = userEvent.setup();
     render(<AddBoard {...testProps} />);
 
-    const expectLength = expectedInitialColumnsCount;
-    expect(getColumnNameEltList().length).toBe(expectLength);
-    expect(getColumnDeleteEltList().length).toBe(expectLength);
-    expect(getColumnNameErrorEltList().length).toBe(expectLength);
+    const expectedLength = expectedInitialColumnsCount;
+    expect(getColumnNameEltList().length).toBe(expectedLength);
+    expect(getColumnDeleteEltList().length).toBe(expectedLength);
+    expect(getColumnNameErrorEltList().length).toBe(expectedLength);
   });
 
   it('should add column to the form', async () => {
@@ -52,9 +52,10 @@ describe('AddBoard component', () => {
 
     await userEvt.click(getAddColumnBtnElt());
 
-    const expectLength = expectedInitialColumnsCount + 1;
-    expect(getColumnNameEltList().length).toBe(expectLength);
-    expect(getColumnDeleteEltList().length).toBe(expectLength);
+    const expectedLength = expectedInitialColumnsCount + 1;
+    expect(getColumnNameEltList().length).toBe(expectedLength);
+    expect(getColumnDeleteEltList().length).toBe(expectedLength);
+    expect(getColumnNameErrorEltList().length).toBe(expectedLength);
   });
 
   it('should delete column from the form', async () => {
@@ -64,10 +65,10 @@ describe('AddBoard component', () => {
     expect(expectedInitialColumnsCount).toBeGreaterThanOrEqual(1);
     await userEvt.click(getColumnDeleteEltList()[0]);
 
-    const expectLength = expectedInitialColumnsCount - 1;
-    expect(getColumnNameEltList().length).toBe(expectLength);
-    expect(getColumnDeleteEltList().length).toBe(expectLength);
-    expect(getColumnNameErrorEltList().length).toBe(expectLength);
+    const expectedLength = expectedInitialColumnsCount - 1;
+    expect(getColumnNameEltList().length).toBe(expectedLength);
+    expect(getColumnDeleteEltList().length).toBe(expectedLength);
+    expect(getColumnNameErrorEltList().length).toBe(expectedLength);
   });
 
   it.each([
@@ -115,7 +116,7 @@ describe('AddBoard component', () => {
     expect(testProps.onAdd).not.toHaveBeenCalled();
   });
 
-  it('should call usecase with trimmed values', async () => {
+  it('should trim text input values', async () => {
     userEvt = userEvent.setup();
     render(<AddBoard {...testProps} />);
 
