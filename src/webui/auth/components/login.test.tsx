@@ -4,17 +4,15 @@ import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
 import { Login } from './login';
-import { notifyError, notifySuccess, loginWithEmail, loginWithGoogle } from 'core/usecases';
+import { loginWithEmail, loginWithGoogle } from 'core/usecases';
 
 jest.mock('core/usecases');
 const mockLoginWithEmail = loginWithEmail as jest.MockedFunction<typeof loginWithEmail>;
 mockLoginWithEmail.mockImplementation(() => {
-  notifySuccess();
   return Promise.resolve({ ok: true });
 });
 const mockLoginWithGoogle = loginWithGoogle as jest.MockedFunction<typeof loginWithGoogle>;
 mockLoginWithGoogle.mockImplementation(() => {
-  notifySuccess();
   return Promise.resolve({ ok: true });
 });
 
@@ -84,7 +82,6 @@ describe('Login component using email method', () => {
     await userEvt.click(getEmailSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle usecase error', async () => {
@@ -93,9 +90,7 @@ describe('Login component using email method', () => {
       password: faker.internet.password(),
     };
 
-    const testError = 'Invalid credentials';
     mockLoginWithEmail.mockImplementationOnce(() => {
-      notifyError(testError);
       return Promise.resolve({ ok: false });
     });
 
@@ -113,8 +108,6 @@ describe('Login component using email method', () => {
       //Do nothing
     }
     expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
-    expect(notifyError).toHaveBeenCalledTimes(1);
-    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 
   it.each([
@@ -188,13 +181,10 @@ describe('Login component using Google method', () => {
     await userEvt.click(getGoogleSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle usecase error', async () => {
-    const testError = 'Google error';
     mockLoginWithGoogle.mockImplementationOnce(() => {
-      notifyError(testError);
       return Promise.resolve({ ok: false });
     });
 
@@ -210,7 +200,5 @@ describe('Login component using Google method', () => {
       //Do nothing
     }
     expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
-    expect(notifyError).toHaveBeenCalledTimes(1);
-    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 });

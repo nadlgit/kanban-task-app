@@ -4,17 +4,15 @@ import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
 import { Register } from './register';
-import { notifyError, notifySuccess, registerWithEmail, registerWithGoogle } from 'core/usecases';
+import { registerWithEmail, registerWithGoogle } from 'core/usecases';
 
 jest.mock('core/usecases');
 const mockRegisterWithEmail = registerWithEmail as jest.MockedFunction<typeof registerWithEmail>;
 mockRegisterWithEmail.mockImplementation(() => {
-  notifySuccess();
   return Promise.resolve({ ok: true });
 });
 const mockRegisterWithGoogle = registerWithGoogle as jest.MockedFunction<typeof registerWithGoogle>;
 mockRegisterWithGoogle.mockImplementation(() => {
-  notifySuccess();
   return Promise.resolve({ ok: true });
 });
 
@@ -107,7 +105,6 @@ describe('Register component using email method', () => {
     await userEvt.click(getEmailSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle usecase error', async () => {
@@ -119,9 +116,7 @@ describe('Register component using email method', () => {
       username: faker.internet.userName(),
     };
 
-    const testError = 'Unable to register';
     mockRegisterWithEmail.mockImplementationOnce(() => {
-      notifyError(testError);
       return Promise.resolve({ ok: false });
     });
 
@@ -141,8 +136,6 @@ describe('Register component using email method', () => {
       //Do nothing
     }
     expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
-    expect(notifyError).toHaveBeenCalledTimes(1);
-    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 
   it.each([
@@ -266,13 +259,10 @@ describe('Register component using Google method', () => {
     await userEvt.click(getGoogleSubmitBtnElt());
 
     await screen.findByTestId(mockNavigateTestId);
-    expect(notifySuccess).toHaveBeenCalledTimes(1);
   });
 
   it('should handle usecase error', async () => {
-    const testError = 'Google error';
     mockRegisterWithGoogle.mockImplementationOnce(() => {
-      notifyError(testError);
       return Promise.resolve({ ok: false });
     });
 
@@ -288,7 +278,5 @@ describe('Register component using Google method', () => {
       //Do nothing
     }
     expect(screen.queryByTestId(mockNavigateTestId)).not.toBeInTheDocument();
-    expect(notifyError).toHaveBeenCalledTimes(1);
-    expect(notifyError).toHaveBeenLastCalledWith(testError);
   });
 });
