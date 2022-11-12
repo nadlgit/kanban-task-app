@@ -149,6 +149,11 @@ describe('AddBoard component', () => {
   });
 
   it('should handle usecase success', async () => {
+    const testNewBoardId = faker.datatype.uuid();
+    mockAddBoardFn.mockImplementationOnce(() => {
+      return Promise.resolve({ ok: true, boardId: testNewBoardId });
+    });
+
     userEvt = userEvent.setup();
     render(<AddBoard {...testProps} />);
 
@@ -162,6 +167,7 @@ describe('AddBoard component', () => {
     expect(addBoard).toHaveBeenCalledTimes(1);
     expect(testProps.close).toHaveBeenCalledTimes(1);
     expect(testProps.onAdd).toHaveBeenCalledTimes(1);
+    expect(testProps.onAdd).toHaveBeenLastCalledWith(testNewBoardId);
   });
 
   it('should handle usecase error', async () => {
