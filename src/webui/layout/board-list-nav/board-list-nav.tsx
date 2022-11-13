@@ -7,7 +7,7 @@ import { AddBoard, useBoardList } from 'webui/board';
 import { useModalToggle } from 'webui/shared';
 
 export const BoardListNav = () => {
-  const { boardList, activeBoardId, setActiveBoardId } = useBoardList();
+  const { loading, boardList, activeBoardId, setActiveBoardId } = useBoardList();
 
   const {
     isModalOpen: isAddBoardOpen,
@@ -16,10 +16,10 @@ export const BoardListNav = () => {
   } = useModalToggle();
 
   useEffect(() => {
-    if (!boardList.length) {
+    if (!loading && !boardList.length) {
       openAddBoard();
     }
-  }, [boardList, openAddBoard]);
+  }, [boardList, loading, openAddBoard]);
 
   return (
     <>
