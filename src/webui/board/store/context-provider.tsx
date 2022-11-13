@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
 import { BoardContext } from './context';
@@ -12,14 +12,7 @@ export const BoardContextProvider = ({ children }: BoardContextProviderProps) =>
   const [loading, setLoading] = useState(true);
   const [boardList, setBoardList] = useState<BoardList>([]);
   const [activeBoardId, setActiveBoardIdState] = useState<UniqueId | null>(null);
-  const setActiveBoardId = useCallback(
-    (id: UniqueId | null) => {
-      if (boardList.find((board) => board.id === id)) {
-        setActiveBoardIdState(id);
-      }
-    },
-    [boardList]
-  );
+  const [nextActiveBoardId, setNextActiveBoardIdState] = useState<UniqueId | null>(activeBoardId);
 
   useEffect(() => {
     const updateBoardList = async () => {
@@ -33,8 +26,18 @@ export const BoardContextProvider = ({ children }: BoardContextProviderProps) =>
     return onBoardListChange(updateBoardList);
   }, []);
 
+  useEffect(() => {
+    if (boardList.find((board) => board.id === nextActiveBoardId)) {
+      setActiveBoardIdState((activeId) =>
+        activeId === nextActiveBoardId ? activeId : nextActiveBoardId
+      );
+    }
+  }, [boardList, nextActiveBoardId]);
+
   return (
-    <BoardContext.Provider value={{ loading, boardList, activeBoardId, setActiveBoardId }}>
+    <BoardContext.Provider
+      value={{ loading, boardList, activeBoardId, setActiveBoardId: setNextActiveBoardIdState }}
+    >
       {children}
     </BoardContext.Provider>
   );
