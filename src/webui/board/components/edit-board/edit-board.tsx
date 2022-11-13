@@ -29,7 +29,14 @@ export const EditBoard = ({ isOpen, close, board }: EditBoardProps) => {
       )
     );
 
-    await editBoard(boardUpdate);
+    if (
+      boardUpdate.name ||
+      boardUpdate.columnsAdded.length > 0 ||
+      boardUpdate.columnsDeleted.length > 0 ||
+      boardUpdate.columnsUpdated.length > 0
+    ) {
+      await editBoard(boardUpdate);
+    }
     close();
   };
 
