@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 
 import { BoardContext } from './context';
-import { resetActiveBoardId } from './reset-active-board-id';
 import type { BoardList, UniqueId } from 'core/entities';
 import { getBoardList, onBoardListChange } from 'core/usecases';
 
@@ -19,7 +18,13 @@ export const BoardContextProvider = ({ children }: BoardContextProviderProps) =>
       setLoading(true);
       const list = await getBoardList();
       setBoardList(list);
-      setActiveBoardIdState((activeId) => resetActiveBoardId(list, activeId));
+      setActiveBoardIdState((activeId) => {
+        if (list.find((board) => board.id === activeId)) {
+          return activeId;
+        } else {
+          return list.length > 0 ? list[0].id : null;
+        }
+      });
       setLoading(false);
     };
     updateBoardList();
