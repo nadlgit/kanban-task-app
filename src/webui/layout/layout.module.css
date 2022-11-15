@@ -9,7 +9,6 @@
     '. footer';
   grid-template-rows: var(--header-height) 1fr auto;
   grid-template-columns: auto 1fr;
-  overflow: hidden;
 }
 
 .header {
@@ -75,10 +74,10 @@
 }
 
 .main {
+  overflow: auto;
   grid-area: main;
   display: grid;
   justify-items: center;
-  overflow: auto;
 }
 
 .footer {

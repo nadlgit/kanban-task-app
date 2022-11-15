@@ -50,6 +50,7 @@ body,
 }
 
 body {
+  overflow: hidden;
   font-family: var(--font-family);
 }
 
