@@ -1,0 +1,7 @@
+.container {
+  height: 100%;
+  padding-block: 1.5rem 0.5rem;
+  padding-inline: clamp(1rem, calc(0.52rem + 2vw), 1.5rem);
+  display: flex;
+  gap: clamp(1rem, calc(0.52rem + 2vw), 1.5rem);
+}

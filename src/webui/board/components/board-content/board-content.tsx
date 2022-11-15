@@ -1,3 +1,5 @@
+import styles from './board-content.module.css';
+
 import { useState } from 'react';
 
 import { Column } from './column';
@@ -18,7 +20,7 @@ export const BoardContent = ({ board, addNewColumn }: BoardContentProps) => {
 
   return (
     <>
-      <div>
+      <div className={styles.container}>
         {board.columns.map((col) => (
           <Column
             key={col.id}

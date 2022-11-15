@@ -1,3 +1,5 @@
+import styles from './column.module.css';
+
 import type { ColumnEntity, UniqueId } from 'core/entities';
 
 type ColumnProps =
@@ -10,28 +12,32 @@ type ColumnProps =
 
 export const Column = ({ column, viewTask, addNewColumn }: ColumnProps) => {
   return (
-    <div style={{ border: '1px solid green', padding: 5 }}>
+    <div className={styles.container}>
+      <p className={styles.titlezone}>
+        {column ? (
+          <>
+            <span className={styles.color}></span>
+            <span>{`${column.name} (${column.tasks.length})`}</span>
+          </>
+        ) : (
+          <span>&nbsp;</span>
+        )}
+      </p>
       {column ? (
         <>
-          <p>
-            <span>color</span>
-            {`${column.name} (${column.tasks.length})`}
-          </p>
           {column.tasks.map((task) => (
-            <div
-              key={task.id}
-              onClick={() => viewTask(column.id, task.id)}
-              style={{ border: '1px solid blue' }}
-            >
-              <p>{task.title}</p>
-              <p>{`${task.subtasks.filter(({ isCompleted }) => isCompleted === true).length} of ${
-                task.subtasks.length
-              } subtasks`}</p>
+            <div key={task.id} onClick={() => viewTask(column.id, task.id)} className={styles.task}>
+              <p className={styles.tasktitle}>{task.title}</p>
+              <p className={styles.taskinfo}>{`${
+                task.subtasks.filter(({ isCompleted }) => isCompleted === true).length
+              } of ${task.subtasks.length} subtasks`}</p>
             </div>
           ))}
         </>
       ) : (
-        <div onClick={addNewColumn}>+ New Column</div>
+        <button onClick={addNewColumn} className={styles.newcolumn}>
+          + New Column
+        </button>
       )}
     </div>
   );
