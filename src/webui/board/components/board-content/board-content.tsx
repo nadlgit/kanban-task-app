@@ -1,102 +1,50 @@
-import type { BoardEntity } from 'core/entities';
+import { useState } from 'react';
 
-type BoardContentProps = { board: BoardEntity | null };
+import { Column } from './column';
+import { ViewTask } from '../view-task';
+import type { BoardEntity, UniqueId } from 'core/entities';
+import { useModalToggle } from 'webui/shared';
 
-export const BoardContent = ({ board }: BoardContentProps) => {
+type BoardContentProps = { board: BoardEntity; addNewColumn: () => void };
+
+export const BoardContent = ({ board, addNewColumn }: BoardContentProps) => {
+  const {
+    isModalOpen: isViewTaskOpen,
+    closeModal: closeViewTask,
+    openModal: openViewTask,
+  } = useModalToggle();
+
+  const [viewTaskProps, setViewTaskProps] = useState<{ columnId: UniqueId; taskId: UniqueId }>();
+
   return (
-    // <div style={{ whiteSpace: 'nowrap' }}>
-    <div>
-      <div>{`Board ${board?.id}: ${board?.name}`}</div>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Laudantium dicta ratione nam
-        laborum magnam eius eveniet! Adipisci, ipsa. Ipsum quo laudantium, ducimus beatae tempora
-        neque non tempore enim aperiam optio!
-      </p>
-    </div>
+    <>
+      <div>
+        {board.columns.map((col) => (
+          <Column
+            key={col.id}
+            column={col}
+            viewTask={(columnId, taskId) => {
+              if (columnId && taskId) {
+                setViewTaskProps({ columnId, taskId });
+                openViewTask();
+              }
+            }}
+          />
+        ))}
+        <Column addNewColumn={addNewColumn} />
+      </div>
+
+      {viewTaskProps && (
+        <ViewTask
+          isOpen={isViewTaskOpen}
+          close={() => {
+            closeViewTask();
+            setViewTaskProps(undefined);
+          }}
+          board={board}
+          {...viewTaskProps}
+        />
+      )}
+    </>
   );
 };
