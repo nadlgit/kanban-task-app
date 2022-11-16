@@ -15,7 +15,7 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-type AddTaskFormProps = {
+export type AddTaskFormProps = {
   columns: { value: string; label?: string }[];
   onSubmit: () => void;
 };
