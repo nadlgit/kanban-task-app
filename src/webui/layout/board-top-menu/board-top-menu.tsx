@@ -1,20 +1,10 @@
-import styles from './board-top-menu.module.css';
-import IconAdd from './icon-add-task-mobile.svg';
-
-import { AddTask, DeleteBoard, EditBoard, useActiveBoard } from 'webui/board';
-import { Button, Menu, useIsMobile, useModalToggle } from 'webui/shared';
+import { DeleteBoard, EditBoard, useActiveBoard } from 'webui/board';
+import { Menu, useModalToggle } from 'webui/shared';
 
 export const BoardTopMenu = () => {
-  const isMobile = useIsMobile();
   const { board } = useActiveBoard();
-  const boardDisabled = !board;
-  const taskDisabled = !board?.columns?.length;
+  const disabled = !board;
 
-  const {
-    isModalOpen: isAddTaskOpen,
-    closeModal: closeAddTask,
-    openModal: openAddTask,
-  } = useModalToggle();
   const {
     isModalOpen: isEditBoardOpen,
     closeModal: closeEditBoard,
@@ -28,33 +18,24 @@ export const BoardTopMenu = () => {
 
   return (
     <>
-      <div className={styles.container}>
-        <Button variant="primary-s" fullWidth={false} onClick={openAddTask} disabled={taskDisabled}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {isMobile ? <img src={IconAdd.src} alt="Add new task" /> : '+ Add New Task'}
-        </Button>
-        <Menu
-          items={[
-            { label: 'Edit Board', onClick: openEditBoard, disabled: boardDisabled },
-            {
-              label: 'Delete Board',
-              onClick: openDeleteBoard,
-              variant: 'destructive',
-              disabled: boardDisabled,
-            },
-          ]}
-        />
-      </div>
+      <Menu
+        items={[
+          { label: 'Edit Board', onClick: openEditBoard, disabled },
+          {
+            label: 'Delete Board',
+            onClick: openDeleteBoard,
+            variant: 'destructive',
+            disabled,
+          },
+        ]}
+      />
 
-      <>
-        {!taskDisabled && <AddTask isOpen={isAddTaskOpen} close={closeAddTask} board={board} />}
-        {!boardDisabled && (
+      {!disabled && (
+        <>
           <EditBoard isOpen={isEditBoardOpen} close={closeEditBoard} board={board} />
-        )}
-        {!boardDisabled && (
           <DeleteBoard isOpen={isDeleteBoardOpen} close={closeDeleteBoard} board={board} />
-        )}
-      </>
+        </>
+      )}
     </>
   );
 };

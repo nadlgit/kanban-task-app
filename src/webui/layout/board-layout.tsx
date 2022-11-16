@@ -3,6 +3,7 @@ import styles from './layout.module.css';
 import { useState } from 'react';
 
 import { ActiveBoard } from './active-board';
+import { BoardAddTask } from './board-add-task';
 import { BoardMobileMenu } from './board-mobile-menu';
 import { BoardSideMenu } from './board-side-menu';
 import { BoardTopMenu } from './board-top-menu';
@@ -39,7 +40,10 @@ export const BoardLayout = () => {
           <h1 className={styles.title}>{boardName}</h1>
           {isMobile && <BoardMobileMenu />}
         </div>
-        <BoardTopMenu />
+        <div className={styles.topaction}>
+          <BoardAddTask />
+          <BoardTopMenu />
+        </div>
       </header>
 
       <aside className={styles.sidebar}>

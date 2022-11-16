@@ -15,7 +15,8 @@
   grid-area: header;
   position: sticky;
   top: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
   align-items: center;
   padding-left: var(--header-padding-inline);
   background-color: var(--header-background-color);
@@ -49,13 +50,13 @@
 }
 
 .headercenter {
-  flex-grow: 1;
   display: flex;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .title {
-  max-width: 70%;
-  white-space: nowrap;
+  max-width: 80%;
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: var(--font-weight-bold);
@@ -68,6 +69,10 @@
 }
 :global(.theme-dark) .title {
   --title-color: var(--color-white);
+}
+
+.topaction {
+  display: flex;
 }
 
 .sidebar {
