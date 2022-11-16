@@ -34,10 +34,10 @@
 .menu {
   composes: body-l from global;
   width: var(--popover-anchor-width);
-  padding: 0.5rem 1rem;
   color: var(--color-grey-medium);
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
+  overflow: hidden;
 }
 :global(.theme-light) .menu {
   background-color: var(--color-white);
@@ -47,10 +47,14 @@
 }
 
 .option {
-  padding-block: 0.25rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
 }
-.option:hover,
-.option[data-active-item] {
-  color: var(--color-purple);
+:global(.theme-light) .option:hover,
+:global(.theme-light) .option[data-active-item] {
+  background-color: var(--color-purple-light);
+}
+:global(.theme-dark) .option:hover,
+:global(.theme-dark) .option[data-active-item] {
+  background-color: var(--color-grey-dark);
 }
