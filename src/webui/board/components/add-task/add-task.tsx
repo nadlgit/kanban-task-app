@@ -1,5 +1,3 @@
-import styles from './add-task.module.css';
-
 import { AddTaskForm } from './add-task-form';
 import type { AddTaskFormProps } from './add-task-form';
 import type { BoardEntity } from 'core/entities';
