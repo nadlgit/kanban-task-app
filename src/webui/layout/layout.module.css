@@ -16,7 +16,8 @@
   position: sticky;
   top: 0;
   display: grid;
-  grid-template-columns: repeat(3, auto);
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'logo headercenter topaction';
   align-items: center;
   padding-left: var(--header-padding-inline);
   background-color: var(--header-background-color);
@@ -33,6 +34,7 @@
 
 .logo,
 .logowithborder {
+  grid-area: logo;
   height: 100%;
   display: flex;
   place-items: center;
@@ -50,6 +52,7 @@
 }
 
 .headercenter {
+  grid-area: headercenter;
   display: flex;
   white-space: nowrap;
   overflow: hidden;
@@ -72,7 +75,9 @@
 }
 
 .topaction {
+  grid-area: topaction;
   display: flex;
+  justify-content: flex-end;
 }
 
 .sidebar {
