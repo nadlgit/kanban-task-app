@@ -54,6 +54,10 @@
 }
 
 .title {
+  max-width: 70%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: var(--font-weight-bold);
   font-size: clamp(1.125rem, calc(0.964rem + 0.6vw), 1.5rem);
   line-height: clamp(1.4375rem, calc(1.232rem + 0.715vw), 1.875rem);

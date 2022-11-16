@@ -23,6 +23,22 @@
   background-color: aqua;
 }
 
+.title {
+  display: flex;
+  width: 80%;
+  white-space: nowrap;
+}
+
+.title > * {
+  display: inline-block;
+}
+
+.columnname {
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .task {
   padding: 1.5rem 1rem;
   display: grid;

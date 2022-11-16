@@ -18,7 +18,7 @@ export const BoardListNavItem = ({ label, onClick, isActive, isCreate }: BoardLi
     <li className={cssClasses.join(' ')}>
       <button onClick={onClick}>
         <Icon imgSrc={IconBoard.src} imgAccessibleName="" className={styles.icon} />
-        <span>{label}</span>
+        <span className={styles.label}>{label}</span>
       </button>
     </li>
   );

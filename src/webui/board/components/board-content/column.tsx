@@ -17,7 +17,10 @@ export const Column = ({ column, viewTask, addNewColumn }: ColumnProps) => {
         {column ? (
           <>
             <span className={styles.color}></span>
-            <span>{`${column.name} (${column.tasks.length})`}</span>
+            <span className={styles.title}>
+              <span className={styles.columnname}>{column.name}</span>
+              <span>&nbsp;{`(${column.tasks.length})`}</span>
+            </span>
           </>
         ) : (
           <span>&nbsp;</span>
