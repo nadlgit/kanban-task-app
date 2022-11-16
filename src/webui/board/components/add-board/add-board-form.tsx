@@ -13,7 +13,7 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-export type AddBoardFormProps = {
+type AddBoardFormProps = {
   onSubmit: (boardName: string, boardColumns: { id: UniqueId; name: string }[]) => void;
 };
 

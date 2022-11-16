@@ -3,7 +3,7 @@ import styles from './text-area.module.css';
 import { forwardRef } from 'react';
 import type { DetailedHTMLProps, TextareaHTMLAttributes } from 'react';
 
-export type TextAreaProps = {
+type TextAreaProps = {
   label: string;
   error?: string;
 } & Required<
