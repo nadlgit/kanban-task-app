@@ -1,5 +1,5 @@
 .base {
-  margin-block: 0.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .label {
@@ -26,4 +26,31 @@
 :global(.theme-dark) .trigger {
   color: var(--color-white);
   background-color: var(--color-grey-dark);
+}
+.trigger[aria-expanded='true'] {
+  border-color: var(--color-purple);
+}
+
+.menu {
+  composes: body-l from global;
+  width: var(--popover-anchor-width);
+  padding: 0.5rem 1rem;
+  color: var(--color-grey-medium);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
+}
+:global(.theme-light) .menu {
+  background-color: var(--color-white);
+}
+:global(.theme-dark) .menu {
+  background-color: var(--color-grey-very-dark);
+}
+
+.option {
+  padding-block: 0.25rem;
+  cursor: pointer;
+}
+.option:hover,
+.option[data-active-item] {
+  color: var(--color-purple);
 }

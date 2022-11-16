@@ -96,7 +96,7 @@ export const AddTaskForm = ({ columns, onSubmit }: AddTaskFormProps) => {
         name="taskstatus"
         control={control}
         render={({ field }) => (
-          <Dropdown label="Status" items={columns} onChange={field.onChange} />
+          <Dropdown label="Status" items={columns} name={field.name} onChange={field.onChange} />
         )}
         shouldUnregister={true}
       />

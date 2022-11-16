@@ -6,28 +6,29 @@ import { Select, SelectItem, SelectLabel, SelectPopover, useSelectState } from '
 type DropdownProps = {
   label: string;
   items: { value: string; label?: string }[];
+  name?: string;
   onChange: (value: string) => void;
 };
 
-export const Dropdown = ({ label, items, onChange }: DropdownProps) => {
-  const state = useSelectState({ setValue: onChange });
+export const Dropdown = ({ label, items, name, onChange }: DropdownProps) => {
+  const state = useSelectState({ setValue: onChange, gutter: 8 });
   return (
-    <p className={styles.base}>
+    <div className={styles.base}>
       <SelectLabel state={state} className={styles.label}>
         {label}
       </SelectLabel>
-      <Select state={state} className={styles.trigger}>
+      <Select state={state} name={name} className={styles.trigger}>
         {items.find(({ value }) => value === state.value)?.label}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={IconSelect.src} alt="" />
       </Select>
-      <SelectPopover state={state}>
+      <SelectPopover state={state} className={styles.menu}>
         {items.map(({ value, label }) => (
-          <SelectItem key={value} value={value}>
+          <SelectItem key={value} value={value} className={styles.option}>
             {label}
           </SelectItem>
         ))}
       </SelectPopover>
-    </p>
+    </div>
   );
 };
