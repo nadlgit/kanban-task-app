@@ -7,7 +7,8 @@ import { Button, Menu, useIsMobile, useModalToggle } from 'webui/shared';
 export const BoardTopMenu = () => {
   const isMobile = useIsMobile();
   const { board } = useActiveBoard();
-  const disabled = !board;
+  const boardDisabled = !board;
+  const taskDisabled = !board?.columns?.length;
 
   const {
     isModalOpen: isAddTaskOpen,
@@ -28,30 +29,32 @@ export const BoardTopMenu = () => {
   return (
     <>
       <div className={styles.container}>
-        <Button variant="primary-s" fullWidth={false} onClick={openAddTask} disabled={disabled}>
+        <Button variant="primary-s" fullWidth={false} onClick={openAddTask} disabled={taskDisabled}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {isMobile ? <img src={IconAdd.src} alt="Add new task" /> : '+ Add New Task'}
         </Button>
         <Menu
           items={[
-            { label: 'Edit Board', onClick: openEditBoard, disabled },
+            { label: 'Edit Board', onClick: openEditBoard, disabled: boardDisabled },
             {
               label: 'Delete Board',
               onClick: openDeleteBoard,
               variant: 'destructive',
-              disabled,
+              disabled: boardDisabled,
             },
           ]}
         />
       </div>
 
-      {!disabled && (
-        <>
-          <AddTask isOpen={isAddTaskOpen} close={closeAddTask} board={board} />
+      <>
+        {!taskDisabled && <AddTask isOpen={isAddTaskOpen} close={closeAddTask} board={board} />}
+        {!boardDisabled && (
           <EditBoard isOpen={isEditBoardOpen} close={closeEditBoard} board={board} />
+        )}
+        {!boardDisabled && (
           <DeleteBoard isOpen={isDeleteBoardOpen} close={closeDeleteBoard} board={board} />
-        </>
-      )}
+        )}
+      </>
     </>
   );
 };
