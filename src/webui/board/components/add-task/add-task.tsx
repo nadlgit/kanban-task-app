@@ -1,14 +1,25 @@
 import styles from './add-task.module.css';
 
+import { AddTaskForm } from './add-task-form';
+import type { AddTaskFormProps } from './add-task-form';
 import type { BoardEntity } from 'core/entities';
-import { Modal } from 'webui/shared';
+import { Modal, ModalHeading } from 'webui/shared';
 
 type AddTaskProps = { isOpen: boolean; close: () => void; board: BoardEntity };
 
 export const AddTask = ({ isOpen, close, board }: AddTaskProps) => {
+  const onSubmit: AddTaskFormProps['onSubmit'] = async () => {
+    //todo
+    close();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={close}>
-      <p>Add Task</p>
+      <ModalHeading>Add New Task</ModalHeading>
+      <AddTaskForm
+        columns={board.columns.map(({ id, name }) => ({ value: id, label: name }))}
+        onSubmit={onSubmit}
+      />
     </Modal>
   );
 };

@@ -9,3 +9,9 @@ export const boardTextInputRegisterOptions: RegisterOptions = {
   required: "Can't be empty",
   pattern: { value: /\S/, message: "Can't be empty" },
 };
+
+export const boardTextAreaRegisterOptions: RegisterOptions = {
+  onBlur: (e) => {
+    e.target.value = e.target.value.trim();
+  },
+};
