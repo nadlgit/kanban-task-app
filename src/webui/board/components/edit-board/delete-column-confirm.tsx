@@ -1,6 +1,6 @@
 import { ConfirmDelete } from '../confirm-delete';
 
-export type DeleteColumnConfirmProps = {
+type DeleteColumnConfirmProps = {
   isOpen: boolean;
   close: () => void;
   columnName: string;

@@ -1,5 +1,6 @@
+import type { ComponentProps } from 'react';
+
 import { AddBoardForm } from './add-board-form';
-import type { AddBoardFormProps } from './add-board-form';
 import type { UniqueId } from 'core/entities';
 import { addBoard } from 'core/usecases';
 import { Modal, ModalHeading } from 'webui/shared';
@@ -7,7 +8,10 @@ import { Modal, ModalHeading } from 'webui/shared';
 type AddBoardProps = { isOpen: boolean; close: () => void; onAdd?: (newBoardId: UniqueId) => void };
 
 export const AddBoard = ({ isOpen, close, onAdd }: AddBoardProps) => {
-  const onSubmit: AddBoardFormProps['onSubmit'] = async (boardName, boardColumns) => {
+  const onSubmit: ComponentProps<typeof AddBoardForm>['onSubmit'] = async (
+    boardName,
+    boardColumns
+  ) => {
     const board = {
       name: boardName,
       columns: boardColumns.map(({ name }) => ({ name })),

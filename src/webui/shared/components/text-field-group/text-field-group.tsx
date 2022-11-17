@@ -1,12 +1,14 @@
 import styles from './text-field-group.module.css';
 
-import type { PropsWithoutRef } from 'react';
+import type { ComponentProps, PropsWithoutRef } from 'react';
 
 import { TextFieldGroupInput } from './text-field-group-input';
-import type { TextFieldGroupInputProps } from './text-field-group-input';
 import { Button } from '../button';
 
-export type TextFieldGroupInputDef = Omit<PropsWithoutRef<TextFieldGroupInputProps>, 'onDelete'>;
+export type TextFieldGroupInputDef = Omit<
+  PropsWithoutRef<ComponentProps<typeof TextFieldGroupInput>>,
+  'onDelete'
+>;
 
 type TextFieldGroupProps = {
   groupLabel: string;

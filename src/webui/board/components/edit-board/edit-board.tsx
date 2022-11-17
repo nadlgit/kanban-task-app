@@ -1,5 +1,6 @@
+import type { ComponentProps } from 'react';
+
 import { EditBoardForm } from './edit-board-form';
-import type { EditBoardFormProps } from './edit-board-form';
 import type { BoardEntity } from 'core/entities';
 import { editBoard } from 'core/usecases';
 import { Modal, ModalHeading } from 'webui/shared';
@@ -7,7 +8,10 @@ import { Modal, ModalHeading } from 'webui/shared';
 type EditBoardProps = { isOpen: boolean; close: () => void; board: BoardEntity };
 
 export const EditBoard = ({ isOpen, close, board }: EditBoardProps) => {
-  const onSubmit: EditBoardFormProps['onSubmit'] = async (boardName, boardColumns) => {
+  const onSubmit: ComponentProps<typeof EditBoardForm>['onSubmit'] = async (
+    boardName,
+    boardColumns
+  ) => {
     const boardUpdate: Parameters<typeof editBoard>[0] = {
       id: board.id,
       name: boardName === board.name ? undefined : boardName,

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { FormEventHandler } from 'react';
+import type { ComponentProps, FormEventHandler } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { DeleteColumnConfirm } from './delete-column-confirm';
-import type { DeleteColumnConfirmProps } from './delete-column-confirm';
 import type { BoardEntity, UniqueId } from 'core/entities';
 import { generateId } from 'infrastructure/utils';
 import {
@@ -17,7 +16,7 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-export type EditBoardFormProps = {
+type EditBoardFormProps = {
   board: BoardEntity;
   onSubmit: (boardName: string, boardColumns: { id: UniqueId; name: string }[]) => void;
 };
@@ -53,7 +52,7 @@ export const EditBoardForm = ({ board, onSubmit }: EditBoardFormProps) => {
     openModal: openDeleteColumnConfirm,
   } = useModalToggle();
   const [deleteColumnConfirmProps, setDeleteColumnConfirmProps] = useState<
-    Omit<DeleteColumnConfirmProps, 'isOpen' | 'close'>
+    Omit<ComponentProps<typeof DeleteColumnConfirm>, 'isOpen' | 'close'>
   >({
     columnName: '',
     onDelete: doNothing,

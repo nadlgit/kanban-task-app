@@ -6,7 +6,7 @@ import type { DetailedHTMLProps, InputHTMLAttributes } from 'react';
 
 import { Icon } from '../icon';
 
-export type TextFieldProps = {
+type TextFieldProps = {
   label: string;
   hideLabel?: boolean;
   error?: string;
