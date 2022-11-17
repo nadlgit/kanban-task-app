@@ -7,11 +7,12 @@ type DropdownProps = {
   label: string;
   items: { value: string; label?: string }[];
   name?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  defaultValue?: string;
 };
 
-export const Dropdown = ({ label, items, name, onChange }: DropdownProps) => {
-  const state = useSelectState({ setValue: onChange, gutter: 8 });
+export const Dropdown = ({ label, items, name, onChange, defaultValue }: DropdownProps) => {
+  const state = useSelectState({ setValue: onChange, defaultValue, gutter: 8 });
   return (
     <div className={styles.base}>
       <SelectLabel state={state} className={styles.label}>
@@ -25,7 +26,7 @@ export const Dropdown = ({ label, items, name, onChange }: DropdownProps) => {
       <SelectPopover state={state} className={styles.menu}>
         {items.map(({ value, label }) => (
           <SelectItem key={value} value={value} className={styles.option}>
-            {label}
+            {label ?? value}
           </SelectItem>
         ))}
       </SelectPopover>
