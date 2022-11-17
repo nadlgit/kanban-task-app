@@ -1,0 +1,11 @@
+.description {
+  composes: body-l from global;
+  margin-bottom: 1.5rem;
+  color: var(--color-grey-medium);
+}
+
+.label {
+  composes: body-m from global;
+  display: block;
+  margin-bottom: 0.25rem;
+}
