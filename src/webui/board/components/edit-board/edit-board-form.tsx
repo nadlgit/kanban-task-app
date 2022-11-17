@@ -17,7 +17,7 @@ import {
   useTextFieldGroupInputList,
 } from 'webui/shared';
 
-type EditBoardFormProps = {
+export type EditBoardFormProps = {
   board: BoardEntity;
   onSubmit: (boardName: string, boardColumns: { id: UniqueId; name: string }[]) => void;
 };
