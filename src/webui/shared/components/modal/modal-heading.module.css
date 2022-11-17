@@ -1,5 +1,8 @@
 .heading {
   composes: heading-l from global;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1em;
 }
 :global(.theme-light) .heading {
