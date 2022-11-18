@@ -1,5 +1,6 @@
 import { ConfirmDelete } from '../confirm-delete';
 import type { BoardEntity, UniqueId } from 'core/entities';
+import { deleteTask } from 'core/usecases';
 
 type DeleteTaskProps = {
   isOpen: boolean;
@@ -21,7 +22,7 @@ export const DeleteTask = ({ isOpen, close, board, columnId, taskId }: DeleteTas
       ' This action cannot be reversed.',
     onClose: async (shouldDelete: boolean) => {
       if (shouldDelete) {
-        // todo
+        await deleteTask(board.id, columnId, taskId);
       }
       close();
     },
