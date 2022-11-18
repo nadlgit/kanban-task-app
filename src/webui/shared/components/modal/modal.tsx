@@ -3,9 +3,9 @@ import styles from './modal.module.css';
 import { Dialog, useDialogState } from 'ariakit/dialog';
 import type { PropsWithChildren } from 'react';
 
-type ModalProps = PropsWithChildren<{ isOpen: boolean; onClose: () => void; hide?: boolean }>;
+type ModalProps = PropsWithChildren<{ isOpen: boolean; onClose: () => void }>;
 
-export const Modal = ({ isOpen, onClose, hide, children }: ModalProps) => {
+export const Modal = ({ isOpen, onClose, children }: ModalProps) => {
   const state = useDialogState({
     open: isOpen,
     setOpen: (open) => {
@@ -15,12 +15,7 @@ export const Modal = ({ isOpen, onClose, hide, children }: ModalProps) => {
     },
   });
   return (
-    <Dialog
-      state={state}
-      className={styles.modal}
-      style={hide ? { visibility: 'hidden' } : undefined}
-      backdropProps={{ className: styles.backdrop }}
-    >
+    <Dialog state={state} className={styles.modal} backdropProps={{ className: styles.backdrop }}>
       {isOpen && children}
     </Dialog>
   );
