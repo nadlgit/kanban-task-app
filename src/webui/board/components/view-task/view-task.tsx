@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { TaskContent } from './task-content';
-import { TaskMenu } from './task-menu';
 import type { BoardEntity, UniqueId } from 'core/entities';
-import { Modal, ModalHeading } from 'webui/shared';
+import { Menu, Modal, ModalHeading } from 'webui/shared';
 
 type ViewTaskProps = {
   isOpen: boolean;
@@ -11,9 +10,19 @@ type ViewTaskProps = {
   board: BoardEntity;
   columnId: UniqueId;
   taskId: UniqueId;
+  openEditTask: () => void;
+  openDeleteTask: () => void;
 };
 
-export const ViewTask = ({ isOpen, close, board, columnId, taskId }: ViewTaskProps) => {
+export const ViewTask = ({
+  isOpen,
+  close,
+  board,
+  columnId,
+  taskId,
+  openEditTask,
+  openDeleteTask,
+}: ViewTaskProps) => {
   const task = {
     title: '',
     description: '',
@@ -27,7 +36,7 @@ export const ViewTask = ({ isOpen, close, board, columnId, taskId }: ViewTaskPro
   const [subtasksStatus, setSubtasksStatus] = useState(
     task.subtasks.map(({ isCompleted }) => isCompleted)
   );
-  const [hideModal, setHideModal] = useState(false);
+  const [saveChanges, setSaveChanges] = useState(false);
   const [closeModal, setCloseModal] = useState(false);
 
   const setSubtaskStatus = (index: number, status: boolean) => {
@@ -38,11 +47,8 @@ export const ViewTask = ({ isOpen, close, board, columnId, taskId }: ViewTaskPro
     });
   };
 
-  const hideView = () => setHideModal(true);
-  const closeView = () => setCloseModal(true);
-
   useEffect(() => {
-    if (closeModal) {
+    if (saveChanges) {
       console.log(
         '%c should update task status',
         'background-color:lime;',
@@ -54,25 +60,46 @@ export const ViewTask = ({ isOpen, close, board, columnId, taskId }: ViewTaskPro
         !subtasksStatus.every((status, idx) => status === task.subtasks[idx].isCompleted)
       );
       //todo: persist changes
+    }
+    if (closeModal) {
       close();
     }
-  }, [close, closeModal, columnId, subtasksStatus, task.subtasks, taskStatus]);
+  }, [close, closeModal, columnId, saveChanges, subtasksStatus, task.subtasks, taskStatus]);
 
   return (
-    <Modal isOpen={isOpen} onClose={closeView} hide={hideModal}>
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        setSaveChanges(true);
+        setCloseModal(true);
+      }}
+    >
       <ModalHeading
         menu={
-          <TaskMenu
-            hideView={hideView}
-            closeView={closeView}
-            board={board}
-            columnId={columnId}
-            taskId={taskId}
+          <Menu
+            items={[
+              {
+                label: 'Edit Task',
+                onClick: () => {
+                  setSaveChanges(true);
+                  openEditTask();
+                },
+              },
+              {
+                label: 'Delete Task',
+                onClick: () => {
+                  setSaveChanges(true);
+                  openDeleteTask();
+                },
+                variant: 'destructive',
+              },
+            ]}
           />
         }
       >
         {task.title}
       </ModalHeading>
+
       <TaskContent
         task={{
           description: task.description,
