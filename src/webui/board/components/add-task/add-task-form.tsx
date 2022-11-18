@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import type { FormEventHandler } from 'react';
+import type { ComponentProps, FormEventHandler } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { generateId } from 'infrastructure/utils';
@@ -16,11 +16,11 @@ import {
 } from 'webui/shared';
 
 type AddTaskFormProps = {
-  columns: { value: string; label?: string }[];
+  statusList: ComponentProps<typeof Dropdown>['items'];
   onSubmit: () => void;
 };
 
-export const AddTaskForm = ({ columns, onSubmit }: AddTaskFormProps) => {
+export const AddTaskForm = ({ statusList, onSubmit }: AddTaskFormProps) => {
   const { register, handleSubmit, formState, control } = useForm({ shouldUnregister: true });
 
   const subtaskItemLabel = 'Subtask Title';
@@ -96,7 +96,7 @@ export const AddTaskForm = ({ columns, onSubmit }: AddTaskFormProps) => {
         name="taskstatus"
         control={control}
         render={({ field }) => (
-          <Dropdown label="Status" items={columns} name={field.name} onChange={field.onChange} />
+          <Dropdown label="Status" items={statusList} name={field.name} onChange={field.onChange} />
         )}
         shouldUnregister={true}
       />

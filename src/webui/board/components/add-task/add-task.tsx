@@ -16,7 +16,7 @@ export const AddTask = ({ isOpen, close, board }: AddTaskProps) => {
     <Modal isOpen={isOpen} onClose={close}>
       <ModalHeading>Add New Task</ModalHeading>
       <AddTaskForm
-        columns={board.columns.map(({ id, name }) => ({ value: id, label: name }))}
+        statusList={board.columns.map(({ id, name }) => ({ value: id, label: name }))}
         onSubmit={onSubmit}
       />
     </Modal>
