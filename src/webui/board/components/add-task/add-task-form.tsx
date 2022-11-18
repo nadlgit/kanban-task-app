@@ -17,7 +17,12 @@ import {
 
 type AddTaskFormProps = {
   statusList: ComponentProps<typeof Dropdown>['items'];
-  onSubmit: () => void;
+  onSubmit: (
+    title: string,
+    description: string,
+    subtasks: { title: string }[],
+    statusId: string
+  ) => void;
 };
 
 export const AddTaskForm = ({ statusList, onSubmit }: AddTaskFormProps) => {
@@ -49,9 +54,12 @@ export const AddTaskForm = ({ statusList, onSubmit }: AddTaskFormProps) => {
     e.preventDefault();
     e.stopPropagation();
     handleSubmit((data) => {
-      onSubmit();
-      console.log('%c data', 'background-color:lime;', data);
-      //todo
+      onSubmit(
+        data['tasktitle'].trim(),
+        data['taskdesc'].trim(),
+        subtasks.map(({ name }) => ({ title: data[name].trim() })),
+        data['taskstatus']
+      );
     })(e);
   };
 
