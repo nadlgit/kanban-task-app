@@ -32,15 +32,17 @@ export const EditTask = ({ isOpen, close, board, columnId, taskId }: EditTaskPro
       id: taskId,
       title: title === task.title ? undefined : title,
       description: description === task.description ? undefined : description,
-      subtasks: subtasks.every(
-        ({ title, previousIndex }, idx) =>
-          previousIndex === idx && title === task.subtasks[previousIndex].title
-      )
-        ? undefined
-        : subtasks.map(({ title, previousIndex }) => ({
-            title,
-            isCompleted: previousIndex ? task.subtasks[previousIndex].isCompleted : false,
-          })),
+      subtasks:
+        subtasks.length === task.subtasks.length &&
+        subtasks.every(
+          ({ title, previousIndex }, idx) =>
+            previousIndex === idx && title === task.subtasks[previousIndex].title
+        )
+          ? undefined
+          : subtasks.map(({ title, previousIndex }) => ({
+              title,
+              isCompleted: previousIndex ? task.subtasks[previousIndex].isCompleted : false,
+            })),
       newColumnId: statusId === task.statusId ? undefined : statusId,
     };
     if (
