@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { TaskContent } from './task-content';
 import type { BoardEntity, UniqueId } from 'core/entities';
+import { editTask } from 'core/usecases';
 import { Menu, Modal, ModalHeading } from 'webui/shared';
 
 type ViewTaskProps = {
@@ -10,8 +11,8 @@ type ViewTaskProps = {
   board: BoardEntity;
   columnId: UniqueId;
   taskId: UniqueId;
-  openEditTask: () => void;
-  openDeleteTask: () => void;
+  openEditTask: (columnId: UniqueId, taskId: UniqueId) => void;
+  openDeleteTask: (columnId: UniqueId, taskId: UniqueId) => void;
 };
 
 export const ViewTask = ({
@@ -36,61 +37,67 @@ export const ViewTask = ({
   const [subtasksStatus, setSubtasksStatus] = useState(
     task.subtasks.map(({ isCompleted }) => isCompleted)
   );
-  const [saveChanges, setSaveChanges] = useState(false);
-  const [closeModal, setCloseModal] = useState(false);
-
-  const setSubtaskStatus = (index: number, status: boolean) => {
-    setSubtasksStatus((l) => {
-      const list = [...l];
-      list[index] = status;
-      return list;
-    });
-  };
+  const [closeAction, setCloseAction] = useState<'close' | 'editTask' | 'deleteTask'>();
 
   useEffect(() => {
-    if (saveChanges) {
-      console.log(
-        '%c should update task status',
-        'background-color:lime;',
-        taskStatus !== columnId
-      );
-      console.log(
-        '%c should update subtasks status',
-        'background-color:lime;',
-        !subtasksStatus.every((status, idx) => status === task.subtasks[idx].isCompleted)
-      );
-      //todo: persist changes
+    const updateTask = async () => {
+      const taskUpdate: Parameters<typeof editTask>[2] = {
+        id: taskId,
+        subtasks: subtasksStatus.every((status, idx) => status === task.subtasks[idx].isCompleted)
+          ? undefined
+          : task.subtasks.map(({ title }, idx) => ({
+              title,
+              isCompleted: subtasksStatus[idx],
+            })),
+        newColumnId: taskStatus === task.statusId ? undefined : taskStatus,
+      };
+      if (taskUpdate?.subtasks || taskUpdate?.newColumnId) {
+        await editTask(board.id, columnId, taskUpdate);
+      }
+    };
+
+    if (closeAction !== undefined) {
+      updateTask().then(() => {
+        switch (closeAction) {
+          case 'close':
+            close();
+            break;
+          case 'editTask':
+            openEditTask(taskStatus, taskId);
+            break;
+          case 'deleteTask':
+            openDeleteTask(taskStatus, taskId);
+            break;
+        }
+      });
     }
-    if (closeModal) {
-      close();
-    }
-  }, [close, closeModal, columnId, saveChanges, subtasksStatus, task.subtasks, taskStatus]);
+  }, [
+    board.id,
+    close,
+    closeAction,
+    columnId,
+    openDeleteTask,
+    openEditTask,
+    subtasksStatus,
+    task.statusId,
+    task.subtasks,
+    taskId,
+    taskStatus,
+  ]);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={() => {
-        setSaveChanges(true);
-        setCloseModal(true);
-      }}
-    >
+    <Modal isOpen={isOpen} onClose={() => setCloseAction('close')}>
       <ModalHeading
         menu={
           <Menu
             items={[
               {
                 label: 'Edit Task',
-                onClick: () => {
-                  setSaveChanges(true);
-                  openEditTask();
-                },
+                onClick: () => setCloseAction('editTask'),
               },
               {
                 label: 'Delete Task',
-                onClick: () => {
-                  setSaveChanges(true);
-                  openDeleteTask();
-                },
+                onClick: () => setCloseAction('deleteTask'),
                 variant: 'destructive',
               },
             ]}
@@ -111,7 +118,13 @@ export const ViewTask = ({
         }}
         statusList={statusList}
         onTaskStatusChange={setTaskStatus}
-        onSubtaskStatusChange={setSubtaskStatus}
+        onSubtaskStatusChange={(index: number, status: boolean) => {
+          setSubtasksStatus((l) => {
+            const list = [...l];
+            list[index] = status;
+            return list;
+          });
+        }}
       />
     </Modal>
   );
