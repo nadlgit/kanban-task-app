@@ -19,7 +19,12 @@ import {
 type EditTaskFormProps = {
   task: Omit<TaskEntity, 'id'> & { statusId: UniqueId };
   statusList: ComponentProps<typeof Dropdown>['items'];
-  onSubmit: () => void;
+  onSubmit: (
+    title: string,
+    description: string,
+    subtasks: { title: string; previousIndex?: number }[],
+    statusId: string
+  ) => void;
 };
 
 export const EditTaskForm = ({ task, statusList, onSubmit }: EditTaskFormProps) => {
@@ -52,9 +57,23 @@ export const EditTaskForm = ({ task, statusList, onSubmit }: EditTaskFormProps) 
     e.preventDefault();
     e.stopPropagation();
     handleSubmit((data) => {
-      onSubmit();
-      console.log('%c data', 'background-color:lime;', data);
-      //todo
+      const getSubtaskPreviousIndex = (itemName: string) => {
+        const prefix = 'subtask-';
+        if (itemName.startsWith(prefix)) {
+          return Number.parseInt(itemName.replace(prefix, ''));
+        } else {
+          return undefined;
+        }
+      };
+      onSubmit(
+        data['tasktitle'].trim(),
+        data['taskdesc'].trim(),
+        subtasks.map(({ name }) => ({
+          title: data[name].trim(),
+          previousIndex: getSubtaskPreviousIndex(name),
+        })),
+        data['taskstatus']
+      );
     })(e);
   };
 
