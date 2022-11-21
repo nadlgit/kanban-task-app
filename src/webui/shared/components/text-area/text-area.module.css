@@ -16,6 +16,7 @@
   padding-inline: 1rem;
   border: 1px solid var(--color-grey-medium-border);
   border-radius: 0.25rem;
+  resize: vertical;
 }
 :global(.theme-light) .input {
   color: var(--color-black);
