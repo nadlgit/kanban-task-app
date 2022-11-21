@@ -51,6 +51,7 @@ body,
 
 body {
   overflow: hidden;
+  overflow-wrap: anywhere;
   font-family: var(--font-family);
 }
 
