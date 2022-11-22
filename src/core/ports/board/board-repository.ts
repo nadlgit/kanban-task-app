@@ -15,7 +15,7 @@ export type BoardRepository = {
   updateBoard: (
     userId: UniqueId,
     board: {
-      id: string;
+      id: UniqueId;
       name?: string;
       columnsAdded?: { name: string; index?: number }[];
       columnsDeleted?: { id: UniqueId }[];
