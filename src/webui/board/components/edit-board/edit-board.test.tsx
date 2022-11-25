@@ -251,9 +251,6 @@ describe('EditBoard component', () => {
     const testBoardUpdate = {
       id: testProps.board.id,
       name: faker.lorem.words(),
-      columnsUpdated: [],
-      columnsAdded: [],
-      columnsDeleted: [],
     };
     expect(testProps.board.name).not.toEqual(testBoardUpdate.name);
 
@@ -281,31 +278,29 @@ describe('EditBoard component', () => {
     expect(testProps.board.columns.length).toBeGreaterThanOrEqual(1);
     const testBoardUpdate = {
       id: testProps.board.id,
-      name: undefined,
-      columnsUpdated: testProps.board.columns.map(({ id }) => ({
+      columnsKept: testProps.board.columns.map(({ id }) => ({
+        isAdded: false,
         id,
         name: faker.lorem.words(),
       })),
-      columnsAdded: [],
-      columnsDeleted: [],
     };
     for (let i = 0; i < testProps.board.columns.length; i++) {
-      expect(testProps.board.columns[i].name).not.toEqual(testBoardUpdate.columnsUpdated[i].name);
+      expect(testProps.board.columns[i].name).not.toEqual(testBoardUpdate.columnsKept[i].name);
     }
 
     userEvt = userEvent.setup();
     render(<EditBoard {...testProps} />);
 
-    for (let i = 0; i < testBoardUpdate.columnsUpdated.length; i++) {
+    for (let i = 0; i < testBoardUpdate.columnsKept.length; i++) {
       await userEvt.clear(getColumnNameEltList()[i]);
-      await userEvt.type(getColumnNameEltList()[i], testBoardUpdate.columnsUpdated[i].name);
+      await userEvt.type(getColumnNameEltList()[i], testBoardUpdate.columnsKept[i].name);
     }
     await userEvt.click(getSubmitBtnElt());
     await waitFor(() => expect(testProps.close).toHaveBeenCalled());
 
     expect(testProps.close).toHaveBeenCalledTimes(1);
-    for (let i = 0; i < testBoardUpdate.columnsUpdated.length; i++) {
-      expect(getColumnNameEltList()[i]).toHaveDisplayValue(testBoardUpdate.columnsUpdated[i].name);
+    for (let i = 0; i < testBoardUpdate.columnsKept.length; i++) {
+      expect(getColumnNameEltList()[i]).toHaveDisplayValue(testBoardUpdate.columnsKept[i].name);
       expect(getColumnNameErrorEltList()[i]).toBeEmptyDOMElement();
     }
     expect(editBoard).toHaveBeenCalledTimes(1);
@@ -319,27 +314,34 @@ describe('EditBoard component', () => {
       board: testBoardFactory(0),
     };
     expect(testProps.board.columns.length).toBe(0);
+    const testColumnsAdded = [{ name: faker.lorem.words() }];
     const testBoardUpdate = {
       id: testProps.board.id,
-      name: undefined,
-      columnsUpdated: [],
-      columnsAdded: [{ name: faker.lorem.words() }],
-      columnsDeleted: [],
+      columnsKept: [
+        ...testProps.board.columns.map(({ id }) => ({
+          isAdded: false,
+          id,
+        })),
+        ...testColumnsAdded.map(({ name }) => ({
+          isAdded: true,
+          name,
+        })),
+      ],
     };
 
     userEvt = userEvent.setup();
     render(<EditBoard {...testProps} />);
 
-    for (let i = 0; i < testBoardUpdate.columnsAdded.length; i++) {
+    for (let i = 0; i < testColumnsAdded.length; i++) {
       await userEvt.click(getAddColumnBtnElt());
-      await userEvt.type(getColumnNameEltList()[i], testBoardUpdate.columnsAdded[i].name);
+      await userEvt.type(getColumnNameEltList()[i], testColumnsAdded[i].name);
     }
     await userEvt.click(getSubmitBtnElt());
     await waitFor(() => expect(testProps.close).toHaveBeenCalled());
 
     expect(testProps.close).toHaveBeenCalledTimes(1);
-    for (let i = 0; i < testBoardUpdate.columnsAdded.length; i++) {
-      expect(getColumnNameEltList()[i]).toHaveDisplayValue(testBoardUpdate.columnsAdded[i].name);
+    for (let i = 0; i < testColumnsAdded.length; i++) {
+      expect(getColumnNameEltList()[i]).toHaveDisplayValue(testColumnsAdded[i].name);
       expect(getColumnNameErrorEltList()[i]).toBeEmptyDOMElement();
     }
     expect(editBoard).toHaveBeenCalledTimes(1);
@@ -355,9 +357,6 @@ describe('EditBoard component', () => {
     expect(testProps.board.columns.length).toBeGreaterThanOrEqual(1);
     const testBoardUpdate = {
       id: testProps.board.id,
-      name: undefined,
-      columnsUpdated: [],
-      columnsAdded: [],
       columnsDeleted: testProps.board.columns.map(({ id }) => ({
         id,
       })),
@@ -387,17 +386,16 @@ describe('EditBoard component', () => {
     const testBoardUpdate = {
       id: testProps.board.id,
       name: `  ${faker.lorem.words()}  `,
-      columnsUpdated: testProps.board.columns.map(({ id }) => ({
+      columnsKept: testProps.board.columns.map(({ id }) => ({
+        isAdded: false,
         id,
         name: `     ${faker.lorem.words()}    `,
       })),
-      columnsAdded: [],
-      columnsDeleted: [],
     };
     expect(testProps.board.name.trim()).not.toEqual(testBoardUpdate.name.trim());
     for (let i = 0; i < testProps.board.columns.length; i++) {
       expect(testProps.board.columns[i].name.trim()).not.toEqual(
-        testBoardUpdate.columnsUpdated[i].name.trim()
+        testBoardUpdate.columnsKept[i].name.trim()
       );
     }
 
@@ -408,7 +406,7 @@ describe('EditBoard component', () => {
     await userEvt.type(getBoardNameElt(), testBoardUpdate.name);
     for (let i = 0; i < testProps.board.columns.length; i++) {
       await userEvt.clear(getColumnNameEltList()[i]);
-      await userEvt.type(getColumnNameEltList()[i], testBoardUpdate.columnsUpdated[i].name);
+      await userEvt.type(getColumnNameEltList()[i], testBoardUpdate.columnsKept[i].name);
     }
     await userEvt.click(getSubmitBtnElt());
     await waitFor(() => expect(testProps.close).toHaveBeenCalled());
@@ -418,7 +416,7 @@ describe('EditBoard component', () => {
     expect(getBoardNameErrorElt()).toBeEmptyDOMElement();
     for (let i = 0; i < testProps.board.columns.length; i++) {
       expect(getColumnNameEltList()[i]).toHaveDisplayValue(
-        testBoardUpdate.columnsUpdated[i].name.trim()
+        testBoardUpdate.columnsKept[i].name.trim()
       );
       expect(getColumnNameErrorEltList()[i]).toBeEmptyDOMElement();
     }
@@ -426,9 +424,9 @@ describe('EditBoard component', () => {
     expect(editBoard).toHaveBeenLastCalledWith({
       ...testBoardUpdate,
       name: testBoardUpdate.name.trim(),
-      columnsUpdated: testBoardUpdate.columnsUpdated.map(({ id, name }) => ({
-        id,
-        name: name.trim(),
+      columnsKept: testBoardUpdate.columnsKept.map((column) => ({
+        ...column,
+        name: column.name.trim(),
       })),
     });
   });

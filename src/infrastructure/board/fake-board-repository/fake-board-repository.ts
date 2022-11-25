@@ -79,9 +79,12 @@ export class FakeBoardRepository implements BoardRepository {
     board: {
       id: string;
       name?: string;
-      columnsAdded?: { name: string; index?: number }[];
       columnsDeleted?: { id: UniqueId }[];
-      columnsUpdated?: { id: UniqueId; name?: string; index?: number }[];
+      columnsKept?:
+        | (
+            | { isAdded: true; id?: undefined; name: string }
+            | { isAdded: false; id: UniqueId; name?: string }
+          )[];
     },
     index?: number
   ) {
@@ -89,24 +92,21 @@ export class FakeBoardRepository implements BoardRepository {
     if (board.name) {
       boardUpdate.name = board.name;
     }
-    if (board.columnsAdded) {
-      board.columnsAdded.forEach((newColumn) => {
-        addEntity(boardUpdate.columns, { ...newEmptyColumn(), ...newColumn }, newColumn.index);
-      });
-    }
     if (board.columnsDeleted) {
       board.columnsDeleted.forEach(({ id }) => {
         deleteEntity(boardUpdate.columns, id);
       });
     }
-    if (board.columnsUpdated) {
-      board.columnsUpdated.forEach((column) => {
-        const columnUpdate = findEntity(boardUpdate.columns, column.id);
-        if (column.name) {
-          columnUpdate.name = column.name;
-        }
-        if (column.index !== undefined) {
-          moveEntity(boardUpdate.columns, columnUpdate.id, column.index);
+    if (board.columnsKept) {
+      board.columnsKept.forEach((column, idx) => {
+        if (column.isAdded) {
+          addEntity(boardUpdate.columns, { ...newEmptyColumn(), name: column.name }, idx);
+        } else {
+          const columnUpdate = findEntity(boardUpdate.columns, column.id);
+          if (column.name) {
+            columnUpdate.name = column.name;
+          }
+          moveEntity(boardUpdate.columns, columnUpdate.id, idx);
         }
       });
     }
