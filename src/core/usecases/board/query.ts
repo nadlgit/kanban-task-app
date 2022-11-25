@@ -1,4 +1,5 @@
 import { getUserId } from './helpers';
+import { notifyError } from '../notification';
 import { Dependencies } from 'core/dependencies';
 import type { UniqueId } from 'core/entities';
 
@@ -7,8 +8,14 @@ export async function getBoardList() {
   if (!userId) {
     return [];
   }
-  const repository = Dependencies.getBoardRepository();
-  return await repository.getBoardList(userId);
+
+  try {
+    const repository = Dependencies.getBoardRepository();
+    return await repository.getBoardList(userId);
+  } catch (err) {
+    notifyError((err as Error).message);
+    return [];
+  }
 }
 
 export async function getBoard(boardId: UniqueId) {
@@ -16,6 +23,12 @@ export async function getBoard(boardId: UniqueId) {
   if (!userId) {
     return null;
   }
-  const repository = Dependencies.getBoardRepository();
-  return await repository.getBoard(userId, boardId);
+
+  try {
+    const repository = Dependencies.getBoardRepository();
+    return await repository.getBoard(userId, boardId);
+  } catch (err) {
+    notifyError((err as Error).message);
+    return null;
+  }
 }
