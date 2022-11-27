@@ -14,6 +14,9 @@ import type { DocumentData, DocumentSnapshot, QuerySnapshot } from 'firebase/fir
 import type { UniqueId } from 'core/entities';
 import { firebaseApp } from 'infrastructure/config';
 
+export type FirestoreDocs = QuerySnapshot<DocumentData>;
+export type FirestoreDoc = DocumentSnapshot<DocumentData>;
+
 export type BoardDocSchema = {
   owner: string;
   name: string;
@@ -75,7 +78,7 @@ export function getUserBoardDocs(userId: UniqueId) {
 
 export function onUserBoardDocsSnapshot(
   userId: UniqueId,
-  callback: (snapshot: QuerySnapshot<DocumentData>) => void
+  callback: (snapshot: FirestoreDocs) => void
 ) {
   return onSnapshot(userBoardCollectionQuery(userId), callback);
 }
@@ -84,10 +87,7 @@ export function getBoardDoc(boardId: UniqueId) {
   return getDoc(getBoardRef(boardId));
 }
 
-export function onBoardDocSnapshot(
-  boardId: UniqueId,
-  callback: (snapshot: DocumentSnapshot<DocumentData>) => void
-) {
+export function onBoardDocSnapshot(boardId: UniqueId, callback: (snapshot: FirestoreDoc) => void) {
   return onSnapshot(getBoardRef(boardId), callback);
 }
 
@@ -97,7 +97,7 @@ export function getBoardTaskDocs(boardId: UniqueId) {
 
 export function onBoardTaskDocsSnapshot(
   boardId: UniqueId,
-  callback: (snapshot: QuerySnapshot<DocumentData>) => void
+  callback: (snapshot: FirestoreDocs) => void
 ) {
   return onSnapshot(taskCollection(boardId), callback);
 }

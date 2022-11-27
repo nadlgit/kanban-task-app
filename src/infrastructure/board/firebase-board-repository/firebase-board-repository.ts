@@ -1,5 +1,13 @@
-import { BoardSubscription } from './board-subscription';
-import { BoardListSubscription } from './boardlist-subscription';
+import {
+  addBoardListSubscriptionCallback,
+  addBoardSubscriptionCallback,
+  getBoardListSubscriptionValue,
+  getBoardSubscriptionValue,
+  initBoardListSubscription,
+  initBoardSubscription,
+  isBoardListSubscriptionInitialized,
+  isBoardSubscriptionInitialized,
+} from './data-subscription';
 import {
   getBoardDoc,
   getBoardRef,
@@ -13,85 +21,46 @@ import {
 } from './firestore-helpers';
 import type { BoardDocSchema, TaskDocSchema } from './firestore-helpers';
 import {
-  convertToBoard,
-  convertToBoardList,
   getBoardColumns,
   getBoardInfo,
   getBoardTaskIds,
   getColumnTaskIds,
   getTaskInfo,
 } from './helpers';
-import type { BoardEntity, UniqueId } from 'core/entities';
+import type { UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
 
 export class FirebaseBoardRepository implements BoardRepository {
-  #boardListSubscription: Record<UniqueId, BoardListSubscription> = {};
-  #boardSubscription: Record<UniqueId, Record<UniqueId, BoardSubscription>> = {};
-
   async getBoardList(userId: UniqueId) {
-    console.log(
-      '%c getBoardList',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    if (!this.#boardListSubscription[userId]) {
-      this.#boardListSubscription[userId] = new BoardListSubscription(userId);
-    }
-    if (!this.#boardListSubscription[userId].getData().isInitialized) {
+    if (!isBoardListSubscriptionInitialized(userId)) {
       const boardDocs = await getUserBoardDocs(userId);
-      const boardList = convertToBoardList(boardDocs);
-      this.#boardListSubscription[userId].init(boardList);
+      initBoardListSubscription(userId, boardDocs);
     }
-    return this.#boardListSubscription[userId].getData().value;
+    return getBoardListSubscriptionValue(userId);
   }
 
   async getBoard(userId: UniqueId, boardId: UniqueId) {
-    console.log(
-      '%c getBoard',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    if (!this.#boardSubscription[userId]) {
-      this.#boardSubscription[userId] = {};
-    }
-    if (!this.#boardSubscription[userId][boardId]) {
-      this.#boardSubscription[userId][boardId] = new BoardSubscription(boardId);
-    }
-    if (!this.#boardSubscription[userId][boardId].getData().isInitialized) {
+    if (!isBoardSubscriptionInitialized(userId, boardId)) {
       const [boardDoc, tasksDocs] = await Promise.all([
         getBoardDoc(boardId),
         getBoardTaskDocs(boardId),
       ]);
-      const board = convertToBoard({ boardDoc }, tasksDocs);
-      this.#boardSubscription[userId][boardId].init(board);
+      initBoardSubscription(userId, boardId, boardDoc, tasksDocs);
     }
 
-    const { isInitialized, value: board } = this.#boardSubscription[userId][boardId].getData();
-    if (!isInitialized) {
+    const board = getBoardSubscriptionValue(userId, boardId);
+    if (!board) {
       throw new Error('TBD: board is undefined !');
     }
     return board;
   }
 
   listenToBoardListChange(userId: UniqueId, callback: () => void) {
-    if (!this.#boardListSubscription[userId]) {
-      this.#boardListSubscription[userId] = new BoardListSubscription(userId);
-    }
-    return this.#boardListSubscription[userId].addCallBack(callback);
+    return addBoardListSubscriptionCallback(userId, callback);
   }
 
   listenToBoardChange(userId: UniqueId, boardId: UniqueId, callback: () => void) {
-    if (!this.#boardSubscription[userId]) {
-      this.#boardSubscription[userId] = {};
-    }
-    if (!this.#boardSubscription[userId][boardId]) {
-      this.#boardSubscription[userId][boardId] = new BoardSubscription(boardId);
-    }
-    return this.#boardSubscription[userId][boardId].addCallBack(callback);
+    return addBoardSubscriptionCallback(userId, boardId, callback);
   }
 
   async addBoard(
@@ -99,13 +68,6 @@ export class FirebaseBoardRepository implements BoardRepository {
     board: { name: string; columns: { name: string }[] },
     index?: number
   ) {
-    console.log(
-      '%c addBoard',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
     const boardRef = newBoardRef();
     const { name, columns } = board;
     const { prevIdAfter, nextIdAfter } = getBoardInfo(
@@ -117,7 +79,7 @@ export class FirebaseBoardRepository implements BoardRepository {
       },
       {
         boardId: boardRef.id,
-        boardList: this.#boardListSubscription[userId].getData().value,
+        boardList: getBoardListSubscriptionValue(userId),
         indexAfter: index,
       }
     );
@@ -157,17 +119,6 @@ export class FirebaseBoardRepository implements BoardRepository {
     },
     index?: number
   ) {
-    console.log(
-      '%c updateBoard',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    const boardBefore =
-      this.#boardSubscription[userId] && this.#boardSubscription[userId][board.id]
-        ? this.#boardSubscription[userId][board.id].getData().value
-        : undefined;
     const boardRef = getBoardRef(board.id);
     const { name, columnsDeleted, columnsKept } = board;
     const hasFieldUpdate = name !== undefined;
@@ -182,14 +133,17 @@ export class FirebaseBoardRepository implements BoardRepository {
       },
       {
         boardId: board.id,
-        boardList: this.#boardListSubscription[userId].getData().value,
+        boardList: getBoardListSubscriptionValue(userId),
         indexAfter: index,
       }
     );
     let boardDocColumns: BoardDocSchema['columns'] | undefined = undefined;
     const updatedTasks: { id: UniqueId; taskDoc: Pick<TaskDocSchema, 'status'> }[] = [];
     if (hasColumnUpdate) {
-      const boardColumnsBefore = await getBoardColumns(board.id, boardBefore);
+      const boardColumnsBefore = await getBoardColumns(
+        board.id,
+        getBoardSubscriptionValue(userId, board.id)
+      );
       const boardColumns: typeof boardColumnsBefore = [];
       if (columnsKept) {
         for (const elt of columnsKept) {
@@ -236,18 +190,7 @@ export class FirebaseBoardRepository implements BoardRepository {
   }
 
   async deleteBoard(userId: UniqueId, boardId: UniqueId) {
-    console.log(
-      '%c deleteBoard',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    const boardBefore =
-      this.#boardSubscription[userId] && this.#boardSubscription[userId][boardId]
-        ? this.#boardSubscription[userId][boardId].getData().value
-        : undefined;
-    const tasksIds = await getBoardTaskIds(boardId, boardBefore);
+    const tasksIds = await getBoardTaskIds(boardId, getBoardSubscriptionValue(userId, boardId));
 
     const batch = startBatch();
     for (const taskId of tasksIds) {
@@ -268,17 +211,6 @@ export class FirebaseBoardRepository implements BoardRepository {
     },
     index?: number
   ) {
-    console.log(
-      '%c addTask',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    const boardBefore =
-      this.#boardSubscription[userId] && this.#boardSubscription[userId][boardId]
-        ? this.#boardSubscription[userId][boardId].getData().value
-        : undefined;
     const taskRef = newTaskRef(boardId);
     const { title, description, subtasks } = task;
     const { statusAfter, prevIdAfter, nextIdAfter } = await getTaskInfo(
@@ -294,7 +226,7 @@ export class FirebaseBoardRepository implements BoardRepository {
         boardId,
         columnIdBefore: columnId,
         columnIdAfter: columnId,
-        board: boardBefore,
+        board: getBoardSubscriptionValue(userId, boardId),
         indexAfter: index,
       }
     );
@@ -327,17 +259,6 @@ export class FirebaseBoardRepository implements BoardRepository {
     index?: number,
     oldColumnId?: UniqueId
   ) {
-    console.log(
-      '%c updateTask',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    const boardBefore =
-      this.#boardSubscription[userId] && this.#boardSubscription[userId][boardId]
-        ? this.#boardSubscription[userId][boardId].getData().value
-        : undefined;
     const taskRef = getTaskRef(boardId, task.id);
     const { title, description, subtasks } = task;
     const hasFieldUpdate =
@@ -357,7 +278,7 @@ export class FirebaseBoardRepository implements BoardRepository {
         boardId,
         columnIdBefore: oldColumnId ?? columnId,
         columnIdAfter: columnId,
-        board: boardBefore,
+        board: getBoardSubscriptionValue(userId, boardId),
         indexAfter: index,
       }
     );
@@ -377,17 +298,6 @@ export class FirebaseBoardRepository implements BoardRepository {
   }
 
   async deleteTask(userId: UniqueId, boardId: UniqueId, columnId: UniqueId, taskId: UniqueId) {
-    console.log(
-      '%c deleteTask',
-      'background-color:cyan;',
-      new Date(),
-      this.#boardListSubscription,
-      this.#boardSubscription
-    );
-    const boardBefore =
-      this.#boardSubscription[userId] && this.#boardSubscription[userId][boardId]
-        ? this.#boardSubscription[userId][boardId].getData().value
-        : undefined;
     const { prevIdBefore, nextIdBefore } = await getTaskInfo(
       {
         statusAfter: false,
@@ -401,7 +311,7 @@ export class FirebaseBoardRepository implements BoardRepository {
         boardId,
         columnIdBefore: columnId,
         columnIdAfter: columnId,
-        board: boardBefore,
+        board: getBoardSubscriptionValue(userId, boardId),
       }
     );
 
