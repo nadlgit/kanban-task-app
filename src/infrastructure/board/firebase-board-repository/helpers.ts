@@ -7,85 +7,8 @@ import {
   getPrevTaskDocRef,
   getTaskDoc,
 } from './firestore-helpers';
-import type { BoardDocSchema, TaskDocSchema } from './firestore-helpers';
-import type { BoardEntity, BoardList, TaskEntity, UniqueId } from 'core/entities';
-
-export function convertToBoardList(boardDocs: QuerySnapshot<DocumentData>) {
-  const boardList: BoardList = [];
-
-  boardDocs.forEach((doc) => {
-    const { name, nextId } = doc.data() as BoardDocSchema;
-    const index = Math.max(
-      0,
-      boardList.findIndex(({ id }) => id === nextId)
-    );
-    boardList.splice(index, 0, { id: doc.id, name });
-  });
-
-  return boardList;
-}
-
-export function convertToBoard(
-  boardInfo:
-    | { board?: undefined; boardDoc: DocumentSnapshot<DocumentData> }
-    | { board: BoardEntity; boardDoc?: undefined }
-    | { board: BoardEntity; boardDoc: DocumentSnapshot<DocumentData> },
-  tasksDocs?: QuerySnapshot<DocumentData>
-) {
-  const board: BoardEntity = boardInfo?.boardDoc
-    ? {
-        id: boardInfo.boardDoc.id,
-        name: (boardInfo.boardDoc.data() as BoardDocSchema).name,
-        columns: [],
-      }
-    : boardInfo.board;
-
-  if (boardInfo?.boardDoc) {
-    const { columns } = boardInfo.boardDoc.data() as BoardDocSchema;
-    Object.entries(columns).forEach(([key, { name, nextId }]) => {
-      const index = Math.max(
-        0,
-        board.columns.findIndex(({ id }) => id === nextId)
-      );
-      board.columns.splice(index, 0, { id: key, name, tasks: [] });
-    });
-
-    if (boardInfo?.board) {
-      for (const elt of board.columns) {
-        const oldElt = boardInfo.board.columns.find(({ id }) => id === elt.id);
-        if (oldElt) {
-          elt.tasks = oldElt.tasks;
-        }
-      }
-    }
-  }
-
-  if (tasksDocs && !tasksDocs?.empty) {
-    const tasks: Record<string, TaskEntity[]> = {};
-
-    tasksDocs.forEach((doc) => {
-      const {
-        title,
-        description,
-        subtasks,
-        status: { id: columnId },
-        nextId,
-      } = doc.data() as TaskDocSchema;
-      if (!tasks[columnId]) tasks[columnId] = [];
-      const index = Math.max(
-        0,
-        tasks[columnId].findIndex(({ id }) => id === nextId)
-      );
-      tasks[columnId].splice(index, 0, { id: doc.id, title, description, subtasks });
-    });
-
-    for (const elt of board.columns) {
-      elt.tasks = tasks[elt.id] ?? [];
-    }
-  }
-
-  return board;
-}
+import type { BoardDocSchema, NextId, TaskDocSchema } from './firestore-helpers';
+import type { BoardEntity, BoardList, UniqueId } from 'core/entities';
 
 export function getBoardInfo(
   infoType: Record<'prevIdAfter' | 'nextIdAfter' | 'prevIdBefore' | 'nextIdBefore', boolean>,
@@ -97,10 +20,10 @@ export function getBoardInfo(
 ) {
   const { boardId, boardList, indexAfter } = context;
 
-  let prevIdAfter: BoardDocSchema['nextId'] = null;
-  let nextIdAfter: BoardDocSchema['nextId'] = null;
-  let prevIdBefore: BoardDocSchema['nextId'] = null;
-  let nextIdBefore: BoardDocSchema['nextId'] = null;
+  let prevIdAfter: NextId = null;
+  let nextIdAfter: NextId = null;
+  let prevIdBefore: NextId = null;
+  let nextIdBefore: NextId = null;
   if (indexAfter !== undefined && indexAfter >= 0 && indexAfter < boardList.length) {
     prevIdAfter = boardList[indexAfter].id;
   }
@@ -196,10 +119,10 @@ export async function getTaskInfo(
   const { taskId, boardId, columnIdBefore, columnIdAfter, board, indexAfter } = context;
 
   let statusAfter: TaskDocSchema['status'] | undefined = undefined;
-  let prevIdAfter: TaskDocSchema['nextId'] = null;
-  let nextIdAfter: TaskDocSchema['nextId'] = null;
-  let prevIdBefore: TaskDocSchema['nextId'] = null;
-  let nextIdBefore: TaskDocSchema['nextId'] = null;
+  let prevIdAfter: NextId = null;
+  let nextIdAfter: NextId = null;
+  let prevIdBefore: NextId = null;
+  let nextIdBefore: NextId = null;
   const columnBefore = board?.columns.find(({ id }) => id === columnIdBefore);
   const columnAfter =
     columnIdAfter === columnIdBefore

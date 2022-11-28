@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 
+import { firestoreDocsToBoard, firestoreDocsToBoardList } from './converters';
 import {
   addBoardListSubscriptionCallback,
   addBoardSubscriptionCallback,
@@ -16,12 +17,11 @@ import {
   onUserBoardDocsSnapshot,
 } from './firestore-helpers';
 import type { FirestoreDoc, FirestoreDocs } from './firestore-helpers';
-import { convertToBoard, convertToBoardList } from './helpers';
 import { doNothing } from 'webui/shared';
 import { BoardEntity } from 'core/entities';
 
+jest.mock('./converters');
 jest.mock('./firestore-helpers');
-jest.mock('./helpers');
 
 const mockOnUserBoardDocsSnapshot = onUserBoardDocsSnapshot as jest.MockedFunction<
   typeof onUserBoardDocsSnapshot
@@ -57,7 +57,9 @@ mockOnBoardTaskDocsSnapshot.mockImplementation((boardId, callback) => {
   return doNothing;
 });
 
-const mockConvertToBoardList = convertToBoardList as jest.MockedFunction<typeof convertToBoardList>;
+const mockFirestoreDocsToBoardList = firestoreDocsToBoardList as jest.MockedFunction<
+  typeof firestoreDocsToBoardList
+>;
 const mockBoardDocs1 = {
   snapshot: {} as FirestoreDocs,
   boardList: [
@@ -70,7 +72,7 @@ const mockBoardDocs2 = {
   snapshot: {} as FirestoreDocs,
   boardList: [{ id: faker.datatype.uuid(), name: faker.lorem.words() }],
 };
-mockConvertToBoardList.mockImplementation((boardDocs) => {
+mockFirestoreDocsToBoardList.mockImplementation((boardDocs) => {
   if (boardDocs === mockBoardDocs1.snapshot) {
     return mockBoardDocs1.boardList;
   }
@@ -80,39 +82,32 @@ mockConvertToBoardList.mockImplementation((boardDocs) => {
   return [];
 });
 
-const mockConvertToBoard = convertToBoard as jest.MockedFunction<typeof convertToBoard>;
+const mockFirestoreDocsToBoard = firestoreDocsToBoard as jest.MockedFunction<
+  typeof firestoreDocsToBoard
+>;
 const mockBoardAndTaskDocs1 = {
   boardDoc: {} as FirestoreDoc,
-  tasksDocs: {} as FirestoreDocs,
+  taskDocs: {} as FirestoreDocs,
   board: { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
 };
 const mockBoardAndTaskDocs2 = {
   boardDoc: {} as FirestoreDoc,
-  tasksDocs: {} as FirestoreDocs,
+  taskDocs: {} as FirestoreDocs,
   board: { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
 };
 const mockBoardAndTaskDocs3 = {
   boardDoc: {} as FirestoreDoc,
-  tasksDocs: {} as FirestoreDocs,
+  taskDocs: {} as FirestoreDocs,
   board: { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
 };
-mockConvertToBoard.mockImplementation(({ boardDoc }, tasksDocs) => {
-  if (
-    boardDoc === mockBoardAndTaskDocs1.boardDoc &&
-    tasksDocs === mockBoardAndTaskDocs1.tasksDocs
-  ) {
+mockFirestoreDocsToBoard.mockImplementation(({ boardDoc }, taskDocs) => {
+  if (boardDoc === mockBoardAndTaskDocs1.boardDoc && taskDocs === mockBoardAndTaskDocs1.taskDocs) {
     return mockBoardAndTaskDocs1.board;
   }
-  if (
-    boardDoc === mockBoardAndTaskDocs2.boardDoc &&
-    tasksDocs === mockBoardAndTaskDocs2.tasksDocs
-  ) {
+  if (boardDoc === mockBoardAndTaskDocs2.boardDoc && taskDocs === mockBoardAndTaskDocs2.taskDocs) {
     return mockBoardAndTaskDocs2.board;
   }
-  if (
-    boardDoc === mockBoardAndTaskDocs3.boardDoc &&
-    tasksDocs === mockBoardAndTaskDocs3.tasksDocs
-  ) {
+  if (boardDoc === mockBoardAndTaskDocs3.boardDoc && taskDocs === mockBoardAndTaskDocs3.taskDocs) {
     return mockBoardAndTaskDocs3.board;
   }
   return {} as BoardEntity;
@@ -179,7 +174,7 @@ describe('Board subscription', () => {
 
     expect(isBoardSubscriptionInitialized(testUserId, testBoardId)).toBeFalsy();
     expect(getBoardSubscriptionValue(testUserId, testBoardId)).toBeUndefined();
-    initBoardSubscription(testUserId, testBoardId, testData.boardDoc, testData.tasksDocs);
+    initBoardSubscription(testUserId, testBoardId, testData.boardDoc, testData.taskDocs);
     expect(isBoardSubscriptionInitialized(testUserId, testBoardId)).toBeTruthy();
     expect(getBoardSubscriptionValue(testUserId, testBoardId)).toEqual(testData.board);
   });
@@ -195,9 +190,9 @@ describe('Board subscription', () => {
     const testBoardId3 = faker.datatype.uuid();
     const testData3 = mockBoardAndTaskDocs3;
 
-    initBoardSubscription(testUserId1, testBoardId1, testData1.boardDoc, testData1.tasksDocs);
-    initBoardSubscription(testUserId2, testBoardId2, testData2.boardDoc, testData2.tasksDocs);
-    initBoardSubscription(testUserId3, testBoardId3, testData3.boardDoc, testData3.tasksDocs);
+    initBoardSubscription(testUserId1, testBoardId1, testData1.boardDoc, testData1.taskDocs);
+    initBoardSubscription(testUserId2, testBoardId2, testData2.boardDoc, testData2.taskDocs);
+    initBoardSubscription(testUserId3, testBoardId3, testData3.boardDoc, testData3.taskDocs);
     expect(getBoardSubscriptionValue(testUserId1, testBoardId1)).toEqual(testData1.board);
     expect(getBoardSubscriptionValue(testUserId2, testBoardId2)).toEqual(testData2.board);
     expect(getBoardSubscriptionValue(testUserId3, testBoardId3)).toEqual(testData3.board);

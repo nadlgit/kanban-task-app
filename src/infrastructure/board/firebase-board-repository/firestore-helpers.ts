@@ -17,11 +17,13 @@ import { firebaseApp } from 'infrastructure/config';
 export type FirestoreDocs = QuerySnapshot<DocumentData>;
 export type FirestoreDoc = DocumentSnapshot<DocumentData>;
 
+export type NextId = string | null;
+
 export type BoardDocSchema = {
   owner: string;
   name: string;
-  columns: Record<string, { name: string; nextId: string | null }>;
-  nextId: string | null;
+  columns: Record<string, { name: string; nextId: NextId }>;
+  nextId: NextId;
 };
 
 export type TaskDocSchema = {
@@ -32,7 +34,7 @@ export type TaskDocSchema = {
     isCompleted: boolean;
   }[];
   status: { id: string; name: string };
-  nextId: string | null;
+  nextId: NextId;
 };
 
 const db = getFirestore(firebaseApp);

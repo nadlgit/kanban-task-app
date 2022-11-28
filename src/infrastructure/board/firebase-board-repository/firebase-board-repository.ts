@@ -1,3 +1,4 @@
+import { boardToFirestoreDoc, taskToFirestoreDoc } from './converters';
 import {
   addBoardListSubscriptionCallback,
   addBoardSubscriptionCallback,
@@ -19,7 +20,7 @@ import {
   newTaskRef,
   startBatch,
 } from './firestore-helpers';
-import type { BoardDocSchema, TaskDocSchema } from './firestore-helpers';
+import type { TaskDocSchema } from './firestore-helpers';
 import {
   getBoardColumns,
   getBoardInfo,
@@ -27,7 +28,7 @@ import {
   getColumnTaskIds,
   getTaskInfo,
 } from './helpers';
-import type { UniqueId } from 'core/entities';
+import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
 
 export class FirebaseBoardRepository implements BoardRepository {
@@ -83,20 +84,16 @@ export class FirebaseBoardRepository implements BoardRepository {
         indexAfter: index,
       }
     );
-    const boardColumns = columns.map(({ name }) => ({ id: newColumnId(boardRef.id), name }));
-    const boardDocColumns: BoardDocSchema['columns'] = Object.fromEntries(
-      boardColumns.map(({ id, name }, idx) => [
-        id,
-        { name, nextId: idx < boardColumns.length - 1 ? boardColumns[idx + 1].id : null },
-      ])
-    );
 
-    const boardDoc: BoardDocSchema = {
-      owner: userId,
+    const { boardDoc, hasAllFields } = boardToFirestoreDoc({
+      userId,
       name,
-      columns: boardDocColumns,
-      nextId: nextIdAfter ?? null,
-    };
+      columns: columns.map(({ name }) => ({ id: newColumnId(boardRef.id), name, tasks: [] })),
+      nextBoardId: nextIdAfter ?? null,
+    });
+    if (!hasAllFields) {
+      throw new Error('TBD: incomplete board data');
+    }
     const batch = startBatch();
     batch.set(boardRef, boardDoc);
     prevIdAfter && batch.update(getBoardRef(prevIdAfter), { nextId: boardRef.id });
@@ -121,7 +118,6 @@ export class FirebaseBoardRepository implements BoardRepository {
   ) {
     const boardRef = getBoardRef(board.id);
     const { name, columnsDeleted, columnsKept } = board;
-    const hasFieldUpdate = name !== undefined;
     const hasColumnUpdate = columnsDeleted !== undefined || columnsKept !== undefined;
     const hasPositionUpdate = index !== undefined;
     const { prevIdAfter, nextIdAfter, prevIdBefore, nextIdBefore } = getBoardInfo(
@@ -137,7 +133,7 @@ export class FirebaseBoardRepository implements BoardRepository {
         indexAfter: index,
       }
     );
-    let boardDocColumns: BoardDocSchema['columns'] | undefined = undefined;
+    let columns: BoardEntity['columns'] | undefined = undefined;
     const updatedTasks: { id: UniqueId; taskDoc: Pick<TaskDocSchema, 'status'> }[] = [];
     if (hasColumnUpdate) {
       const boardColumnsBefore = await getBoardColumns(
@@ -165,28 +161,23 @@ export class FirebaseBoardRepository implements BoardRepository {
           )
         );
       }
-      boardDocColumns = Object.fromEntries(
-        boardColumns.map(({ id, name }, idx) => [
-          id,
-          { name, nextId: idx < boardColumns.length - 1 ? boardColumns[idx + 1].id : null },
-        ])
-      );
+
+      columns = boardColumns.map(({ id, name }) => ({ id, name, tasks: [] }));
     }
 
-    if (hasFieldUpdate || hasColumnUpdate || hasPositionUpdate) {
-      const boardDoc: Partial<BoardDocSchema> = {};
-      if (name) boardDoc.name = name;
-      if (boardDocColumns) boardDoc.columns = boardDocColumns;
-      if (nextIdAfter !== undefined) boardDoc.nextId = nextIdAfter;
-      const batch = startBatch();
-      batch.update(boardRef, boardDoc);
-      for (const task of updatedTasks) {
-        batch.update(getTaskRef(board.id, task.id), task.taskDoc);
-      }
-      prevIdAfter && batch.update(getBoardRef(prevIdAfter), { nextId: boardRef.id });
-      prevIdBefore && batch.update(getBoardRef(prevIdBefore), { nextId: nextIdBefore });
-      await batch.commit();
+    const { boardDoc, hasNoField } = boardToFirestoreDoc({
+      name,
+      columns,
+      nextBoardId: nextIdAfter,
+    });
+    const batch = startBatch();
+    !hasNoField && batch.update(boardRef, boardDoc);
+    for (const task of updatedTasks) {
+      batch.update(getTaskRef(board.id, task.id), task.taskDoc);
     }
+    prevIdAfter && batch.update(getBoardRef(prevIdAfter), { nextId: boardRef.id });
+    prevIdBefore && batch.update(getBoardRef(prevIdBefore), { nextId: nextIdBefore });
+    await batch.commit();
   }
 
   async deleteBoard(userId: UniqueId, boardId: UniqueId) {
@@ -231,13 +222,16 @@ export class FirebaseBoardRepository implements BoardRepository {
       }
     );
 
-    const taskDoc: TaskDocSchema = {
+    const { taskDoc, hasAllFields } = taskToFirestoreDoc({
       title,
       description,
       subtasks,
-      status: statusAfter ?? { id: columnId, name: '-noname-' },
-      nextId: nextIdAfter ?? null,
-    };
+      column: statusAfter ?? { id: columnId, name: '-noname-' },
+      nextTaskId: nextIdAfter ?? null,
+    });
+    if (!hasAllFields) {
+      throw new Error('TBD: incomplete task data');
+    }
     const batch = startBatch();
     batch.set(taskRef, taskDoc);
     prevIdAfter && batch.update(getTaskRef(boardId, prevIdAfter), { nextId: taskRef.id });
@@ -261,8 +255,6 @@ export class FirebaseBoardRepository implements BoardRepository {
   ) {
     const taskRef = getTaskRef(boardId, task.id);
     const { title, description, subtasks } = task;
-    const hasFieldUpdate =
-      title !== undefined || description !== undefined || subtasks !== undefined;
     const hasStatusUpdate = oldColumnId !== undefined;
     const hasPositionUpdate = index !== undefined;
     const { statusAfter, prevIdAfter, nextIdAfter } = await getTaskInfo(
@@ -283,18 +275,17 @@ export class FirebaseBoardRepository implements BoardRepository {
       }
     );
 
-    if (hasFieldUpdate || hasStatusUpdate || hasPositionUpdate) {
-      const taskDoc: Partial<TaskDocSchema> = {};
-      if (title) taskDoc.title = title;
-      if (description) taskDoc.description = description;
-      if (subtasks) taskDoc.subtasks = subtasks;
-      if (statusAfter !== undefined) taskDoc.status = statusAfter;
-      if (nextIdAfter !== undefined) taskDoc.nextId = nextIdAfter;
-      const batch = startBatch();
-      batch.update(taskRef, taskDoc);
-      prevIdAfter && batch.update(getTaskRef(boardId, prevIdAfter), { nextId: taskRef.id });
-      await batch.commit();
-    }
+    const { taskDoc, hasNoField } = taskToFirestoreDoc({
+      title,
+      description,
+      subtasks,
+      column: statusAfter,
+      nextTaskId: nextIdAfter,
+    });
+    const batch = startBatch();
+    !hasNoField && batch.update(taskRef, taskDoc);
+    prevIdAfter && batch.update(getTaskRef(boardId, prevIdAfter), { nextId: taskRef.id });
+    await batch.commit();
   }
 
   async deleteTask(userId: UniqueId, boardId: UniqueId, columnId: UniqueId, taskId: UniqueId) {
