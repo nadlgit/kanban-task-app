@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { BoardEntity, BoardList, UniqueId } from 'core/entities';
 
 import {
   boardToFirestoreDoc,
@@ -7,52 +6,12 @@ import {
   firestoreDocsToBoardList,
   taskToFirestoreDoc,
 } from './converters';
-import { BoardDocSchema, TaskDocSchema } from './firestore-helpers';
-import { FirestoreDoc, FirestoreDocs } from './test-utils';
-
-const testBoardDataFactory = (board: BoardEntity, nextBoardId?: UniqueId, userId?: UniqueId) => {
-  const boardDoc: { id: string; data: BoardDocSchema } = {
-    id: board.id,
-    data: {
-      owner: userId ?? faker.datatype.uuid(),
-      name: board.name,
-      columns: {},
-      nextId: nextBoardId ?? null,
-    },
-  };
-  const taskDocs: { id: string; data: TaskDocSchema }[] = [];
-
-  board.columns.forEach(({ id: columnId, name: columnName, tasks }, columnIdx) => {
-    const nextColumnId =
-      columnIdx < board.columns.length - 1 ? board.columns[columnIdx + 1].id : null;
-    boardDoc.data.columns[columnId] = { name: columnName, nextId: nextColumnId };
-    tasks.forEach(({ id: taskId, title, description, subtasks }, taskIdx) => {
-      const nextTaskId = taskIdx < tasks.length - 1 ? tasks[taskIdx + 1].id : null;
-      taskDocs.push({
-        id: taskId,
-        data: {
-          title,
-          description,
-          subtasks,
-          status: { id: columnId, name: columnName },
-          nextId: nextTaskId,
-        },
-      });
-    });
-  });
-
-  return { board, boardDoc, taskDocs };
-};
-
-const testBoardListDataFactory = (boardList: BoardList) => {
-  const boardDocs: { id: string; data: BoardDocSchema }[] = [];
-  boardList.forEach(({ id, name }, idx) => {
-    const nextId = idx < boardList.length - 1 ? boardList[idx + 1].id : undefined;
-    const { boardDoc } = testBoardDataFactory({ id, name, columns: [] }, nextId);
-    boardDocs.push(boardDoc);
-  });
-  return { boardList, boardDocs };
-};
+import {
+  FirestoreDoc,
+  FirestoreDocs,
+  testBoardDataFactory,
+  testBoardListDataFactory,
+} from './test-utils';
 
 describe('firestoreDocsToBoardList()', () => {
   it('should handle empty board collection', () => {
@@ -322,6 +281,40 @@ describe('firestoreDocsToBoard()', () => {
         return { id, name, tasks: columnAfter ? columnAfter.tasks : tasks };
       }),
     };
+
+    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
+    expect(result).toEqual(expected);
+  });
+
+  it.each([
+    { desc: ' taskDocs undefined', taskDocs: undefined },
+    {
+      desc: ' taskDocs defined',
+      taskDocs: new FirestoreDocs(
+        testBoardDataFactory({
+          id: faker.datatype.uuid(),
+          name: faker.lorem.words(),
+          columns: [
+            {
+              id: faker.datatype.uuid(),
+              name: faker.lorem.words(),
+              tasks: [
+                {
+                  id: faker.datatype.uuid(),
+                  title: faker.lorem.words(),
+                  description: faker.lorem.words(),
+                  subtasks: [],
+                },
+              ],
+            },
+          ],
+        }).taskDocs
+      ),
+    },
+  ])('should handle boardBefore undefined / boardDoc "empty" / $desc', ({ taskDocs }) => {
+    const boardBefore = undefined;
+    const boardDoc = new FirestoreDoc({} as ReturnType<typeof testBoardDataFactory>['boardDoc']);
+    const expected = undefined;
 
     const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
     expect(result).toEqual(expected);

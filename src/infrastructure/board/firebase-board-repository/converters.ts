@@ -29,8 +29,8 @@ export function firestoreDocsToBoard(
     | { boardBefore: BoardEntity; boardDoc: FirestoreDoc },
   taskDocs?: FirestoreDocs
 ) {
-  let board: BoardEntity;
-  if (boardInfo?.boardDoc) {
+  let board: BoardEntity | undefined;
+  if (boardInfo?.boardDoc && boardInfo.boardDoc.exists()) {
     const { name, columns } = boardInfo.boardDoc.data() as BoardDocSchema;
     board = {
       id: boardInfo.boardDoc.id,
@@ -44,7 +44,7 @@ export function firestoreDocsToBoard(
   if (board && taskDocs && !taskDocs.empty) {
     const columnTasks = firestoreTaskDocsToColumnTasks(taskDocs);
     Object.entries(columnTasks).forEach(([key, tasks]) => {
-      const column = board.columns.find(({ id }) => id === key);
+      const column = board?.columns.find(({ id }) => id === key);
       if (column) {
         column.tasks = tasks;
       }

@@ -1,5 +1,3 @@
-import type { DocumentData, DocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
-
 import {
   getBoardDoc,
   getBoardTaskDocs,
