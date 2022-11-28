@@ -22,11 +22,15 @@ export function getBoardInfo(
   let nextIdAfter: NextId = null;
   let prevIdBefore: NextId = null;
   let nextIdBefore: NextId = null;
-  if (indexAfter !== undefined && indexAfter >= 0 && indexAfter < boardList.length) {
-    prevIdAfter = boardList[indexAfter].id;
+  const computedIndexAfter =
+    indexAfter !== undefined && indexAfter >= 0 && indexAfter < boardList.length
+      ? indexAfter
+      : boardList.length - 1;
+  if (computedIndexAfter > 0) {
+    prevIdAfter = boardList[computedIndexAfter - 1].id;
   }
-  if (indexAfter !== undefined && indexAfter >= 0 && indexAfter < boardList.length - 1) {
-    nextIdAfter = boardList[indexAfter + 1].id;
+  if (computedIndexAfter < boardList.length - 1) {
+    nextIdAfter = boardList[computedIndexAfter + 1].id;
   }
   const indexBefore = boardList.findIndex(({ id }) => id === boardId);
   if (indexBefore > 0) {
@@ -128,11 +132,15 @@ export async function getTaskInfo(
       : board?.columns.find(({ id }) => id === columnIdAfter);
   if (board && board.id === boardId && columnBefore && columnAfter) {
     statusAfter = { id: columnAfter.id, name: columnAfter.name };
-    if (indexAfter !== undefined && indexAfter >= 0 && indexAfter < columnAfter.tasks.length) {
-      prevIdAfter = columnAfter.tasks[indexAfter].id;
+    const computedIndexAfter =
+      indexAfter !== undefined && indexAfter >= 0 && indexAfter < columnAfter.tasks.length
+        ? indexAfter
+        : columnAfter.tasks.length - 1;
+    if (computedIndexAfter > 0) {
+      prevIdAfter = columnAfter.tasks[computedIndexAfter - 1].id;
     }
-    if (indexAfter !== undefined && indexAfter >= 0 && indexAfter < columnAfter.tasks.length - 1) {
-      nextIdAfter = columnAfter.tasks[indexAfter + 1].id;
+    if (computedIndexAfter < columnAfter.tasks.length - 1) {
+      nextIdAfter = columnAfter.tasks[computedIndexAfter + 1].id;
     }
     const indexBefore = columnBefore.tasks.findIndex(({ id }) => id === taskId);
     if (indexBefore > 0) {

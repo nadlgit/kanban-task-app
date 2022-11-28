@@ -31,6 +31,14 @@ import {
 import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
 
+export const BOARD_UNDEFINED_ERROR = Object.freeze(new Error('Unable to find requested board'));
+export const ADD_BOARD_MISSING_DATA_ERROR = Object.freeze(
+  new Error('Missing data, unable to add board')
+);
+export const ADD_TASK_MISSING_DATA_ERROR = Object.freeze(
+  new Error('Missing data, unable to add task')
+);
+
 export class FirebaseBoardRepository implements BoardRepository {
   async getBoardList(userId: UniqueId) {
     if (!isBoardListSubscriptionInitialized(userId)) {
@@ -51,7 +59,7 @@ export class FirebaseBoardRepository implements BoardRepository {
 
     const board = getBoardSubscriptionValue(userId, boardId);
     if (!board) {
-      throw new Error('TBD: board is undefined !');
+      throw BOARD_UNDEFINED_ERROR;
     }
     return board;
   }
@@ -92,7 +100,7 @@ export class FirebaseBoardRepository implements BoardRepository {
       nextBoardId: nextIdAfter ?? null,
     });
     if (!hasAllFields) {
-      throw new Error('TBD: incomplete board data');
+      throw ADD_BOARD_MISSING_DATA_ERROR;
     }
     const batch = startBatch();
     batch.set(boardRef, boardDoc);
@@ -230,7 +238,7 @@ export class FirebaseBoardRepository implements BoardRepository {
       nextTaskId: nextIdAfter ?? null,
     });
     if (!hasAllFields) {
-      throw new Error('TBD: incomplete task data');
+      throw ADD_TASK_MISSING_DATA_ERROR;
     }
     const batch = startBatch();
     batch.set(taskRef, taskDoc);

@@ -1,5 +1,14 @@
 import { faker } from '@faker-js/faker';
-import { DocumentChange, Query, QueryDocumentSnapshot, SnapshotMetadata } from 'firebase/firestore';
+import {
+  CollectionReference,
+  DocumentChange,
+  DocumentReference,
+  Firestore,
+  Query,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  SnapshotMetadata,
+} from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 
 import type { BoardEntity, BoardList, UniqueId } from 'core/entities';
@@ -30,23 +39,40 @@ export class FirestoreDoc extends QueryDocumentSnapshot<DocumentData> {
   }
 }
 
-export class FirestoreDocs {
-  metadata: SnapshotMetadata;
-  query: Query<DocumentData>;
+export class FirestoreDocs implements QuerySnapshot<DocumentData> {
+  metadata: SnapshotMetadata = {} as typeof this.metadata;
+  query: Query<DocumentData> = {} as typeof this.query;
   docs: FirestoreDoc[];
   size: number;
   empty: boolean;
   forEach: (callback: (result: FirestoreDoc) => void, thisArg?: unknown) => void;
-  docChanges: () => DocumentChange<DocumentData>[];
+  docChanges: () => DocumentChange<DocumentData>[] = doNothing as typeof this.docChanges;
 
   constructor(docs: { id: string; data: DocumentData }[] = []) {
-    this.metadata = {} as typeof this.metadata;
-    this.query = {} as typeof this.query;
     this.docs = docs.map((doc) => new FirestoreDoc(doc));
     this.size = this.docs.length;
     this.empty = !(this.docs.length > 0);
     this.forEach = (callback) => this.docs.forEach(callback);
-    this.docChanges = doNothing as typeof this.docChanges;
+  }
+}
+
+export class FirestoreRef implements DocumentReference<DocumentData> {
+  readonly converter = null;
+  readonly type = 'document';
+  readonly firestore: Firestore = {} as typeof this.firestore;
+  path = '';
+  parent: CollectionReference<DocumentData> = {} as typeof this.parent;
+  withConverter: () => DocumentReference<DocumentData> = doNothing as typeof this.withConverter;
+
+  #id: string;
+
+  constructor(ref: { id: string }) {
+    const { id } = ref;
+    this.#id = id;
+  }
+
+  get id() {
+    return this.#id;
   }
 }
 
