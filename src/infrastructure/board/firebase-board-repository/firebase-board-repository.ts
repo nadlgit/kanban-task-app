@@ -189,6 +189,18 @@ export class FirebaseBoardRepository implements BoardRepository {
   }
 
   async deleteBoard(userId: UniqueId, boardId: UniqueId) {
+    const { prevIdBefore, nextIdBefore } = getBoardInfo(
+      {
+        prevIdAfter: false,
+        nextIdAfter: false,
+        prevIdBefore: true,
+        nextIdBefore: true,
+      },
+      {
+        boardId: boardId,
+        boardList: getBoardListSubscriptionValue(userId),
+      }
+    );
     const tasksIds = await getBoardTaskIds(boardId, getBoardSubscriptionValue(userId, boardId));
 
     const batch = startBatch();
@@ -196,6 +208,7 @@ export class FirebaseBoardRepository implements BoardRepository {
       batch.delete(getTaskRef(boardId, taskId));
     }
     batch.delete(getBoardRef(boardId));
+    prevIdBefore && batch.update(getBoardRef(prevIdBefore), { nextId: nextIdBefore });
     await batch.commit();
   }
 
