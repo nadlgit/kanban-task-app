@@ -2,7 +2,7 @@ import {
   getBoardDoc,
   getBoardTaskDocs,
   getColumnTaskDocs,
-  getPrevTaskDocRef,
+  getPrevTaskRef,
   getTaskDoc,
 } from './firestore-helpers';
 import type { BoardDocSchema, NextId, TaskDocSchema } from './firestore-helpers';
@@ -150,12 +150,12 @@ export async function getTaskInfo(
       nextIdBefore = columnBefore.tasks[indexBefore + 1].id;
     }
   } else {
-    const [boardDoc, tasksDocsAfter, prevtaskDocRefBefore, taskDocBefore] = await Promise.all([
+    const [boardDoc, tasksDocsAfter, PrevTaskRefBefore, taskDocBefore] = await Promise.all([
       infoType.statusAfter ? getBoardDoc(boardId) : Promise.resolve(null),
       infoType.prevIdAfter || infoType.nextIdAfter
         ? getColumnTaskDocs(boardId, columnIdAfter)
         : Promise.resolve(null),
-      infoType.prevIdBefore ? getPrevTaskDocRef(boardId, taskId) : Promise.resolve(null),
+      infoType.prevIdBefore ? getPrevTaskRef(boardId, taskId) : Promise.resolve(null),
       infoType.nextIdBefore ? getTaskDoc(boardId, taskId) : Promise.resolve(null),
     ]);
     if (boardDoc) {
@@ -183,8 +183,8 @@ export async function getTaskInfo(
       }
     }
 
-    if (prevtaskDocRefBefore) {
-      prevIdBefore = prevtaskDocRefBefore.id;
+    if (PrevTaskRefBefore) {
+      prevIdBefore = PrevTaskRefBefore.id;
     }
 
     if (taskDocBefore) {

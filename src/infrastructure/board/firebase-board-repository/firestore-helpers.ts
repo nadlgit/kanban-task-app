@@ -112,7 +112,7 @@ export function getColumnTaskDocs(boardId: UniqueId, columnId: UniqueId) {
   return getDocs(columnTaskCollectionQuery(boardId, columnId));
 }
 
-export function getPrevTaskDocRef(boardId: UniqueId, taskId: UniqueId) {
+export function getPrevTaskRef(boardId: UniqueId, taskId: UniqueId) {
   return getDocs(prevTaskCollectionQuery(boardId, taskId)).then((result) =>
     result.empty ? null : result.docs[0].ref
   );
