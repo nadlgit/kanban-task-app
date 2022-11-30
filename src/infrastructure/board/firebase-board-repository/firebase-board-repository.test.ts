@@ -5,6 +5,7 @@ import {
   getBoardDoc,
   getBoardRef,
   getBoardTaskDocs,
+  getColumnTaskDocs,
   getTaskRef,
   getUserBoardDocs,
   newBoardRef,
@@ -58,6 +59,14 @@ const mockGetBoardTaskDocs = getBoardTaskDocs as jest.MockedFunction<typeof getB
 mockGetBoardTaskDocs.mockImplementation((boardId) => {
   const taskDocs = getMockFirestoreBoardAndTaskDocs(boardId).taskDocs;
   return Promise.resolve(new FirestoreDocs(taskDocs));
+});
+
+const mockGetColumnTaskDocs = getColumnTaskDocs as jest.MockedFunction<typeof getColumnTaskDocs>;
+mockGetColumnTaskDocs.mockImplementation((boardId, columnId) => {
+  const columnTaskDocs = getMockFirestoreBoardAndTaskDocs(boardId).taskDocs.filter(
+    ({ id }) => id === columnId
+  );
+  return Promise.resolve(new FirestoreDocs(columnTaskDocs));
 });
 
 const mockGetBoardRef = getBoardRef as jest.MockedFunction<typeof getBoardRef>;
@@ -173,15 +182,15 @@ describe('FirebaseBoardRepository.getBoard()', () => {
 
 describe('FirebaseBoardRepository.addBoard()', () => {
   it.each([
-    { desc: 'index undefined', testIndex: undefined },
-    { desc: 'index at start', testIndex: 0 },
-    { desc: 'index at middle', testIndex: 1 },
-  ])('should handle $desc', async ({ testIndex }) => {
+    { desc: 'index undefined', testNewIndex: undefined },
+    { desc: 'index at start', testNewIndex: 0 },
+    { desc: 'index at middle', testNewIndex: 1 },
+  ])('should handle $desc', async ({ testNewIndex }) => {
     const testUserId = faker.datatype.uuid();
-    const testBoardList = [
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
+    mockBoards = [
+      { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
+      { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
+      { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
     ];
     const testBoard = {
       name: faker.lorem.words(),
@@ -196,25 +205,20 @@ describe('FirebaseBoardRepository.addBoard()', () => {
     };
     const testBoardRef = new FirestoreRef({ id: faker.datatype.uuid() });
     const testBoardIndex =
-      testIndex !== undefined && testIndex >= 0 && testIndex < testBoardList.length
-        ? testIndex
-        : testBoardList.length;
+      testNewIndex !== undefined && testNewIndex >= 0 && testNewIndex < mockBoards.length
+        ? testNewIndex
+        : mockBoards.length;
     const testPrevBoardRef =
-      testBoardIndex > 0
-        ? new FirestoreRef({ id: testBoardList[testBoardIndex - 1].id })
-        : undefined;
+      testBoardIndex > 0 ? new FirestoreRef({ id: mockBoards[testBoardIndex - 1].id }) : undefined;
     mockNewBoardRef.mockImplementationOnce(() => testBoardRef);
 
-    mockBoards = testBoardList.map(({ id, name }) => ({ id, name, columns: [] }));
     const repository = new FirebaseBoardRepository();
     await repository.getBoardList(testUserId);
-    const boardId = await repository.addBoard(testUserId, testBoard, testIndex);
+    const boardId = await repository.addBoard(testUserId, testBoard, testNewIndex);
 
     expect(boardId).toEqual(testBoardRef.id);
-    expect(mockBatchSet).toHaveBeenCalledTimes(1);
-    const [boardRef, boardData] = mockBatchSet.mock.calls[0];
     const testNextBoardId =
-      testBoardIndex < testBoardList.length - 1 ? testBoardList[testBoardIndex + 1].id : undefined;
+      testBoardIndex < mockBoards.length - 1 ? mockBoards[testBoardIndex + 1].id : undefined;
     const testBoardDocData = testBoardDataFactory(
       {
         id: testBoardRef.id,
@@ -228,13 +232,14 @@ describe('FirebaseBoardRepository.addBoard()', () => {
       testNextBoardId,
       testUserId
     ).boardDoc.data;
-    expect(boardRef).toEqual(testBoardRef);
-    expect(boardData).toEqual(testBoardDocData);
+    expect(mockBatchSet).toHaveBeenCalledTimes(1);
+    expect(mockBatchSet.mock.calls[0]).toEqual([testBoardRef, testBoardDocData]);
     if (testPrevBoardRef) {
       expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-      const [prevBoardRef, prevBoardData] = mockBatchUpdate.mock.calls[0];
-      expect(prevBoardRef).toEqual(testPrevBoardRef);
-      expect(prevBoardData).toEqual({ nextId: testBoardRef.id });
+      expect(mockBatchUpdate.mock.calls[0]).toEqual([
+        testPrevBoardRef,
+        { nextId: testBoardRef.id },
+      ]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -244,10 +249,180 @@ describe('FirebaseBoardRepository.addBoard()', () => {
   });
 });
 
+describe('FirebaseBoardRepository.updateBoard()', () => {
+  it('should handle name update', async () => {
+    const testUserId = faker.datatype.uuid();
+    const testBoardUpdate = {
+      id: faker.datatype.uuid(),
+      name: faker.lorem.words(),
+    };
+    mockBoards = [{ id: testBoardUpdate.id, name: faker.lorem.words(), columns: [] }];
+    const testBoardRef = new FirestoreRef({ id: testBoardUpdate.id });
+
+    const repository = new FirebaseBoardRepository();
+    await repository.getBoardList(testUserId);
+    await repository.updateBoard(testUserId, testBoardUpdate);
+
+    expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBatchUpdate.mock.calls[0]).toEqual([testBoardRef, { name: testBoardUpdate.name }]);
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    {
+      desc: 'deletion',
+      testBoardUpdate: {
+        id: faker.datatype.uuid(),
+        columnsDeleted: [{ id: faker.datatype.uuid() }],
+      } as Parameters<FirebaseBoardRepository['updateBoard']>[1],
+    },
+    {
+      desc: 'addition',
+      testBoardUpdate: {
+        id: faker.datatype.uuid(),
+        columnsKept: [{ isAdded: true, name: faker.lorem.words() }],
+      } as Parameters<FirebaseBoardRepository['updateBoard']>[1],
+    },
+    {
+      desc: 'name update',
+      testBoardUpdate: {
+        id: faker.datatype.uuid(),
+        columnsKept: [{ isAdded: false, id: faker.datatype.uuid(), name: faker.lorem.words() }],
+      } as Parameters<FirebaseBoardRepository['updateBoard']>[1],
+    },
+    {
+      desc: 'move',
+      testBoardUpdate: {
+        id: faker.datatype.uuid(),
+        columnsKept: [
+          { isAdded: false, id: faker.datatype.uuid() },
+          { isAdded: true, name: faker.lorem.words() },
+          { isAdded: false, id: faker.datatype.uuid() },
+        ],
+      } as Parameters<FirebaseBoardRepository['updateBoard']>[1],
+    },
+  ])('should handle columns update: $desc', async ({ testBoardUpdate }) => {
+    const testUserId = faker.datatype.uuid();
+    const testBoard: BoardEntity = {
+      id: testBoardUpdate.id,
+      name: faker.lorem.words(),
+      columns: [],
+    };
+    if (testBoardUpdate.columnsDeleted) {
+      for (const elt of testBoardUpdate.columnsDeleted) {
+        testBoard.columns.push({ id: elt.id, name: faker.lorem.words(), tasks: [] });
+      }
+    }
+    if (testBoardUpdate.columnsKept) {
+      for (const elt of testBoardUpdate.columnsKept.filter(({ isAdded }) => !isAdded)) {
+        testBoard.columns.push({
+          id: elt.id ?? faker.datatype.uuid(),
+          name: faker.lorem.words(),
+          tasks: [],
+        });
+      }
+    }
+    mockBoards = [testBoard];
+    const testBoardRef = new FirestoreRef({ id: testBoardUpdate.id });
+
+    const repository = new FirebaseBoardRepository();
+    await repository.getBoardList(testUserId);
+    await repository.updateBoard(testUserId, testBoardUpdate);
+
+    let testBoardUpdateColumns: BoardEntity['columns'] = [];
+    if (testBoardUpdate.columnsKept) {
+      const addedIdxList = testBoardUpdate.columnsKept
+        .map(({ isAdded }, idx) => ({
+          isAdded,
+          idx,
+        }))
+        .filter(({ isAdded }) => isAdded)
+        .map(({ idx }) => idx);
+      testBoardUpdateColumns = testBoardUpdate.columnsKept.map(({ isAdded, id, name }, idx) => {
+        const addedId: UniqueId = mockNewColumnId.mock.results[addedIdxList.indexOf(idx)]?.value;
+        const prevName =
+          testBoard.columns.find(({ id: columnId }) => columnId === id)?.name ??
+          faker.lorem.words();
+        return {
+          id: isAdded ? addedId : id,
+          name: name ?? prevName,
+          tasks: [],
+        };
+      });
+    }
+    if (testBoardUpdate.columnsDeleted && testBoardUpdateColumns.length === 0) {
+      const deletedIds = testBoardUpdate.columnsDeleted.map(({ id }) => id);
+      testBoardUpdateColumns = testBoard.columns.filter(({ id }) => !deletedIds.includes(id));
+    }
+    const testBoardDocData = testBoardDataFactory(
+      {
+        id: testBoard.id,
+        name: testBoard.name,
+        columns: testBoardUpdateColumns,
+      },
+      undefined,
+      testUserId
+    ).boardDoc.data;
+    expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBatchUpdate.mock.calls[0]).toEqual([
+      testBoardRef,
+      { columns: testBoardDocData.columns },
+    ]);
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { from: 'start', to: 'middle' },
+    { from: 'start', to: 'end' },
+    { from: 'middle', to: 'start' },
+    { from: 'middle', to: 'end' },
+    { from: 'end', to: 'start' },
+    { from: 'end', to: 'middle' },
+  ])('should handle move from $from to $to', async ({ from, to }) => {
+    const testUserId = faker.datatype.uuid();
+    mockBoards = [
+      { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
+      { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
+      { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] },
+    ];
+    const indexes: Record<string, number> = { start: 0, middle: 1, end: 2 };
+    const testIndex = indexes[from];
+    const testNewIndex = indexes[to];
+    const testBoardId = mockBoards[testIndex].id;
+    const testBoardRef = new FirestoreRef({ id: testBoardId });
+    const prevBoardBeforeRef =
+      testIndex > 0 ? new FirestoreRef({ id: mockBoards[testIndex - 1].id }) : undefined;
+    const nextBoardBeforeId =
+      testIndex < mockBoards.length - 1 ? mockBoards[testIndex + 1].id : null;
+    const prevBoardAfterRef =
+      testNewIndex > 0 ? new FirestoreRef({ id: mockBoards[testNewIndex].id }) : undefined;
+    const nextBoardAfterId =
+      testNewIndex < mockBoards.length - 1 ? mockBoards[testNewIndex + 1].id : null;
+    const expectedUpdates = [[testBoardRef, { nextId: nextBoardAfterId }]];
+    if (prevBoardBeforeRef) {
+      expectedUpdates.push([prevBoardBeforeRef, { nextId: nextBoardBeforeId }]);
+    }
+    if (prevBoardAfterRef) {
+      expectedUpdates.push([prevBoardAfterRef, { nextId: testBoardId }]);
+    }
+
+    const repository = new FirebaseBoardRepository();
+    await repository.getBoardList(testUserId);
+    await repository.updateBoard(testUserId, { id: testBoardId }, testNewIndex);
+
+    expect(mockBatchUpdate).toHaveBeenCalledTimes(expectedUpdates.length);
+    for (const param of mockBatchUpdate.mock.calls) {
+      expect(expectedUpdates).toContainEqual(param);
+    }
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('FirebaseBoardRepository.deleteBoard()', () => {
   it.each([
     {
       desc: 'board at start',
+      testBoardListLength: 2,
       testIndex: 0,
       testBoard: {
         id: faker.datatype.uuid(),
@@ -257,6 +432,7 @@ describe('FirebaseBoardRepository.deleteBoard()', () => {
     },
     {
       desc: 'board at middle',
+      testBoardListLength: 3,
       testIndex: 1,
       testBoard: {
         id: faker.datatype.uuid(),
@@ -328,42 +504,40 @@ describe('FirebaseBoardRepository.deleteBoard()', () => {
         ],
       },
     },
-  ])('should handle $desc', async ({ testBoard, testIndex }) => {
+  ])('should handle $desc', async ({ testBoardListLength, testBoard, testIndex }) => {
     const testUserId = faker.datatype.uuid();
     const testBoardIndex = testIndex ?? 0;
-    const testBoardList = [
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-      { id: faker.datatype.uuid(), name: faker.lorem.words() },
-    ];
-    testBoardList[testBoardIndex] = { id: testBoard.id, name: testBoard.name };
+    mockBoards = [];
+    for (let i = 0; i < (testBoardListLength ?? 1); i++) {
+      mockBoards.push(
+        i === testBoardIndex
+          ? testBoard
+          : { id: faker.datatype.uuid(), name: faker.lorem.words(), columns: [] }
+      );
+    }
     const testBoardRef = new FirestoreRef({ id: testBoard.id });
     const testTaskRefs = testBoard.columns.flatMap(({ tasks }) =>
       tasks.map(({ id }) => new FirestoreRef({ id: mockMakeTaskRefId(testBoard.id, id) }))
     );
     const testPrevBoardRef =
-      testBoardIndex > 0
-        ? new FirestoreRef({ id: testBoardList[testBoardIndex - 1].id })
-        : undefined;
+      testBoardIndex > 0 ? new FirestoreRef({ id: mockBoards[testBoardIndex - 1].id }) : undefined;
     const testNextBoardId =
-      testBoardIndex < testBoardList.length - 1 ? testBoardList[testBoardIndex + 1].id : null;
+      testBoardIndex < mockBoards.length - 1 ? mockBoards[testBoardIndex + 1].id : null;
 
-    mockBoards = testBoardList.map(({ id, name }) =>
-      id === testBoard.id ? testBoard : { id, name, columns: [] }
-    );
     const repository = new FirebaseBoardRepository();
     await repository.getBoardList(testUserId);
     await repository.deleteBoard(testUserId, testBoard.id);
 
     expect(mockBatchDelete).toHaveBeenCalledTimes(1 + testTaskRefs.length);
-    for (const param of mockBatchDelete.mock.calls) {
-      expect([testBoardRef, ...testTaskRefs]).toContainEqual(param[0]);
+    for (const expected of [testBoardRef, ...testTaskRefs]) {
+      expect(mockBatchDelete.mock.calls).toContainEqual([expected]);
     }
     if (testPrevBoardRef) {
       expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-      const [prevBoardRef, prevBoardData] = mockBatchUpdate.mock.calls[0];
-      expect(prevBoardRef).toEqual(testPrevBoardRef);
-      expect(prevBoardData).toEqual({ nextId: testNextBoardId });
+      expect(mockBatchUpdate.mock.calls[0]).toEqual([
+        testPrevBoardRef,
+        { nextId: testNextBoardId },
+      ]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
