@@ -150,7 +150,7 @@ export async function getTaskInfo(
       nextIdBefore = columnBefore.tasks[indexBefore + 1].id;
     }
   } else {
-    const [boardDoc, tasksDocsAfter, PrevTaskRefBefore, taskDocBefore] = await Promise.all([
+    const [boardDoc, tasksDocsAfter, prevTaskRefBefore, taskDocBefore] = await Promise.all([
       infoType.statusAfter ? getBoardDoc(boardId) : Promise.resolve(null),
       infoType.prevIdAfter || infoType.nextIdAfter
         ? getColumnTaskDocs(boardId, columnIdAfter)
@@ -158,6 +158,7 @@ export async function getTaskInfo(
       infoType.prevIdBefore ? getPrevTaskRef(boardId, taskId) : Promise.resolve(null),
       infoType.nextIdBefore ? getTaskDoc(boardId, taskId) : Promise.resolve(null),
     ]);
+
     if (boardDoc) {
       statusAfter = {
         id: columnIdAfter,
@@ -183,8 +184,8 @@ export async function getTaskInfo(
       }
     }
 
-    if (PrevTaskRefBefore) {
-      prevIdBefore = PrevTaskRefBefore.id;
+    if (prevTaskRefBefore) {
+      prevIdBefore = prevTaskRefBefore.id;
     }
 
     if (taskDocBefore) {
