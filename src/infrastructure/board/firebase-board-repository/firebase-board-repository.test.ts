@@ -6,6 +6,8 @@ import {
   getBoardRef,
   getBoardTaskDocs,
   getColumnTaskDocs,
+  getPrevTaskRef,
+  getTaskDoc,
   getTaskRef,
   getUserBoardDocs,
   newBoardRef,
@@ -69,14 +71,33 @@ mockGetColumnTaskDocs.mockImplementation((boardId, columnId) => {
   return Promise.resolve(new FirestoreDocs(columnTaskDocs));
 });
 
+const mockGetTaskDoc = getTaskDoc as jest.MockedFunction<typeof getTaskDoc>;
+mockGetTaskDoc.mockImplementation((boardId, taskId) => {
+  const taskDoc =
+    getMockFirestoreBoardAndTaskDocs(boardId).taskDocs.find(({ id }) => id === taskId) ??
+    ({} as ReturnType<typeof getMockFirestoreBoardAndTaskDocs>['taskDocs'][0]);
+  return Promise.resolve(new FirestoreDoc(taskDoc));
+});
+
 const mockGetBoardRef = getBoardRef as jest.MockedFunction<typeof getBoardRef>;
 mockGetBoardRef.mockImplementation((boardId) => new FirestoreRef({ id: boardId }));
 
-const mockGetTaskRef = getTaskRef as jest.MockedFunction<typeof getTaskRef>;
 const mockMakeTaskRefId = (boardId: UniqueId, taskId: UniqueId) => boardId + '-' + taskId;
+
+const mockGetTaskRef = getTaskRef as jest.MockedFunction<typeof getTaskRef>;
 mockGetTaskRef.mockImplementation(
   (boardId, taskId) => new FirestoreRef({ id: mockMakeTaskRefId(boardId, taskId) })
 );
+
+const mockGetPrevTaskRef = getPrevTaskRef as jest.MockedFunction<typeof getPrevTaskRef>;
+mockGetPrevTaskRef.mockImplementation((boardId, taskId) => {
+  const prevTaskId = getMockFirestoreBoardAndTaskDocs(boardId).taskDocs.find(
+    ({ data }) => data.nextId === taskId
+  )?.id;
+  return Promise.resolve(
+    prevTaskId ? new FirestoreRef({ id: mockMakeTaskRefId(boardId, prevTaskId) }) : null
+  );
+});
 
 const mockNewBoardRef = newBoardRef as jest.MockedFunction<typeof newBoardRef>;
 mockNewBoardRef.mockImplementation(() => new FirestoreRef({ id: faker.datatype.uuid() }));
@@ -540,5 +561,118 @@ describe('FirebaseBoardRepository.deleteBoard()', () => {
       ]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe.skip('FirebaseBoardRepository.addTask()', () => {
+  it.each([
+    { desc: 'index undefined', testNewIndex: undefined },
+    { desc: 'index at start', testNewIndex: 0 },
+    { desc: 'index at middle', testNewIndex: 1 },
+  ])('should handle $desc', async ({ testNewIndex }) => {
+    const testUserId = faker.datatype.uuid();
+    const testBoardId = faker.datatype.uuid();
+    const testColumn = {
+      id: faker.datatype.uuid(),
+      name: faker.lorem.words(),
+      tasks: [
+        {
+          id: faker.datatype.uuid(),
+          title: faker.lorem.words(),
+          description: faker.lorem.words(),
+          subtasks: [],
+        },
+        {
+          id: faker.datatype.uuid(),
+          title: faker.lorem.words(),
+          description: faker.lorem.words(),
+          subtasks: [],
+        },
+        {
+          id: faker.datatype.uuid(),
+          title: faker.lorem.words(),
+          description: faker.lorem.words(),
+          subtasks: [],
+        },
+      ],
+    };
+    mockBoards = [
+      {
+        id: testBoardId,
+        name: faker.lorem.words(),
+        columns: [testColumn],
+      },
+    ];
+    const testTask = {
+      title: faker.lorem.words(),
+      description: faker.lorem.words(),
+      subtasks: [
+        {
+          title: faker.lorem.words(),
+          isCompleted: true,
+        },
+        {
+          title: faker.lorem.words(),
+          isCompleted: false,
+        },
+      ],
+    };
+    const testTaskRef = new FirestoreRef({
+      id: mockMakeTaskRefId(testBoardId, faker.datatype.uuid()),
+    });
+    const testTaskIndex =
+      testNewIndex !== undefined && testNewIndex >= 0 && testNewIndex < testColumn.tasks.length
+        ? testNewIndex
+        : testColumn.tasks.length;
+    const testPrevTaskRef =
+      testTaskIndex > 0
+        ? new FirestoreRef({
+            id: mockMakeTaskRefId(testBoardId, testColumn.tasks[testTaskIndex - 1].id),
+          })
+        : undefined;
+    mockNewTaskRef.mockImplementationOnce(() => testTaskRef);
+
+    const repository = new FirebaseBoardRepository();
+    await repository.getBoardList(testUserId);
+    const taskId = await repository.addTask(
+      testUserId,
+      testBoardId,
+      testColumn.id,
+      testTask,
+      testNewIndex
+    );
+
+    expect(taskId).toEqual(testTaskRef.id);
+    const testTaskDocData = {
+      title: testTask.title,
+      description: testTask.description,
+      subtasks: testTask.subtasks,
+      status: { id: testColumn.id, name: testColumn.name },
+      nextId:
+        testTaskIndex < testColumn.tasks.length - 1 ? testColumn.tasks[testTaskIndex + 1].id : null,
+    };
+    expect(mockBatchSet).toHaveBeenCalledTimes(1);
+    expect(mockBatchSet.mock.calls[0]).toEqual([testTaskRef, testTaskDocData]);
+    if (testPrevTaskRef) {
+      expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
+      expect(mockBatchUpdate.mock.calls[0]).toEqual([testPrevTaskRef, { nextId: testTaskRef.id }]);
+    }
+    expect(mockBatchCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it.skip('should throw when firestore task document is not complete', async () => {
+    // throw ADD_TASK_MISSING_DATA_ERROR => not testable right now
+  });
+});
+
+describe.skip('FirebaseBoardRepository.updateTask()', () => {
+  it('should', () => {
+    //
+  });
+});
+
+describe.skip('FirebaseBoardRepository.deleteTask()', () => {
+  it('should', () => {
+    //
   });
 });
