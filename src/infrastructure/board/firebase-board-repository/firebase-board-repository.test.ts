@@ -265,10 +265,6 @@ describe('FirebaseBoardRepository.addBoard()', () => {
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
-
-  it.skip('should throw when firestore board document is not complete', async () => {
-    // throw ADD_BOARD_MISSING_DATA_ERROR => not testable right now
-  });
 });
 
 describe('FirebaseBoardRepository.updateBoard()', () => {
@@ -669,10 +665,6 @@ describe.skip('FirebaseBoardRepository.addTask()', () => {
       expect(mockBatchUpdate.mock.calls[0]).toEqual([testPrevTaskRef, { nextId: testTaskRef.id }]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
-  });
-
-  it.skip('should throw when firestore task document is not complete', async () => {
-    // throw ADD_TASK_MISSING_DATA_ERROR => not testable right now
   });
 });
 

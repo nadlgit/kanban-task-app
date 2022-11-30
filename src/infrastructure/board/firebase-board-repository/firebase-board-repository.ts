@@ -32,12 +32,6 @@ import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
 
 export const BOARD_UNDEFINED_ERROR = Object.freeze(new Error('Unable to find requested board'));
-export const ADD_BOARD_MISSING_DATA_ERROR = Object.freeze(
-  new Error('Missing data, unable to add board')
-);
-export const ADD_TASK_MISSING_DATA_ERROR = Object.freeze(
-  new Error('Missing data, unable to add task')
-);
 
 export class FirebaseBoardRepository implements BoardRepository {
   async getBoardList(userId: UniqueId) {
@@ -93,15 +87,15 @@ export class FirebaseBoardRepository implements BoardRepository {
       }
     );
 
-    const { boardDoc, hasAllFields } = boardToFirestoreDoc({
-      userId,
-      name,
-      columns: columns.map(({ name }) => ({ id: newColumnId(boardRef.id), name, tasks: [] })),
-      nextBoardId: nextIdAfter ?? null,
-    });
-    if (!hasAllFields) {
-      throw ADD_BOARD_MISSING_DATA_ERROR;
-    }
+    const { boardDoc } = boardToFirestoreDoc(
+      {
+        userId,
+        name,
+        columns: columns.map(({ name }) => ({ id: newColumnId(boardRef.id), name, tasks: [] })),
+        nextBoardId: nextIdAfter ?? null,
+      },
+      true
+    );
     const batch = startBatch();
     batch.set(boardRef, boardDoc);
     prevIdAfter && batch.update(getBoardRef(prevIdAfter), { nextId: boardRef.id });
@@ -243,16 +237,16 @@ export class FirebaseBoardRepository implements BoardRepository {
       }
     );
 
-    const { taskDoc, hasAllFields } = taskToFirestoreDoc({
-      title,
-      description,
-      subtasks,
-      column: statusAfter ?? { id: columnId, name: '-noname-' },
-      nextTaskId: nextIdAfter ?? null,
-    });
-    if (!hasAllFields) {
-      throw ADD_TASK_MISSING_DATA_ERROR;
-    }
+    const { taskDoc } = taskToFirestoreDoc(
+      {
+        title,
+        description,
+        subtasks,
+        column: statusAfter ?? { id: columnId, name: '-noname-' },
+        nextTaskId: nextIdAfter ?? null,
+      },
+      true
+    );
     const batch = startBatch();
     batch.set(taskRef, taskDoc);
     prevIdAfter && batch.update(getTaskRef(boardId, prevIdAfter), { nextId: taskRef.id });

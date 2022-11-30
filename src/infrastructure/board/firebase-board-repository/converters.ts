@@ -7,6 +7,13 @@ import type {
 } from './firestore-helpers';
 import type { BoardEntity, BoardList, TaskEntity, UniqueId } from 'core/entities';
 
+export const BOARD_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
+  new Error('Missing data, unable to convert board')
+);
+export const TASK_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
+  new Error('Missing data, unable to convert task')
+);
+
 export function firestoreDocsToBoardList(boardDocs: FirestoreDocs) {
   const boardList: BoardList = [];
 
@@ -55,7 +62,8 @@ export function firestoreDocsToBoard(
 }
 
 export function boardToFirestoreDoc(
-  board: Partial<Omit<BoardEntity, 'id'>> & { userId?: UniqueId; nextBoardId?: NextId }
+  board: Partial<Omit<BoardEntity, 'id'>> & { userId?: UniqueId; nextBoardId?: NextId },
+  allFieldsRequired = false
 ) {
   const { name, columns, userId, nextBoardId } = board;
   const boardDoc: Partial<BoardDocSchema> = {};
@@ -82,14 +90,19 @@ export function boardToFirestoreDoc(
     boardDoc.name === undefined &&
     boardDoc.columns === undefined &&
     boardDoc.nextId === undefined;
-  return { boardDoc, hasAllFields, hasNoField };
+
+  if (allFieldsRequired && !hasAllFields) {
+    throw BOARD_TO_DOC_MISSING_DATA_ERROR;
+  }
+  return { boardDoc, hasNoField };
 }
 
 export function taskToFirestoreDoc(
   task: Partial<Omit<TaskEntity, 'id'>> & {
     column?: { id: UniqueId; name: string };
     nextTaskId?: NextId;
-  }
+  },
+  allFieldsRequired = false
 ) {
   const { title, description, subtasks, column, nextTaskId } = task;
   const taskDoc: Partial<TaskDocSchema> = {};
@@ -121,7 +134,11 @@ export function taskToFirestoreDoc(
     taskDoc.subtasks === undefined &&
     taskDoc.status === undefined &&
     taskDoc.nextId === undefined;
-  return { taskDoc, hasAllFields, hasNoField };
+
+  if (allFieldsRequired && !hasAllFields) {
+    throw TASK_TO_DOC_MISSING_DATA_ERROR;
+  }
+  return { taskDoc: taskDoc as TaskDocSchema, hasNoField };
 }
 
 function columnsToFirestoreColumns(columns: BoardEntity['columns']) {

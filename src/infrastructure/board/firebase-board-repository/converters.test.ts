@@ -2,9 +2,11 @@ import { faker } from '@faker-js/faker';
 
 import {
   boardToFirestoreDoc,
+  BOARD_TO_DOC_MISSING_DATA_ERROR,
   firestoreDocsToBoard,
   firestoreDocsToBoardList,
   taskToFirestoreDoc,
+  TASK_TO_DOC_MISSING_DATA_ERROR,
 } from './converters';
 import {
   FirestoreDoc,
@@ -322,11 +324,17 @@ describe('firestoreDocsToBoard()', () => {
 });
 
 describe('boardToFirestoreDoc()', () => {
+  it.each([
+    { desc: 'no field provided', testData: {} },
+    { desc: 'only name provided', testData: { name: faker.lorem.words() } },
+  ])('should throw when all fields required and $desc', ({ testData }) => {
+    expect(() => boardToFirestoreDoc(testData, true)).toThrow(BOARD_TO_DOC_MISSING_DATA_ERROR);
+  });
+
   it('should handle no field provided', () => {
     const testData = {};
     const expected = {
       boardDoc: {},
-      hasAllFields: false,
       hasNoField: true,
     };
 
@@ -363,7 +371,6 @@ describe('boardToFirestoreDoc()', () => {
         }).boardDoc.data.columns,
         nextId: testData.nextBoardId,
       },
-      hasAllFields: true,
       hasNoField: false,
     };
 
@@ -375,7 +382,6 @@ describe('boardToFirestoreDoc()', () => {
     const testData = { name: faker.lorem.words() };
     const expected = {
       boardDoc: { name: testData.name },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -406,7 +412,6 @@ describe('boardToFirestoreDoc()', () => {
           columns: testData.columns,
         }).boardDoc.data.columns,
       },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -418,7 +423,6 @@ describe('boardToFirestoreDoc()', () => {
     const testData = { userId: faker.datatype.uuid() };
     const expected = {
       boardDoc: { owner: testData.userId },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -430,7 +434,6 @@ describe('boardToFirestoreDoc()', () => {
     const testData = { nextBoardId: faker.datatype.uuid() };
     const expected = {
       boardDoc: { nextId: testData.nextBoardId },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -440,11 +443,17 @@ describe('boardToFirestoreDoc()', () => {
 });
 
 describe('taskToFirestoreDoc()', () => {
+  it.each([
+    { desc: 'no field provided', testData: {} },
+    { desc: 'only title provided', testData: { title: faker.lorem.words() } },
+  ])('should throw when all fields required and $desc', ({ testData }) => {
+    expect(() => taskToFirestoreDoc(testData, true)).toThrow(TASK_TO_DOC_MISSING_DATA_ERROR);
+  });
+
   it('should handle no field provided', () => {
     const testData = {};
     const expected = {
       taskDoc: {},
-      hasAllFields: false,
       hasNoField: true,
     };
 
@@ -477,7 +486,6 @@ describe('taskToFirestoreDoc()', () => {
         status: testData.column,
         nextId: testData.nextTaskId,
       },
-      hasAllFields: true,
       hasNoField: false,
     };
 
@@ -489,7 +497,6 @@ describe('taskToFirestoreDoc()', () => {
     const testData = { title: faker.lorem.words() };
     const expected = {
       taskDoc: { title: testData.title },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -501,7 +508,6 @@ describe('taskToFirestoreDoc()', () => {
     const testData = { description: faker.lorem.words() };
     const expected = {
       taskDoc: { description: testData.description },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -524,7 +530,6 @@ describe('taskToFirestoreDoc()', () => {
     };
     const expected = {
       taskDoc: { subtasks: testData.subtasks },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -536,7 +541,6 @@ describe('taskToFirestoreDoc()', () => {
     const testData = { column: { id: faker.datatype.uuid(), name: faker.lorem.words() } };
     const expected = {
       taskDoc: { status: testData.column },
-      hasAllFields: false,
       hasNoField: false,
     };
 
@@ -548,7 +552,6 @@ describe('taskToFirestoreDoc()', () => {
     const testData = { nextTaskId: faker.datatype.uuid() };
     const expected = {
       taskDoc: { nextId: testData.nextTaskId },
-      hasAllFields: false,
       hasNoField: false,
     };
 
