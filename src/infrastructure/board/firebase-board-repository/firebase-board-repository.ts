@@ -20,14 +20,7 @@ import {
   newTaskRef,
   startBatch,
 } from './firestore-helpers';
-import type { TaskDocSchema } from './firestore-helpers';
-import {
-  getBoardColumns,
-  getBoardInfo,
-  getBoardTaskIds,
-  getColumnTaskIds,
-  getTaskInfo,
-} from './helpers';
+import type { NextId, TaskDocSchema } from './firestore-helpers';
 import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
 
@@ -73,19 +66,12 @@ export class FirebaseBoardRepository implements BoardRepository {
   ) {
     const boardRef = newBoardRef();
     const { name, columns } = board;
-    const { prevIdAfter, nextIdAfter } = getBoardInfo(
-      {
-        prevIdAfter: true,
-        nextIdAfter: true,
-        prevIdBefore: false,
-        nextIdBefore: false,
-      },
-      {
-        boardId: boardRef.id,
-        boardList: getBoardListSubscriptionValue(userId),
-        indexAfter: index,
-      }
-    );
+
+    const boardList = await this.getBoardList(userId);
+    const boardIndexAfter = getComputedIndexAfter(boardList, index);
+
+    const prevIdAfter = getPrevId(boardList, boardIndexAfter);
+    const nextIdAfter = getNextId(boardList, boardIndexAfter);
 
     const { boardDoc } = boardToFirestoreDoc(
       {
@@ -120,51 +106,53 @@ export class FirebaseBoardRepository implements BoardRepository {
   ) {
     const boardRef = getBoardRef(board.id);
     const { name, columnsDeleted, columnsKept } = board;
-    const hasColumnUpdate = columnsDeleted !== undefined || columnsKept !== undefined;
-    const hasPositionUpdate = index !== undefined;
-    const { prevIdAfter, nextIdAfter, prevIdBefore, nextIdBefore } = getBoardInfo(
-      {
-        prevIdAfter: hasPositionUpdate,
-        nextIdAfter: hasPositionUpdate,
-        prevIdBefore: hasPositionUpdate,
-        nextIdBefore: hasPositionUpdate,
-      },
-      {
-        boardId: board.id,
-        boardList: getBoardListSubscriptionValue(userId),
-        indexAfter: index,
-      }
-    );
+
     let columns: BoardEntity['columns'] | undefined = undefined;
-    const updatedTasks: { id: UniqueId; taskDoc: Pick<TaskDocSchema, 'status'> }[] = [];
-    if (hasColumnUpdate) {
-      const boardColumnsBefore = await getBoardColumns(
-        board.id,
-        getBoardSubscriptionValue(userId, board.id)
-      );
-      const boardColumns: typeof boardColumnsBefore = [];
+    const updatedTasks: { id: UniqueId; newStatus: { id: UniqueId; name: string } }[] = [];
+    if (columnsDeleted || columnsKept) {
+      const boardBefore = await this.getBoard(userId, board.id);
+      columns = [];
+
       if (columnsKept) {
         for (const elt of columnsKept) {
-          const column = {
-            id: elt?.id ?? newColumnId(board.id),
-            name:
-              elt?.name ?? boardColumnsBefore.find(({ id }) => id === elt?.id)?.name ?? '-noname-',
+          const column = boardBefore.columns.find(({ id }) => id === elt.id) ?? {
+            id: newColumnId(board.id),
+            name: elt?.name ?? '-noname-',
+            tasks: [],
           };
-          boardColumns.push(column);
-          if (!elt.isAdded && elt?.name) {
-            const tasksIds = await getColumnTaskIds(board.id, column.id);
-            updatedTasks.push(...tasksIds.map((id) => ({ id, taskDoc: { status: column } })));
+          if (!elt.isAdded && elt.name && elt.name !== column.name) {
+            column.name = elt.name;
+            updatedTasks.push(
+              ...column.tasks.map(({ id }) => ({
+                id,
+                newStatus: { id: column.id, name: column.name },
+              }))
+            );
           }
+          columns.push(column);
         }
       } else {
-        boardColumns.push(
-          ...boardColumnsBefore.filter(
-            ({ id }) => !columnsDeleted?.map(({ id }) => id)?.includes(id)
+        columns.push(
+          ...boardBefore.columns.filter(
+            ({ id }) => !columnsDeleted?.map(({ id }) => id).includes(id)
           )
         );
       }
+    }
 
-      columns = boardColumns.map(({ id, name }) => ({ id, name, tasks: [] }));
+    const boardList = await this.getBoardList(userId);
+    const boardIndexBefore = getIndex(boardList, board.id);
+    const boardIndexAfter = getComputedIndexAfter(boardList, index);
+
+    let prevIdBefore: NextId | undefined = undefined;
+    let nextIdBefore: NextId | undefined = undefined;
+    let prevIdAfter: NextId | undefined = undefined;
+    let nextIdAfter: NextId | undefined = undefined;
+    if (index !== undefined) {
+      prevIdBefore = getPrevId(boardList, boardIndexBefore);
+      nextIdBefore = getNextId(boardList, boardIndexBefore);
+      prevIdAfter = getPrevId(boardList, boardIndexAfter);
+      nextIdAfter = getNextId(boardList, boardIndexAfter);
     }
 
     const { boardDoc, hasNoField } = boardToFirestoreDoc({
@@ -175,7 +163,7 @@ export class FirebaseBoardRepository implements BoardRepository {
     const batch = startBatch();
     !hasNoField && batch.update(boardRef, boardDoc);
     for (const task of updatedTasks) {
-      batch.update(getTaskRef(board.id, task.id), task.taskDoc);
+      batch.update(getTaskRef(board.id, task.id), { status: task.newStatus });
     }
     prevIdAfter && batch.update(getBoardRef(prevIdAfter), { nextId: boardRef.id });
     prevIdBefore && batch.update(getBoardRef(prevIdBefore), { nextId: nextIdBefore });
@@ -183,19 +171,13 @@ export class FirebaseBoardRepository implements BoardRepository {
   }
 
   async deleteBoard(userId: UniqueId, boardId: UniqueId) {
-    const { prevIdBefore, nextIdBefore } = getBoardInfo(
-      {
-        prevIdAfter: false,
-        nextIdAfter: false,
-        prevIdBefore: true,
-        nextIdBefore: true,
-      },
-      {
-        boardId: boardId,
-        boardList: getBoardListSubscriptionValue(userId),
-      }
-    );
-    const tasksIds = await getBoardTaskIds(boardId, getBoardSubscriptionValue(userId, boardId));
+    const boardList = await this.getBoardList(userId);
+    const boardIndex = getIndex(boardList, boardId);
+    const board = await this.getBoard(userId, boardId);
+
+    const prevIdBefore = getPrevId(boardList, boardIndex);
+    const nextIdBefore = getNextId(boardList, boardIndex);
+    const tasksIds = board.columns.flatMap(({ tasks }) => tasks.map(({ id }) => id));
 
     const batch = startBatch();
     for (const taskId of tasksIds) {
@@ -219,23 +201,14 @@ export class FirebaseBoardRepository implements BoardRepository {
   ) {
     const taskRef = newTaskRef(boardId);
     const { title, description, subtasks } = task;
-    const { statusAfter, prevIdAfter, nextIdAfter } = await getTaskInfo(
-      {
-        statusAfter: true,
-        prevIdAfter: true,
-        nextIdAfter: true,
-        prevIdBefore: false,
-        nextIdBefore: false,
-      },
-      {
-        taskId: taskRef.id,
-        boardId,
-        columnIdBefore: columnId,
-        columnIdAfter: columnId,
-        board: getBoardSubscriptionValue(userId, boardId),
-        indexAfter: index,
-      }
-    );
+
+    const board = await this.getBoard(userId, boardId);
+    const columnIndexAfter = getIndex(board.columns, columnId);
+    const taskIndexAfter = getComputedIndexAfter(board.columns[columnIndexAfter].tasks, index);
+
+    const statusAfter = { id: columnId, name: board.columns[columnIndexAfter].name };
+    const prevIdAfter = getPrevId(board.columns[columnIndexAfter].tasks, taskIndexAfter);
+    const nextIdAfter = getNextId(board.columns[columnIndexAfter].tasks, taskIndexAfter);
 
     const { taskDoc } = taskToFirestoreDoc(
       {
@@ -270,25 +243,28 @@ export class FirebaseBoardRepository implements BoardRepository {
   ) {
     const taskRef = getTaskRef(boardId, task.id);
     const { title, description, subtasks } = task;
-    const hasStatusUpdate = oldColumnId !== undefined;
-    const hasPositionUpdate = index !== undefined;
-    const { statusAfter, prevIdAfter, nextIdAfter } = await getTaskInfo(
-      {
-        statusAfter: hasStatusUpdate,
-        prevIdAfter: hasStatusUpdate || hasPositionUpdate,
-        nextIdAfter: hasStatusUpdate || hasPositionUpdate,
-        prevIdBefore: hasStatusUpdate || hasPositionUpdate,
-        nextIdBefore: hasStatusUpdate || hasPositionUpdate,
-      },
-      {
-        taskId: task.id,
-        boardId,
-        columnIdBefore: oldColumnId ?? columnId,
-        columnIdAfter: columnId,
-        board: getBoardSubscriptionValue(userId, boardId),
-        indexAfter: index,
-      }
-    );
+
+    const board = await this.getBoard(userId, boardId);
+    const columnIndexBefore = getIndex(board.columns, oldColumnId ?? columnId);
+    const taskIndexBefore = getIndex(board.columns[columnIndexBefore].tasks, task.id);
+    const columnIndexAfter = getIndex(board.columns, columnId);
+    const taskIndexAfter = getComputedIndexAfter(board.columns[columnIndexAfter].tasks, index);
+
+    let statusAfter: TaskDocSchema['status'] | undefined = undefined;
+    if (oldColumnId !== undefined) {
+      statusAfter = { id: columnId, name: board.columns[columnIndexAfter].name };
+    }
+
+    let prevIdBefore: NextId | undefined = undefined;
+    let nextIdBefore: NextId | undefined = undefined;
+    let prevIdAfter: NextId | undefined = undefined;
+    let nextIdAfter: NextId | undefined = undefined;
+    if (oldColumnId !== undefined || index !== undefined) {
+      prevIdBefore = getPrevId(board.columns[columnIndexBefore].tasks, taskIndexBefore);
+      nextIdBefore = getNextId(board.columns[columnIndexBefore].tasks, taskIndexBefore);
+      prevIdAfter = getPrevId(board.columns[columnIndexAfter].tasks, taskIndexAfter);
+      nextIdAfter = getNextId(board.columns[columnIndexAfter].tasks, taskIndexAfter);
+    }
 
     const { taskDoc, hasNoField } = taskToFirestoreDoc({
       title,
@@ -299,31 +275,40 @@ export class FirebaseBoardRepository implements BoardRepository {
     });
     const batch = startBatch();
     !hasNoField && batch.update(taskRef, taskDoc);
+    prevIdBefore && batch.update(getTaskRef(boardId, prevIdBefore), { nextId: nextIdBefore });
     prevIdAfter && batch.update(getTaskRef(boardId, prevIdAfter), { nextId: taskRef.id });
     await batch.commit();
   }
 
   async deleteTask(userId: UniqueId, boardId: UniqueId, columnId: UniqueId, taskId: UniqueId) {
-    const { prevIdBefore, nextIdBefore } = await getTaskInfo(
-      {
-        statusAfter: false,
-        prevIdAfter: false,
-        nextIdAfter: false,
-        prevIdBefore: true,
-        nextIdBefore: true,
-      },
-      {
-        taskId,
-        boardId,
-        columnIdBefore: columnId,
-        columnIdAfter: columnId,
-        board: getBoardSubscriptionValue(userId, boardId),
-      }
-    );
+    const board = await this.getBoard(userId, boardId);
+    const columnIndex = getIndex(board.columns, columnId);
+    const taskIndex = getIndex(board.columns[columnIndex].tasks, taskId);
+
+    const prevIdBefore = getPrevId(board.columns[columnIndex].tasks, taskIndex);
+    const nextIdBefore = getNextId(board.columns[columnIndex].tasks, taskIndex);
 
     const batch = startBatch();
     batch.delete(getTaskRef(boardId, taskId));
     prevIdBefore && batch.update(getTaskRef(boardId, prevIdBefore), { nextId: nextIdBefore });
     await batch.commit();
   }
+}
+
+function getIndex(list: { id: UniqueId }[], itemId: UniqueId) {
+  return list.findIndex(({ id }) => id === itemId);
+}
+
+function getComputedIndexAfter(list: { id: UniqueId }[], indexAfter?: number) {
+  return indexAfter !== undefined && indexAfter >= 0 && indexAfter < list.length
+    ? indexAfter
+    : list.length - 1;
+}
+
+function getPrevId(list: { id: UniqueId }[], index: number) {
+  return index > 0 ? list[index - 1].id : null;
+}
+
+function getNextId(list: { id: UniqueId }[], index: number) {
+  return index < list.length - 1 ? list[index + 1].id : null;
 }

@@ -44,10 +44,6 @@ const userBoardCollectionQuery = (userId: UniqueId) =>
   query(boardCollection, where('owner', '==', userId));
 
 const taskCollection = (boardId: UniqueId) => collection(doc(boardCollection, boardId), 'tasks');
-const columnTaskCollectionQuery = (boardId: UniqueId, columnId: UniqueId) =>
-  query(taskCollection(boardId), where('status.id', '==', columnId));
-const prevTaskCollectionQuery = (boardId: UniqueId, taskId: UniqueId) =>
-  query(taskCollection(boardId), where('nextId', '==', taskId));
 
 export function newBoardRef() {
   return doc(boardCollection);
@@ -102,18 +98,4 @@ export function onBoardTaskDocsSnapshot(
   callback: (snapshot: FirestoreDocs) => void
 ) {
   return onSnapshot(taskCollection(boardId), callback);
-}
-
-export function getTaskDoc(boardId: UniqueId, taskId: UniqueId) {
-  return getDoc(getTaskRef(boardId, taskId));
-}
-
-export function getColumnTaskDocs(boardId: UniqueId, columnId: UniqueId) {
-  return getDocs(columnTaskCollectionQuery(boardId, columnId));
-}
-
-export function getPrevTaskRef(boardId: UniqueId, taskId: UniqueId) {
-  return getDocs(prevTaskCollectionQuery(boardId, taskId)).then((result) =>
-    result.empty ? null : result.docs[0].ref
-  );
 }

@@ -5,9 +5,6 @@ import {
   getBoardDoc,
   getBoardRef,
   getBoardTaskDocs,
-  getColumnTaskDocs,
-  getPrevTaskRef,
-  getTaskDoc,
   getTaskRef,
   getUserBoardDocs,
   newBoardRef,
@@ -64,41 +61,11 @@ mockGetBoardTaskDocs.mockImplementation((boardId) => {
   return Promise.resolve(new FirestoreDocs(taskDocs));
 });
 
-const mockGetColumnTaskDocs = getColumnTaskDocs as jest.MockedFunction<typeof getColumnTaskDocs>;
-mockGetColumnTaskDocs.mockImplementation((boardId, columnId) => {
-  const columnTaskDocs = getMockFirestoreBoardAndTaskDocs(boardId).taskDocs.filter(
-    ({ id }) => id === columnId
-  );
-  return Promise.resolve(new FirestoreDocs(columnTaskDocs));
-});
-
-const mockGetTaskDoc = getTaskDoc as jest.MockedFunction<typeof getTaskDoc>;
-mockGetTaskDoc.mockImplementation((boardId, taskId) => {
-  const taskDoc =
-    getMockFirestoreBoardAndTaskDocs(boardId).taskDocs.find(({ id }) => id === taskId) ??
-    ({} as ReturnType<typeof getMockFirestoreBoardAndTaskDocs>['taskDocs'][0]);
-  return Promise.resolve(new FirestoreDoc(taskDoc));
-});
-
 const mockGetBoardRef = getBoardRef as jest.MockedFunction<typeof getBoardRef>;
 mockGetBoardRef.mockImplementation((boardId) => new FirestoreRef({ id: boardId }));
 
-const mockMakeTaskRefId = (boardId: UniqueId, taskId: UniqueId) => boardId + '-' + taskId;
-
 const mockGetTaskRef = getTaskRef as jest.MockedFunction<typeof getTaskRef>;
-mockGetTaskRef.mockImplementation(
-  (boardId, taskId) => new FirestoreRef({ id: mockMakeTaskRefId(boardId, taskId) })
-);
-
-const mockGetPrevTaskRef = getPrevTaskRef as jest.MockedFunction<typeof getPrevTaskRef>;
-mockGetPrevTaskRef.mockImplementation((boardId, taskId) => {
-  const prevTaskId = getMockFirestoreBoardAndTaskDocs(boardId).taskDocs.find(
-    ({ data }) => data.nextId === taskId
-  )?.id;
-  return Promise.resolve(
-    prevTaskId ? new FirestoreRef({ id: mockMakeTaskRefId(boardId, prevTaskId) }) : null
-  );
-});
+mockGetTaskRef.mockImplementation((boardId, taskId) => new FirestoreRef({ id: taskId }));
 
 const mockNewBoardRef = newBoardRef as jest.MockedFunction<typeof newBoardRef>;
 mockNewBoardRef.mockImplementation(() => new FirestoreRef({ id: faker.datatype.uuid() }));
@@ -286,7 +253,7 @@ describe('FirebaseBoardRepository.updateBoard()', () => {
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
 
-  it.skip.each([
+  it.each([
     {
       desc: 'deletion',
       testBoardUpdate: {
@@ -545,7 +512,7 @@ describe('FirebaseBoardRepository.deleteBoard()', () => {
     }
     const testBoardRef = new FirestoreRef({ id: testBoard.id });
     const testTaskRefs = testBoard.columns.flatMap(({ tasks }) =>
-      tasks.map(({ id }) => new FirestoreRef({ id: mockMakeTaskRefId(testBoard.id, id) }))
+      tasks.map(({ id }) => new FirestoreRef({ id: id }))
     );
     const testPrevBoardRef =
       testBoardIndex > 0 ? new FirestoreRef({ id: mockBoards[testBoardIndex - 1].id }) : undefined;
@@ -571,7 +538,7 @@ describe('FirebaseBoardRepository.deleteBoard()', () => {
   });
 });
 
-describe.skip('FirebaseBoardRepository.addTask()', () => {
+describe('FirebaseBoardRepository.addTask()', () => {
   it.each([
     { desc: 'index undefined', testNewIndex: undefined },
     { desc: 'index at start', testNewIndex: 0 },
@@ -625,7 +592,7 @@ describe.skip('FirebaseBoardRepository.addTask()', () => {
       ],
     };
     const testTaskRef = new FirestoreRef({
-      id: mockMakeTaskRefId(testBoardId, faker.datatype.uuid()),
+      id: faker.datatype.uuid(),
     });
     const testTaskIndex =
       testNewIndex !== undefined && testNewIndex >= 0 && testNewIndex < testColumn.tasks.length
@@ -634,7 +601,7 @@ describe.skip('FirebaseBoardRepository.addTask()', () => {
     const testPrevTaskRef =
       testTaskIndex > 0
         ? new FirestoreRef({
-            id: mockMakeTaskRefId(testBoardId, testColumn.tasks[testTaskIndex - 1].id),
+            id: testColumn.tasks[testTaskIndex - 1].id,
           })
         : undefined;
     mockNewTaskRef.mockImplementationOnce(() => testTaskRef);
@@ -719,7 +686,7 @@ describe('FirebaseBoardRepository.updateTask()', () => {
     await repository.updateTask(testUserId, testBoardId, testColumn.id, testTaskUpdate);
 
     const testTaskRef = new FirestoreRef({
-      id: mockMakeTaskRefId(testBoardId, testTaskUpdate.id),
+      id: testTaskUpdate.id,
     });
     const testTaskDocData: Partial<TaskDocSchema> = {};
     if (testTaskUpdate.title) {
@@ -736,7 +703,7 @@ describe('FirebaseBoardRepository.updateTask()', () => {
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
 
-  it.skip.each([
+  it.each([
     { from: 'start', to: 'middle' },
     { from: 'start', to: 'end' },
     { from: 'middle', to: 'start' },
@@ -793,7 +760,7 @@ describe('FirebaseBoardRepository.updateTask()', () => {
     );
 
     const testTaskRef = new FirestoreRef({
-      id: mockMakeTaskRefId(testBoardId, testTaskId),
+      id: testTaskId,
     });
     const prevTaskBeforeRef =
       testIndex > 0 ? new FirestoreRef({ id: testColumn.tasks[testIndex - 1].id }) : undefined;
@@ -817,7 +784,7 @@ describe('FirebaseBoardRepository.updateTask()', () => {
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
 
-  it.skip('should handle move to different column', async () => {
+  it('should handle move to different column', async () => {
     const testUserId = faker.datatype.uuid();
     const testBoardId = faker.datatype.uuid();
     const testColumn = {
@@ -873,7 +840,7 @@ describe('FirebaseBoardRepository.updateTask()', () => {
     );
 
     const testTaskRef = new FirestoreRef({
-      id: mockMakeTaskRefId(testBoardId, testTaskId),
+      id: testTaskId,
     });
     const prevTaskBeforeRef =
       testIndex > 0 ? new FirestoreRef({ id: testColumn.tasks[testIndex - 1].id }) : undefined;
@@ -951,12 +918,12 @@ describe('FirebaseBoardRepository.deleteTask()', () => {
     await repository.deleteTask(testUserId, testBoardId, testColumn.id, testTask.id);
 
     const testTaskRef = new FirestoreRef({
-      id: mockMakeTaskRefId(testBoardId, testTask.id),
+      id: testTask.id,
     });
     const testPrevTaskRef =
       testTaskIndex > 0
         ? new FirestoreRef({
-            id: mockMakeTaskRefId(testBoardId, testColumn.tasks[testTaskIndex - 1].id),
+            id: testColumn.tasks[testTaskIndex - 1].id,
           })
         : undefined;
     const testNextTaskId =
