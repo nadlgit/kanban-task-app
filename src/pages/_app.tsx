@@ -5,9 +5,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 import { AuthContextProvider } from 'webui/auth';
 import { Dependencies } from 'core/dependencies';
-// import { FirebaseAuthRepository } from 'infrastructure/auth';
-import { FakeAuthRepository } from 'infrastructure/auth';
-import { FakeBoardRepository } from 'infrastructure/board';
+import { FakeAuthRepository, FirebaseAuthRepository } from 'infrastructure/auth';
+import { FakeBoardRepository, FirebaseBoardRepository } from 'infrastructure/board';
 import { ErrorFallback } from 'webui/misc';
 import { UINotification } from 'webui/notification';
 import { AuthRouter } from 'webui/routes';
@@ -16,9 +15,12 @@ import { ThemeContextProvider } from 'webui/theme';
 
 Dependencies.init({
   appNotification: new UINotification(),
-  // authRepository: new FirebaseAuthRepository(),
-  authRepository: new FakeAuthRepository(),
-  boardRepository: new FakeBoardRepository(),
+  authRepository: process.env.NEXT_PUBLIC_FAKE_REPOSITORIES
+    ? new FakeAuthRepository()
+    : new FirebaseAuthRepository(),
+  boardRepository: process.env.NEXT_PUBLIC_FAKE_REPOSITORIES
+    ? new FakeBoardRepository()
+    : new FirebaseBoardRepository(),
 });
 
 export default function MyApp({ Component, pageProps }: NextAppPropsWithLayout) {

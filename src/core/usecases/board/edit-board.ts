@@ -6,9 +6,12 @@ import type { UniqueId } from 'core/entities';
 type BoardUpdate = {
   id: UniqueId;
   name?: string;
-  columnsAdded: { name: string }[];
-  columnsDeleted: { id: UniqueId }[];
-  columnsUpdated: { id: UniqueId; name: string }[];
+  columnsDeleted?: { id: UniqueId }[];
+  columnsKept?:
+    | (
+        | { isAdded: true; id?: undefined; name: string }
+        | { isAdded: false; id: UniqueId; name?: string }
+      )[];
 };
 
 export async function editBoard(boardUpdate: BoardUpdate) {

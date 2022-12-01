@@ -17,9 +17,12 @@ export type BoardRepository = {
     board: {
       id: UniqueId;
       name?: string;
-      columnsAdded?: { name: string; index?: number }[];
       columnsDeleted?: { id: UniqueId }[];
-      columnsUpdated?: { id: UniqueId; name?: string; index?: number }[];
+      columnsKept?:
+        | (
+            | { isAdded: true; id?: undefined; name: string }
+            | { isAdded: false; id: UniqueId; name?: string }
+          )[];
     },
     index?: number
   ) => Promise<void>;

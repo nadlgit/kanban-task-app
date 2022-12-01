@@ -27,34 +27,16 @@ const mockUpdateBoardFn = boardRepository.updateBoard as jest.MockedFunction<
 
 describe('editBoard()', () => {
   it('should handle success', async () => {
-    const testBoard = {
+    const testBoard: Parameters<typeof editBoard>[0] = {
       id: faker.datatype.uuid(),
       name: faker.lorem.words(),
-      columnsAdded: [
-        {
-          name: faker.lorem.words(),
-        },
-        {
-          name: faker.lorem.words(),
-        },
-      ],
-      columnsDeleted: [
-        {
-          id: faker.datatype.uuid(),
-        },
-        {
-          id: faker.datatype.uuid(),
-        },
-      ],
-      columnsUpdated: [
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-        },
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-        },
+      columnsDeleted: [{ id: faker.datatype.uuid() }, { id: faker.datatype.uuid() }],
+      columnsKept: [
+        { isAdded: true, name: faker.lorem.words() },
+        { isAdded: false, id: faker.datatype.uuid(), name: faker.lorem.words() },
+        { isAdded: false, id: faker.datatype.uuid(), name: faker.lorem.words() },
+        { isAdded: true, name: faker.lorem.words() },
+        { isAdded: false, id: faker.datatype.uuid() },
       ],
     };
 
@@ -69,9 +51,6 @@ describe('editBoard()', () => {
   it('should handle failure', async () => {
     const testBoard = {
       id: faker.datatype.uuid(),
-      columnsAdded: [],
-      columnsDeleted: [],
-      columnsUpdated: [],
     };
     const testError = 'Operation failed';
     mockUpdateBoardFn.mockImplementationOnce(() => {
@@ -90,9 +69,6 @@ describe('editBoard()', () => {
   it('should handle not logged user', async () => {
     const testBoard = {
       id: faker.datatype.uuid(),
-      columnsAdded: [],
-      columnsDeleted: [],
-      columnsUpdated: [],
     };
     const testError = AUTH_NOT_LOGGED_IN_ERROR.message;
     mockGetUserFn.mockImplementationOnce(() => null);

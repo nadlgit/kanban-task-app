@@ -15,30 +15,36 @@ export const EditBoard = ({ isOpen, close, board }: EditBoardProps) => {
     const boardUpdate: Parameters<typeof editBoard>[0] = {
       id: board.id,
       name: boardName === board.name ? undefined : boardName,
-      columnsAdded: [],
-      columnsDeleted: [],
-      columnsUpdated: [],
     };
     const listBefore = board.columns;
     const listAfter = boardColumns;
-    boardUpdate.columnsAdded = listAfter
-      .filter(({ id: afterId }) => !listBefore.find(({ id: idBefore }) => idBefore === afterId))
-      .map(({ name }) => ({ name }));
-    boardUpdate.columnsDeleted = listBefore
+    const deletedIds = listBefore
       .filter(({ id: idBefore }) => !listAfter.find(({ id: idAfter }) => idBefore === idAfter))
-      .map(({ id }) => ({ id }));
-    boardUpdate.columnsUpdated = listAfter.filter(({ id: idAfter, name: nameAfter }) =>
-      listBefore.find(
-        ({ id: idBefore, name: nameBefore }) => idBefore === idAfter && nameBefore !== nameAfter
+      .map(({ id }) => id);
+    const addedIds = listAfter
+      .filter(({ id: afterId }) => !listBefore.find(({ id: idBefore }) => idBefore === afterId))
+      .map(({ id }) => id);
+    const updatedIds = listAfter
+      .filter(({ id: idAfter, name: nameAfter }) =>
+        listBefore.find(
+          ({ id: idBefore, name: nameBefore }) => idBefore === idAfter && nameBefore !== nameAfter
+        )
       )
-    );
+      .map(({ id }) => id);
+    if (deletedIds.length > 0) {
+      boardUpdate.columnsDeleted = listBefore
+        .filter(({ id }) => deletedIds.includes(id))
+        .map(({ id }) => ({ id }));
+    }
+    if (addedIds.length > 0 || updatedIds.length > 0) {
+      boardUpdate.columnsKept = listAfter.map(({ id, name }) =>
+        addedIds.includes(id)
+          ? { isAdded: true, name }
+          : { isAdded: false, id, name: updatedIds.includes(id) ? name : undefined }
+      );
+    }
 
-    if (
-      boardUpdate.name ||
-      boardUpdate.columnsAdded.length > 0 ||
-      boardUpdate.columnsDeleted.length > 0 ||
-      boardUpdate.columnsUpdated.length > 0
-    ) {
+    if (boardUpdate.name || boardUpdate.columnsDeleted || boardUpdate.columnsKept) {
       await editBoard(boardUpdate);
     }
     close();
