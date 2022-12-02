@@ -41,8 +41,9 @@ export function initBoardSubscription(
   taskDocs: FirestoreDocs
 ) {
   const subscription = getBoardSubscription(userId, boardId);
-  if (!subscription.getData().isInitialized) {
-    subscription.setData(firestoreDocsToBoard({ boardDoc }, taskDocs));
+  const board = firestoreDocsToBoard({ boardDoc }, taskDocs);
+  if (!subscription.getData().isInitialized && board) {
+    subscription.setData(board);
   }
 }
 
@@ -105,16 +106,20 @@ function getBoardSubscription(userId: UniqueId, boardId: UniqueId) {
     const subscription = new Subscription<BoardEntity>();
     boardSubscription[userId][boardId] = subscription;
     onBoardDocSnapshot(boardId, (boardDoc) => {
-      subscription.setData(
-        firestoreDocsToBoard({ boardBefore: subscription.getData().value, boardDoc })
-      );
-      subscription.executeCallbacks();
+      const board = firestoreDocsToBoard({ boardBefore: subscription.getData().value, boardDoc });
+      if (board) {
+        subscription.setData(board);
+        subscription.executeCallbacks();
+      }
     });
     onBoardTaskDocsSnapshot(boardId, (taskDocs) => {
       const boardBefore = subscription.getData().value;
       if (boardBefore) {
-        subscription.setData(firestoreDocsToBoard({ boardBefore }, taskDocs));
-        subscription.executeCallbacks();
+        const board = firestoreDocsToBoard({ boardBefore }, taskDocs);
+        if (board) {
+          subscription.setData(board);
+          subscription.executeCallbacks();
+        }
       }
     });
   }
