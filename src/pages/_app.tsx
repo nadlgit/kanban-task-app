@@ -8,7 +8,7 @@ import { Dependencies } from 'core/dependencies';
 import { FakeAuthRepository, FirebaseAuthRepository } from 'infrastructure/auth';
 import { FakeBoardRepository, FirebaseBoardRepository } from 'infrastructure/board';
 import { ErrorFallback } from 'webui/misc';
-import { UINotification } from 'webui/notification';
+import { UINotification, UINotificationContainer } from 'webui/notification';
 import { AuthRouter } from 'webui/routes';
 import type { NextAppPropsWithLayout } from 'webui/shared';
 import { ThemeContextProvider } from 'webui/theme';
@@ -35,6 +35,7 @@ export default function MyApp({ Component, pageProps }: NextAppPropsWithLayout) 
           <AuthContextProvider>
             <AuthRouter>{getLayout(<Component {...pageProps} />)}</AuthRouter>
           </AuthContextProvider>
+          <UINotificationContainer />
         </ThemeContextProvider>
       </ErrorBoundary>
     </>
