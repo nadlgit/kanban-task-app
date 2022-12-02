@@ -1,0 +1,8 @@
+:global(.theme-light) .toast {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+:global(.theme-dark) .toast {
+  background-color: var(--color-grey-dark);
+  color: var(--color-white);
+}

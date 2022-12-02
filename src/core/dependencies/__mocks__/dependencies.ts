@@ -33,8 +33,16 @@ const boardRepository = {
   deleteTask: jest.fn(),
 };
 
+let isDemo = false;
+
 export const Dependencies = {
   init: jest.fn,
+
+  setIsDemo: (value: boolean) => {
+    isDemo = value;
+  },
+
+  isDemo: () => isDemo,
 
   getAppNotification: () => appNotification,
 

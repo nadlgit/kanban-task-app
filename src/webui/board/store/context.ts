@@ -8,6 +8,7 @@ export const BoardContext = createContext<
       boardList: BoardList;
       activeBoardId: UniqueId | null;
       setActiveBoardId: (id: UniqueId | null) => void;
+      isDemo: boolean;
     }
   | undefined
 >(undefined);

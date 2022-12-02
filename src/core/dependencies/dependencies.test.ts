@@ -48,12 +48,14 @@ type FakeDependenciesInit = {
   appNotification: ReturnType<typeof mockAppNotificationFactory>;
   authRepository: ReturnType<typeof mockAuthRepositoryFactory>;
   boardRepository: ReturnType<typeof mockBoardRepositoryFactory>;
+  demoRepository: ReturnType<typeof mockBoardRepositoryFactory>;
 };
 
 const fakeDependencies: FakeDependenciesInit = {
   appNotification: mockAppNotificationFactory(),
   authRepository: mockAuthRepositoryFactory(),
   boardRepository: mockBoardRepositoryFactory(),
+  demoRepository: mockBoardRepositoryFactory(),
 };
 
 const fakeDependenciesOtherAppNotif: FakeDependenciesInit = {
@@ -69,6 +71,11 @@ const fakeDependenciesOtherAuthRepo: FakeDependenciesInit = {
 const fakeDependenciesOtherBoardRepo: FakeDependenciesInit = {
   ...fakeDependencies,
   boardRepository: mockBoardRepositoryFactory(),
+};
+
+const fakeDependenciesOtherDemoRepo: FakeDependenciesInit = {
+  ...fakeDependencies,
+  demoRepository: mockBoardRepositoryFactory(),
 };
 
 describe.each([
@@ -101,6 +108,45 @@ describe.each([
   });
 
   it('should return value initialized by first call to init()', () => {
+    const testDependenciesFirst = { ...fakeDependencies };
+    const testDependenciesSecond = { ...otherTestDependencies };
+    const expected = testDependenciesFirst[expectedField as keyof FakeDependenciesInit];
+    const notExpected = testDependenciesSecond[expectedField as keyof FakeDependenciesInit];
+
+    expect(testedFn).toThrow();
+
+    Dependencies.init(testDependenciesFirst);
+
+    expect(testedFn).not.toThrow();
+    expect(testedFn()).toEqual(expected);
+    expect(testedFn()).not.toEqual(notExpected);
+
+    Dependencies.init(testDependenciesSecond);
+
+    expect(testedFn).not.toThrow();
+    expect(testedFn()).toEqual(expected);
+    expect(testedFn()).not.toEqual(notExpected);
+  });
+});
+
+describe('demoRepository handling', () => {
+  it('getBoardRepository() should throw when not initialized', () => {
+    const testedFn = () => Dependencies.getBoardRepository();
+
+    const testDependencies = { ...fakeDependencies };
+    expect(testedFn).toThrow();
+
+    Dependencies.init(testDependencies);
+
+    expect(testedFn).not.toThrow();
+  });
+
+  it('getBoardRepository() should return value initialized by first call to init()', () => {
+    const testedFn = () => Dependencies.getBoardRepository();
+    const expectedField = 'demoRepository';
+    const otherTestDependencies = fakeDependenciesOtherDemoRepo;
+    Dependencies.setIsDemo(true);
+
     const testDependenciesFirst = { ...fakeDependencies };
     const testDependenciesSecond = { ...otherTestDependencies };
     const expected = testDependenciesFirst[expectedField as keyof FakeDependenciesInit];

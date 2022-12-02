@@ -4,11 +4,14 @@ let initialized = false;
 let appNotification: AppNotification;
 let authRepository: AuthRepository;
 let boardRepository: BoardRepository;
+let demoRepository: BoardRepository;
+let isDemo = false;
 
 export type DependenciesInitInfo = {
   appNotification: typeof appNotification;
   authRepository: typeof authRepository;
   boardRepository: typeof boardRepository;
+  demoRepository: typeof demoRepository;
 };
 
 export const Dependencies = {
@@ -17,9 +20,16 @@ export const Dependencies = {
       appNotification = dep.appNotification;
       authRepository = dep.authRepository;
       boardRepository = dep.boardRepository;
+      demoRepository = dep.demoRepository;
       initialized = true;
     }
   },
+
+  setIsDemo: (value: boolean) => {
+    isDemo = value;
+  },
+
+  isDemo: () => isDemo,
 
   getAppNotification: () => {
     if (appNotification === undefined) {
@@ -39,6 +49,9 @@ export const Dependencies = {
     if (boardRepository === undefined) {
       throw new Error('boardRepository dependency has not been initialized');
     }
-    return boardRepository;
+    if (demoRepository === undefined) {
+      throw new Error('demoRepository dependency has not been initialized');
+    }
+    return isDemo ? demoRepository : boardRepository;
   },
 };
