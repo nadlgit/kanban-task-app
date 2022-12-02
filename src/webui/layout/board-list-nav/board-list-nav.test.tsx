@@ -49,7 +49,7 @@ mockAddBoardComponent.mockImplementation(({ isOpen, close, onAdd }) => {
 });
 
 const Wrapper = ({ children }: PropsWithChildren) => (
-  <BoardContextProvider>{children}</BoardContextProvider>
+  <BoardContextProvider isDemo={false}>{children}</BoardContextProvider>
 );
 
 let userEvt = userEvent.setup();

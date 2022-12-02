@@ -2,6 +2,7 @@ export * from './add-board';
 export * from './add-task';
 export * from './delete-board';
 export * from './delete-task';
+export * from './demo-handling';
 export * from './edit-board';
 export * from './edit-task';
 export * from './query';

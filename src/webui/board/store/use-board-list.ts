@@ -7,5 +7,6 @@ export const useBoardList = () => {
   if (context === undefined) {
     throw new Error('useBoardList() must be used with <BoardContextProvider>');
   }
-  return context;
+  const { loading, boardList, activeBoardId, setActiveBoardId } = context;
+  return { loading, boardList, activeBoardId, setActiveBoardId };
 };

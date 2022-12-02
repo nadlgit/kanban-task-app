@@ -44,7 +44,7 @@ const deleteMockBoard = (boardId: UniqueId) => {
 };
 
 const Wrapper = ({ children }: PropsWithChildren) => (
-  <BoardContextProvider>{children}</BoardContextProvider>
+  <BoardContextProvider isDemo={false}>{children}</BoardContextProvider>
 );
 
 describe('useBoardList()', () => {

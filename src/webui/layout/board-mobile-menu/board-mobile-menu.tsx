@@ -5,7 +5,7 @@ import IconUp from './icon-chevron-up.svg';
 import { Dialog, DialogDisclosure, useDialogState } from 'ariakit/dialog';
 
 import { BoardListNav } from '../board-list-nav';
-import { Logout } from 'webui/auth';
+import { BoardExit } from '../board-exit';
 import { ThemeSwitch } from 'webui/theme';
 
 export const BoardMobileMenu = () => {
@@ -23,7 +23,7 @@ export const BoardMobileMenu = () => {
       >
         <BoardListNav />
         <ThemeSwitch />
-        <Logout />
+        <BoardExit />
       </Dialog>
     </>
   );

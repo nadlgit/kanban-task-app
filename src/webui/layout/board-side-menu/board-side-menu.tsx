@@ -5,7 +5,7 @@ import IconShow from './icon-show-sidebar.svg';
 import { Disclosure, DisclosureContent, useDisclosureState } from 'ariakit/disclosure';
 
 import { BoardListNav } from '../board-list-nav';
-import { Logout } from 'webui/auth';
+import { BoardExit } from '../board-exit';
 import { Icon, ThemedLogo } from 'webui/shared';
 import { ThemeSwitch } from 'webui/theme';
 
@@ -38,7 +38,7 @@ export const BoardSideMenu = ({ defaultIsOpen, onToggle }: BoardSideMenuProps) =
         </div>
         <BoardListNav />
         <ThemeSwitch />
-        <Logout />
+        <BoardExit />
       </DisclosureContent>
     </>
   );

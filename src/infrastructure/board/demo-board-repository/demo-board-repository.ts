@@ -13,7 +13,7 @@ import {
 import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
 
-export class FakeBoardRepository implements BoardRepository {
+export class DemoBoardRepository implements BoardRepository {
   #boards: BoardEntity[] = getInitialBoards();
   #onBoardListChangeCallback: () => void = () => {
     console.log('onBoardListChangeCallback', { boards: this.#boards });
