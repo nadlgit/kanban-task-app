@@ -1,27 +1,14 @@
-import { initialBoards } from './initial-boards';
 import type { BoardEntity, ColumnEntity, TaskEntity, UniqueId } from 'core/entities';
 import { generateId } from 'infrastructure/utils';
 
-const nextBoardId = () => generateId('board');
-const nextColumnId = () => generateId('column');
-const nextTaskId = () => generateId('task');
+export const nextBoardId = () => generateId('board');
+export const nextColumnId = () => generateId('column');
+export const nextTaskId = () => generateId('task');
 
 export function setPeriodicCallback(callback: () => void) {
   const POLL_FREQUENCY_MILLISECONDS = 60 * 1000;
   const intervalId = setInterval(callback, POLL_FREQUENCY_MILLISECONDS);
   return () => clearTimeout(intervalId);
-}
-
-export function getInitialBoards(): BoardEntity[] {
-  return initialBoards.map((board) => ({
-    ...board,
-    id: nextBoardId(),
-    columns: board.columns.map((column) => ({
-      ...column,
-      id: nextColumnId(),
-      tasks: column.tasks.map((task) => ({ ...task, id: nextTaskId() })),
-    })),
-  }));
 }
 
 export function newEmptyBoard(): BoardEntity {

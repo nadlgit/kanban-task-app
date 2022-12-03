@@ -1,6 +1,19 @@
+import { nextBoardId, nextColumnId, nextTaskId } from './helpers';
 import type { BoardEntity } from 'core/entities';
 
-export const initialBoards: BoardEntity[] = [
+export function getInitialBoards(): BoardEntity[] {
+  return initialBoards.map((board) => ({
+    ...board,
+    id: nextBoardId(),
+    columns: board.columns.map((column) => ({
+      ...column,
+      id: nextColumnId(),
+      tasks: column.tasks.map((task) => ({ ...task, id: nextTaskId() })),
+    })),
+  }));
+}
+
+const initialBoards: BoardEntity[] = [
   {
     id: 'ID_TO_SET',
     name: 'Platform Launch',
