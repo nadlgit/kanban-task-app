@@ -4,10 +4,8 @@ import IconShow from './icon-show-sidebar.svg';
 
 import { Disclosure, DisclosureContent, useDisclosureState } from 'ariakit/disclosure';
 
-import { BoardListNav } from '../board-list-nav';
-import { BoardExit } from '../board-exit';
+import { BoardMenuDetails } from '../board-menu-details';
 import { Icon, ThemedLogo } from 'webui/shared';
-import { ThemeSwitch } from 'webui/theme';
 
 type BoardSideMenuProps = { defaultIsOpen: boolean; onToggle: (isOpen: boolean) => void };
 
@@ -36,9 +34,7 @@ export const BoardSideMenu = ({ defaultIsOpen, onToggle }: BoardSideMenuProps) =
         <div className={styles.logo}>
           <ThemedLogo />
         </div>
-        <BoardListNav />
-        <ThemeSwitch />
-        <BoardExit />
+        <BoardMenuDetails />
       </DisclosureContent>
     </>
   );

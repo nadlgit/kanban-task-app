@@ -2,7 +2,7 @@ import styles from './layout.module.css';
 
 import type { PropsWithChildren } from 'react';
 
-import { BoardOpenDemo } from './board-open-demo';
+import { OpenDemo } from './board-demo';
 import { ChallengeAttribution } from './challenge-attribution';
 import { ThemedLogo } from 'webui/shared';
 import { ThemeSwitch } from 'webui/theme';
@@ -15,7 +15,7 @@ export const BaseLayout = ({ children }: BaseLayoutProps) => {
       <header className={styles.header}>
         <ThemedLogo />
         <div className={styles.topaction}>
-          <BoardOpenDemo />
+          <OpenDemo />
         </div>
       </header>
       <main className={styles.main}>

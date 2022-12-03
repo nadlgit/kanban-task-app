@@ -4,9 +4,7 @@ import IconUp from './icon-chevron-up.svg';
 
 import { Dialog, DialogDisclosure, useDialogState } from 'ariakit/dialog';
 
-import { BoardListNav } from '../board-list-nav';
-import { BoardExit } from '../board-exit';
-import { ThemeSwitch } from 'webui/theme';
+import { BoardMenuDetails } from '../board-menu-details';
 
 export const BoardMobileMenu = () => {
   const state = useDialogState();
@@ -21,9 +19,7 @@ export const BoardMobileMenu = () => {
         className={styles.menu}
         backdropProps={{ className: styles.menuwrapper }}
       >
-        <BoardListNav />
-        <ThemeSwitch />
-        <BoardExit />
+        <BoardMenuDetails />
       </Dialog>
     </>
   );
