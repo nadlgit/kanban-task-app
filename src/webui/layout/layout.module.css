@@ -78,6 +78,8 @@
   grid-area: topaction;
   display: flex;
   justify-content: flex-end;
+  gap: var(--header-padding-inline);
+  margin-right: var(--header-padding-inline);
 }
 
 .sidebar {
