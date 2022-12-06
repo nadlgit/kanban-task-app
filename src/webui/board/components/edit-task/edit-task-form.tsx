@@ -28,7 +28,9 @@ type EditTaskFormProps = {
 };
 
 export const EditTaskForm = ({ task, statusList, onSubmit }: EditTaskFormProps) => {
-  const { register, handleSubmit, formState, control } = useForm({ shouldUnregister: true });
+  const { register, handleSubmit, formState, control, setFocus } = useForm({
+    shouldUnregister: true,
+  });
 
   const subtaskItemLabel = 'Subtask Title';
   const newSubtaskItemName = () => generateId('newsubtask');
@@ -76,6 +78,10 @@ export const EditTaskForm = ({ task, statusList, onSubmit }: EditTaskFormProps) 
       );
     })(e);
   };
+
+  useEffect(() => {
+    setFocus('tasktitle');
+  }, [setFocus]);
 
   useEffect(() => {
     updateTextInputErrors(

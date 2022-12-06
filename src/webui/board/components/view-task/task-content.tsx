@@ -33,6 +33,7 @@ export const TaskContent = ({
             label={title}
             defaultChecked={isCompleted}
             onChange={(e) => onSubtaskStatusChange(idx, e.target.checked)}
+            autoFocus={idx === 0}
           />
         ))}
       </div>
@@ -41,6 +42,7 @@ export const TaskContent = ({
         items={statusList}
         defaultValue={task.statusId}
         onChange={onTaskStatusChange}
+        autoFocus={task.subtasks.length === 0}
       />
     </>
   );

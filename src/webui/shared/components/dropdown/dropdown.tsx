@@ -9,16 +9,24 @@ type DropdownProps = {
   name?: string;
   onChange?: (value: string) => void;
   defaultValue?: string;
+  autoFocus?: boolean;
 };
 
-export const Dropdown = ({ label, items, name, onChange, defaultValue }: DropdownProps) => {
+export const Dropdown = ({
+  label,
+  items,
+  name,
+  onChange,
+  defaultValue,
+  autoFocus = false,
+}: DropdownProps) => {
   const state = useSelectState({ setValue: onChange, defaultValue, gutter: 8 });
   return (
     <div className={styles.base}>
       <SelectLabel state={state} className={styles.label}>
         {label}
       </SelectLabel>
-      <Select state={state} name={name} className={styles.trigger}>
+      <Select state={state} name={name} className={styles.trigger} autoFocus={autoFocus}>
         {items.find(({ value }) => value === state.value)?.label}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={IconSelect.src} alt="" />

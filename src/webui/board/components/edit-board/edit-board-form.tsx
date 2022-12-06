@@ -22,7 +22,9 @@ type EditBoardFormProps = {
 };
 
 export const EditBoardForm = ({ board, onSubmit }: EditBoardFormProps) => {
-  const { register, handleSubmit, formState, watch } = useForm({ shouldUnregister: true });
+  const { register, handleSubmit, formState, watch, setFocus } = useForm({
+    shouldUnregister: true,
+  });
 
   const columnItemLabel = 'Column Name';
   const newColumnItemName = () => generateId('newcolumn');
@@ -68,6 +70,10 @@ export const EditBoardForm = ({ board, onSubmit }: EditBoardFormProps) => {
       );
     })(e);
   };
+
+  useEffect(() => {
+    setFocus('boardname');
+  }, [setFocus]);
 
   useEffect(() => {
     updateTextInputErrors(
