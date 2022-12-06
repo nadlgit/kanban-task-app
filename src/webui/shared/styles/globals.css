@@ -40,6 +40,8 @@
   --color-white: rgb(255, 255, 255);
   --color-white-hover: rgb(255, 255, 255, 0.85);
   --backdrop-color: rgba(0, 0, 0, 0.5);
+  --scrollbar-thumb-color: rgba(130, 143, 163, 0.2);
+  --scrollbar-track-color: transparent;
   --header-height: clamp(4rem, calc(3rem + 4vw), 6rem);
 }
 
@@ -63,6 +65,22 @@ body.theme-light {
 body.theme-dark {
   background-color: var(--color-grey-very-dark);
   color: var(--color-white);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-color) var(--scrollbar-track-color);
+}
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: var(--scrollbar-track-color);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color);
+}
+::-webkit-scrollbar-corner {
+  background-color: var(--scrollbar-track-color);
 }
 
 button:not(:disabled),
