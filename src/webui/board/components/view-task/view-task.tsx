@@ -86,7 +86,7 @@ export const ViewTask = ({
   ]);
 
   return (
-    <Modal isOpen={isOpen} onClose={() => setCloseAction('close')}>
+    <Modal isOpen={isOpen} onClose={() => setCloseAction('close')} withDismiss>
       <ModalHeading
         menu={
           <Menu

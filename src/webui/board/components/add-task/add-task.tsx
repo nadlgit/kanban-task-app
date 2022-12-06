@@ -24,7 +24,7 @@ export const AddTask = ({ isOpen, close, board }: AddTaskProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close}>
+    <Modal isOpen={isOpen} onClose={close} withDismiss>
       <ModalHeading>Add New Task</ModalHeading>
       <AddTaskForm
         statusList={board.columns.map(({ id, name }) => ({ value: id, label: name }))}
