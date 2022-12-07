@@ -15,7 +15,7 @@ export const BoardListNavItem = ({ label, onClick, isActive, isCreate }: BoardLi
   isActive && cssClasses.push(styles.active);
   isCreate && cssClasses.push(styles.create);
   return (
-    <li>
+    <li aria-current={isActive}>
       <button onClick={onClick} className={cssClasses.join(' ')}>
         <Icon imgSrc={IconBoard.src} imgAccessibleName="" className={styles.icon} />
         <span className={styles.label}>{label}</span>
