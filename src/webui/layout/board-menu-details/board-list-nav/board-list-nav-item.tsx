@@ -11,12 +11,12 @@ type BoardListNavItemProps = {
 };
 
 export const BoardListNavItem = ({ label, onClick, isActive, isCreate }: BoardListNavItemProps) => {
-  const cssClasses = [styles.item];
+  const cssClasses = [styles.button];
   isActive && cssClasses.push(styles.active);
   isCreate && cssClasses.push(styles.create);
   return (
-    <li className={cssClasses.join(' ')}>
-      <button onClick={onClick}>
+    <li>
+      <button onClick={onClick} className={cssClasses.join(' ')}>
         <Icon imgSrc={IconBoard.src} imgAccessibleName="" className={styles.icon} />
         <span className={styles.label}>{label}</span>
       </button>

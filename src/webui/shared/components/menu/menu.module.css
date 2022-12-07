@@ -26,6 +26,9 @@
   color: var(--color-grey-medium);
   cursor: pointer;
 }
+.item[data-active-item] {
+  outline: none;
+}
 :global(.theme-light) .item:hover,
 :global(.theme-light) .item[data-active-item] {
   background-color: var(--color-purple-light);

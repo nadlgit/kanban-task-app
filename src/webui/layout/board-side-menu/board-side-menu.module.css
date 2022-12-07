@@ -16,20 +16,24 @@
   width: clamp(15rem, calc(13.57rem + 2.98vw), 16.25rem);
   background-color: transparent;
 }
-.trigger.ishide:hover {
+.trigger.ishide:hover,
+.trigger.ishide:focus {
   color: var(--color-purple);
 }
-:global(.theme-light) .trigger.ishide:hover {
+:global(.theme-light) .trigger.ishide:hover,
+:global(.theme-light) .trigger.ishide:focus {
   background-color: var(--color-purple-light);
 }
-:global(.theme-dark) .trigger.ishide:hover {
+:global(.theme-dark) .trigger.ishide:hover,
+:global(.theme-dark) .trigger.ishide:focus {
   background-color: var(--color-white);
 }
 .trigger.isshow {
   color: var(--color-white);
   background-color: var(--color-purple);
 }
-.trigger.isshow:hover {
+.trigger.isshow:hover,
+.trigger.isshow:focus {
   background-color: var(--color-purple-hover);
 }
 

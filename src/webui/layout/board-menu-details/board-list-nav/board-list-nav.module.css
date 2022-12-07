@@ -1,15 +1,12 @@
 .container {
+  --board-list-nav-padding-left: clamp(1.5rem, calc(0.93rem + 1.19vw), 2rem);
   width: 100%;
-}
-
-.title,
-.list > * {
-  padding-left: clamp(1.5rem, calc(0.93rem + 1.19vw), 2rem);
 }
 
 .title {
   composes: heading-s from global;
   padding-block: 1.25rem;
+  padding-left: var(--board-list-nav-padding-left);
   text-transform: uppercase;
 }
 

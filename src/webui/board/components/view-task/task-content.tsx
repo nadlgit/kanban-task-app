@@ -3,6 +3,7 @@ import styles from './task-content.module.css';
 import type { ComponentProps } from 'react';
 
 import type { TaskEntity, UniqueId } from 'core/entities';
+import { generateId } from 'infrastructure/utils';
 import { Checkbox, Dropdown } from 'webui/shared';
 
 type TaskContentProps = {
@@ -18,14 +19,15 @@ export const TaskContent = ({
   onTaskStatusChange,
   onSubtaskStatusChange,
 }: TaskContentProps) => {
+  const completedSubtasks = task.subtasks.filter(({ isCompleted }) => isCompleted === true);
+  const subtasksLabel = `Subtasks (${completedSubtasks.length} of ${task.subtasks.length})`;
+  const subtasksLabelId = generateId('vtstl');
   return (
     <>
       <p className={styles.description}>{task.description}</p>
-      <div>
-        <p className={styles.label}>
-          {`Subtasks (${
-            task.subtasks.filter(({ isCompleted }) => isCompleted === true).length
-          } of ${task.subtasks.length})`}
+      <div role="group" aria-labelledby={subtasksLabelId} className={styles.subtasks}>
+        <p id={subtasksLabelId} className={styles.label}>
+          {subtasksLabel}
         </p>
         {task.subtasks.map(({ title, isCompleted }, idx) => (
           <Checkbox
