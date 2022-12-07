@@ -18,7 +18,7 @@ type AddBoardFormProps = {
 };
 
 export const AddBoardForm = ({ onSubmit }: AddBoardFormProps) => {
-  const { register, handleSubmit, formState } = useForm({ shouldUnregister: true });
+  const { register, handleSubmit, formState, setFocus } = useForm({ shouldUnregister: true });
 
   const columnItemLabel = 'Column Name';
   const newColumnItemName = () => generateId('newcolumn');
@@ -52,6 +52,10 @@ export const AddBoardForm = ({ onSubmit }: AddBoardFormProps) => {
       );
     })(e);
   };
+
+  useEffect(() => {
+    setFocus('boardname');
+  }, [setFocus]);
 
   useEffect(() => {
     updateTextInputErrors(

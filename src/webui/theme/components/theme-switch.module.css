@@ -34,22 +34,29 @@
   padding-inline: 0.1875rem;
   cursor: pointer;
 }
-.switch[data-theme='light'] {
-  text-align: left;
-}
-.switch[data-theme='dark'] {
-  text-align: right;
-}
-
-.switch::before {
-  content: '';
-  width: 0.875rem;
-  height: 0.875rem;
-  display: inline-block;
-  background-color: var(--color-white);
-  border-radius: 1000vmax;
-}
 
 .switch:hover {
   background-color: var(--color-purple-hover);
+}
+
+.indicator {
+  --theme-switch-indicator-width: 0.875rem;
+  width: 100%;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.switch[data-theme='light'] .indicator {
+  transform: translateX(0);
+}
+.switch[data-theme='dark'] .indicator {
+  transform: translateX(calc(100% - var(--theme-switch-indicator-width)));
+}
+
+.indicator::before {
+  content: '';
+  width: var(--theme-switch-indicator-width);
+  height: var(--theme-switch-indicator-width);
+  display: inline-block;
+  background-color: var(--color-white);
+  border-radius: 1000vmax;
 }

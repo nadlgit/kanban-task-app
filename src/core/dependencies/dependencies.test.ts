@@ -130,6 +130,10 @@ describe.each([
 });
 
 describe('demoRepository handling', () => {
+  it('isDemo() should initially return false', () => {
+    expect(Dependencies.isDemo()).toBeFalsy();
+  });
+
   it('getBoardRepository() should throw when not initialized', () => {
     const testedFn = () => Dependencies.getBoardRepository();
 

@@ -57,7 +57,7 @@ export const EditTask = ({ isOpen, close, board, columnId, taskId }: EditTaskPro
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close}>
+    <Modal isOpen={isOpen} onClose={close} withDismiss>
       <ModalHeading>Edit Task</ModalHeading>
       <EditTaskForm
         task={{

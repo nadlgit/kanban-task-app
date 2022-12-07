@@ -24,7 +24,7 @@ export const AddBoard = ({ isOpen, close, onAdd }: AddBoardProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close}>
+    <Modal isOpen={isOpen} onClose={close} withDismiss>
       <ModalHeading>Add New Board</ModalHeading>
       <AddBoardForm onSubmit={onSubmit} />
     </Modal>

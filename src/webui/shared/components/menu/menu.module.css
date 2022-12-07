@@ -1,5 +1,5 @@
 .button {
-  padding: 0.5em 1em;
+  padding-left: 0.25rem;
   line-height: 1em;
   border: none;
   background-color: transparent;
@@ -26,10 +26,12 @@
   color: var(--color-grey-medium);
   cursor: pointer;
 }
-:global(.theme-light) .item:hover {
+:global(.theme-light) .item:hover,
+:global(.theme-light) .item[data-active-item] {
   background-color: var(--color-purple-light);
 }
-:global(.theme-dark) .item:hover {
+:global(.theme-dark) .item:hover,
+:global(.theme-dark) .item[data-active-item] {
   background-color: var(--color-grey-dark);
 }
 

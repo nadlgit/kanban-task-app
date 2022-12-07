@@ -26,7 +26,9 @@ export const ThemeSwitch = () => {
         currentTheme={theme}
         onChange={handleThemeChange}
       />
-      <span className={styles.switch} onClick={toggleTheme} data-theme={theme} />
+      <span aria-hidden className={styles.switch} onClick={toggleTheme} data-theme={theme}>
+        <span className={styles.indicator} />
+      </span>
       <Choice
         value="dark"
         iconUrl={IconDark.src}

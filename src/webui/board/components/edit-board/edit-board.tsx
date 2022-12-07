@@ -51,7 +51,7 @@ export const EditBoard = ({ isOpen, close, board }: EditBoardProps) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={close}>
+    <Modal isOpen={isOpen} onClose={close} withDismiss>
       <ModalHeading>Edit Board</ModalHeading>
       <EditBoardForm board={board} onSubmit={onSubmit} />
     </Modal>

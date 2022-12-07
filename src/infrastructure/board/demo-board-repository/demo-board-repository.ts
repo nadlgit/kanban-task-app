@@ -3,38 +3,35 @@ import {
   changeTaskColumn,
   deleteEntity,
   findEntity,
-  getInitialBoards,
   moveEntity,
   newEmptyBoard,
   newEmptyColumn,
   newEmptyTask,
   setPeriodicCallback,
 } from './helpers';
+import { getInitialBoards } from './initial-boards';
 import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
+import { doNothing } from 'webui/shared';
 
 export class DemoBoardRepository implements BoardRepository {
   #boards: BoardEntity[] = getInitialBoards();
-  #onBoardListChangeCallback: () => void = () => {
-    console.log('onBoardListChangeCallback', { boards: this.#boards });
-  };
+  #onBoardListChangeCallback: () => void = doNothing;
   #onBoardChangeCallback: Map<UniqueId, () => void> = new Map();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getBoardList(userId: string) {
     const boardList = this.#boards.map(({ id, name }) => ({ id, name }));
-    console.log('getBoardList', { userId }, boardList);
     return boardList;
   }
 
   async getBoard(userId: string, boardId: string) {
     const board = findEntity(this.#boards, boardId);
-    console.log('getBoard', { userId, boardId }, board);
     return board;
   }
 
   listenToBoardListChange(userId: string, callback: () => void) {
     this.#onBoardListChangeCallback = () => {
-      console.log('onBoardListChangeCallback+cb', { userId, boards: this.#boards });
       callback();
     };
     return setPeriodicCallback(this.#onBoardListChangeCallback);
@@ -42,11 +39,6 @@ export class DemoBoardRepository implements BoardRepository {
 
   listenToBoardChange(userId: string, boardId: string, callback: () => void) {
     const boardCallback = () => {
-      console.log('onBoardChangeCallback+cb', {
-        userId,
-        boardId,
-        board: this.#boards.find((b) => b.id === boardId),
-      });
       callback();
     };
     this.#onBoardChangeCallback.set(boardId, boardCallback);
@@ -70,7 +62,6 @@ export class DemoBoardRepository implements BoardRepository {
     addEntity(this.#boards, newBoard, index);
 
     this.#onBoardListChangeCallback();
-    console.log('addBoard', { userId, board, index }, this.#boards);
     return newBoard.id;
   }
 
@@ -119,14 +110,12 @@ export class DemoBoardRepository implements BoardRepository {
     if (board.name) {
       this.#onBoardListChangeCallback();
     }
-    console.log('updateBoard', { userId, board, index }, this.#boards);
   }
 
   async deleteBoard(userId: string, boardId: string) {
     deleteEntity(this.#boards, boardId);
 
     this.#onBoardListChangeCallback();
-    console.log('deleteBoard', { userId, boardId }, this.#boards);
   }
 
   async addTask(
@@ -147,7 +136,6 @@ export class DemoBoardRepository implements BoardRepository {
 
     const listenerCallback = this.#onBoardChangeCallback.get(boardId);
     listenerCallback && listenerCallback();
-    console.log('addTask', { userId, boardId, columnId, task, index }, column);
     return newTask.id;
   }
 
@@ -186,7 +174,6 @@ export class DemoBoardRepository implements BoardRepository {
 
     const listenerCallback = this.#onBoardChangeCallback.get(board.id);
     listenerCallback && listenerCallback();
-    console.log('updateTask', { userId, boardId, columnId, task, index, oldColumnId }, board);
   }
 
   async deleteTask(userId: string, boardId: string, columnId: string, taskId: string) {
@@ -196,6 +183,5 @@ export class DemoBoardRepository implements BoardRepository {
 
     const listenerCallback = this.#onBoardChangeCallback.get(board.id);
     listenerCallback && listenerCallback();
-    console.log('deleteTask', { userId, boardId, columnId, taskId }, column);
   }
 }
