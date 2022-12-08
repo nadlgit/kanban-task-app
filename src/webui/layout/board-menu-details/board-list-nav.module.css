@@ -12,4 +12,6 @@
 
 .list {
   list-style-type: none;
+  max-height: 75%;
+  overflow-y: auto;
 }
