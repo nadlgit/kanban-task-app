@@ -19,7 +19,7 @@ export const BoardLayout = () => {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(true);
 
   if (loading) {
-    return <Loading />;
+    return <Loading standalone />;
   }
 
   return (
