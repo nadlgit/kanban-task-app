@@ -1,0 +1,18 @@
+.container {
+  --board-list-nav-padding-left: clamp(1.5rem, calc(0.93rem + 1.19vw), 2rem);
+  width: 100%;
+  height: 50vh;
+}
+
+.title {
+  composes: heading-s from global;
+  padding-block: 1.25rem;
+  padding-left: var(--board-list-nav-padding-left);
+  text-transform: uppercase;
+}
+
+.list {
+  list-style-type: none;
+  max-height: 80%;
+  overflow-y: auto;
+}

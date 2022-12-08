@@ -23,7 +23,7 @@ export const BoardListNav = () => {
 
   return (
     <>
-      <div className={styles.container}>
+      <nav className={styles.container}>
         <p className={styles.title}>{`All boards (${boardList.length})`}</p>
         <ul className={styles.list}>
           {boardList.map((item) => (
@@ -36,7 +36,7 @@ export const BoardListNav = () => {
           ))}
           <BoardListNavItem label="+ Create New Board" onClick={openAddBoard} isCreate />
         </ul>
-      </div>
+      </nav>
 
       <AddBoard isOpen={isAddBoardOpen} close={closeAddBoard} onAdd={setActiveBoardId} />
     </>

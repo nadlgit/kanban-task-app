@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
@@ -54,15 +54,14 @@ const Wrapper = ({ children }: PropsWithChildren) => (
 
 let userEvt = userEvent.setup();
 
-const activeClass = 'active';
-const getBoardEltList = () => screen.getAllByRole('listitem').slice(0, -1);
+const getBoardActiveItem = () =>
+  within(screen.getByRole('listitem', { current: true })).getByRole('button');
 const getAddBoardBtnElt = () => screen.getByRole('button', { name: /\+ Create New Board/i });
 
 describe('BoardListNav component', () => {
   it('should initially display list first board as active', async () => {
     const initialBoardListLength = mockBoardList.length;
     expect(initialBoardListLength).toBeGreaterThanOrEqual(2);
-    const expectedLength = initialBoardListLength;
     const expectedActiveIndex = 0;
 
     userEvt = userEvent.setup();
@@ -70,15 +69,7 @@ describe('BoardListNav component', () => {
       render(<BoardListNav />, { wrapper: Wrapper });
     });
 
-    expect(getBoardEltList()).toHaveLength(expectedLength);
-    for (let i = 0; i < getBoardEltList().length; i++) {
-      const elt = getBoardEltList()[i];
-      if (i === expectedActiveIndex) {
-        expect(elt).toHaveClass(activeClass);
-      } else {
-        expect(elt).not.toHaveClass(activeClass);
-      }
-    }
+    expect(getBoardActiveItem()).toHaveAccessibleName(mockBoardList[expectedActiveIndex].name);
   });
 
   it('should set added board as active', async () => {
@@ -94,14 +85,6 @@ describe('BoardListNav component', () => {
 
     await userEvt.click(getAddBoardBtnElt());
 
-    expect(getBoardEltList()).toHaveLength(expectedLength);
-    for (let i = 0; i < getBoardEltList().length; i++) {
-      const elt = getBoardEltList()[i];
-      if (i === expectedActiveIndex) {
-        expect(elt).toHaveClass(activeClass);
-      } else {
-        expect(elt).not.toHaveClass(activeClass);
-      }
-    }
+    expect(getBoardActiveItem()).toHaveAccessibleName(mockBoardList[expectedActiveIndex].name);
   });
 });

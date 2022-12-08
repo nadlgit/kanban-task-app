@@ -17,7 +17,7 @@ export const AuthRouter = ({ children }: AuthRouterProps) => {
   const router = useRouter();
 
   if (loading) {
-    return <Loading />;
+    return <Loading standalone />;
   }
 
   if (!user && !isPublicRoute(router.pathname)) {

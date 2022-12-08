@@ -4,6 +4,10 @@
   color: var(--color-grey-medium);
 }
 
+.subtasks {
+  margin-bottom: 1.5rem;
+}
+
 .label {
   composes: body-m from global;
   display: block;
