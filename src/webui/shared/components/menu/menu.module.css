@@ -11,13 +11,15 @@
   overflow: hidden;
   border-radius: 0.5rem;
   box-shadow: 0 0.625rem 1.25rem rgba(54, 78, 126, 0.25);
-  outline: auto;
 }
 :global(.theme-light) .menu {
   background-color: var(--color-white);
 }
 :global(.theme-dark) .menu {
   background-color: var(--color-grey-very-dark);
+}
+.menu:has(.item:focus-visible) {
+  outline: auto;
 }
 
 .item {
