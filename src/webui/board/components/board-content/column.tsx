@@ -14,17 +14,15 @@ type ColumnProps =
 export const Column = ({ column, viewTask, addNewColumn }: ColumnProps) => {
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>
-        {column ? (
-          <>
-            <span aria-hidden className={styles.color} />
-            <span className={styles.columnname}>{column.name}</span>
-            <span>&nbsp;{`(${column.tasks.length})`}</span>
-          </>
-        ) : (
-          <span>&nbsp;</span>
-        )}
-      </h2>
+      {column ? (
+        <h2 className={styles.title}>
+          <span aria-hidden className={styles.color} />
+          <span className={styles.columnname}>{column.name}</span>
+          <span>&nbsp;{`(${column.tasks.length})`}</span>
+        </h2>
+      ) : (
+        <div className={styles.title}>&nbsp;</div>
+      )}
 
       {column ? (
         <>
