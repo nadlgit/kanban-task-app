@@ -36,7 +36,7 @@
 }
 
 input[type='checkbox'].input:hover:not(:disabled) + .label,
-input[type='checkbox'].input:focus:not(:disabled) + .label {
+input[type='checkbox'].input:focus-visible:not(:disabled) + .label {
   background-color: var(--color-purple-light-hover);
 }
 
