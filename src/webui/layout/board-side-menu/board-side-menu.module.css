@@ -17,15 +17,15 @@
   background-color: transparent;
 }
 .trigger.ishide:hover,
-.trigger.ishide:focus {
+.trigger.ishide:focus-visible {
   color: var(--color-purple);
 }
 :global(.theme-light) .trigger.ishide:hover,
-:global(.theme-light) .trigger.ishide:focus {
+:global(.theme-light) .trigger.ishide:focus-visible {
   background-color: var(--color-purple-light);
 }
 :global(.theme-dark) .trigger.ishide:hover,
-:global(.theme-dark) .trigger.ishide:focus {
+:global(.theme-dark) .trigger.ishide:focus-visible {
   background-color: var(--color-white);
 }
 .trigger.isshow {
@@ -33,7 +33,7 @@
   background-color: var(--color-purple);
 }
 .trigger.isshow:hover,
-.trigger.isshow:focus {
+.trigger.isshow:focus-visible {
   background-color: var(--color-purple-hover);
 }
 
