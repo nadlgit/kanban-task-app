@@ -38,13 +38,18 @@ describe('editBoard()', () => {
         { isAdded: true, name: faker.lorem.words() },
         { isAdded: false, id: faker.datatype.uuid() },
       ],
+      newIndex: faker.datatype.number(50),
     };
 
     const result = await editBoard(testBoard);
 
     expect(result).toEqual({ ok: true });
     expect(boardRepository.updateBoard).toHaveBeenCalledTimes(1);
-    expect(boardRepository.updateBoard).toHaveBeenLastCalledWith(mockUserId, testBoard);
+    expect(boardRepository.updateBoard).toHaveBeenLastCalledWith(
+      mockUserId,
+      testBoard,
+      testBoard.newIndex
+    );
     expect(notifyError).not.toHaveBeenCalled();
   });
 
@@ -61,7 +66,7 @@ describe('editBoard()', () => {
 
     expect(result).toEqual({ ok: false });
     expect(boardRepository.updateBoard).toHaveBeenCalledTimes(1);
-    expect(boardRepository.updateBoard).toHaveBeenLastCalledWith(mockUserId, testBoard);
+    expect(boardRepository.updateBoard).toHaveBeenLastCalledWith(mockUserId, testBoard, undefined);
     expect(notifyError).toHaveBeenCalledTimes(1);
     expect(notifyError).toHaveBeenLastCalledWith(testError);
   });

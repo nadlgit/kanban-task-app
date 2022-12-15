@@ -9,6 +9,7 @@ type TaskUpdate = {
   description?: string;
   subtasks?: { title: string; isCompleted: boolean }[];
   newColumnId?: UniqueId;
+  newIndex?: number;
 };
 
 export async function editTask(boardId: UniqueId, columnId: UniqueId, taskUpdate: TaskUpdate) {
@@ -22,7 +23,8 @@ export async function editTask(boardId: UniqueId, columnId: UniqueId, taskUpdate
   try {
     const newColumnId = taskUpdate?.newColumnId ?? columnId;
     const oldColumnId = taskUpdate?.newColumnId && columnId;
-    await repository.updateTask(userId, boardId, newColumnId, taskUpdate, undefined, oldColumnId);
+    const index = taskUpdate?.newIndex;
+    await repository.updateTask(userId, boardId, newColumnId, taskUpdate, index, oldColumnId);
   } catch (err) {
     notifyError((err as Error).message);
     return { ok: false };
