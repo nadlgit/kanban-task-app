@@ -2,7 +2,7 @@
 
 This is a full stack web app allowing authenticated users to manage their projects and tasks in Kanban boards. The design is adapted from the [Kanban task management web app challenge on Frontend Mentor](https://www.frontendmentor.io/challenges/kanban-task-management-web-app-wgQLt-HlbB).
 
-**Work in progress**: interaction with backend is still buggy and drag and drop is not yet implemented.
+**Work in progress**: interaction with backend is still buggy.
 
 - Solution URL: [https://github.com/nadlgit/kanban-task-app](https://github.com/nadlgit/kanban-task-app)
 - Live Site URL: [https://nadl-kanban-task-app.netlify.app](https://nadl-kanban-task-app.netlify.app) or directly demo page [https://nadl-kanban-task-app.netlify.app/demo](https://nadl-kanban-task-app.netlify.app/demo)
@@ -31,11 +31,13 @@ Users should be able to:
 Users should be able to:
 
 - Register, log in and log out
+- Drag and drop columns to re-order them
 - Drag and drop projects to re-order them
 
 Project should:
 
 - Follow [clean architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) principles
+- Respect some accessibility guidelines
 
 ## Built with
 
@@ -46,9 +48,10 @@ Project should:
 - Semantic HTML5 markup
 - Tested with [Jest](https://jestjs.io/), [Testing Library](https://testing-library.com/) and [Faker](https://fakerjs.dev/)
 
-Additional tools:
+Additional librairies:
 
 - [React Hook Form](https://react-hook-form.com/) and [yup](https://github.com/jquense/yup) for form validation
 - [Ariakit](https://ariakit.org/) for some components such as modals
+- [react-beautiful-dnd (rbd)](https://github.com/atlassian/react-beautiful-dnd) for drag and drop
 - [react-hot-toast](https://react-hot-toast.com/) for notifications
 - [react-error-boundary](https://github.com/bvaughn/react-error-boundary)
