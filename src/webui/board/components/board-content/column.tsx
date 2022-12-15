@@ -1,45 +1,50 @@
 import styles from './column.module.css';
 
+import { Draggable, Droppable } from 'react-beautiful-dnd';
+
 import { Task } from './task';
 import type { ColumnEntity, UniqueId } from 'core/entities';
+import { DroppableTypes, toDroppableColumnId } from 'webui/shared';
 
-type ColumnProps =
-  | {
-      column: ColumnEntity;
-      viewTask: (columnId: UniqueId, taskId: UniqueId) => void;
-      addNewColumn?: undefined;
-    }
-  | { column?: undefined; viewTask?: undefined; addNewColumn: () => void };
+type ColumnProps = ColumnEntity & {
+  viewTask: (columnId: UniqueId, taskId: UniqueId) => void;
+  index: number;
+  boardId: UniqueId;
+};
 
-export const Column = ({ column, viewTask, addNewColumn }: ColumnProps) => {
+export const Column = ({ id, name, tasks, viewTask, index, boardId }: ColumnProps) => {
   return (
-    <div className={styles.container}>
-      {column ? (
-        <h2 className={styles.title}>
-          <span aria-hidden className={styles.color} />
-          <span className={styles.columnname}>{column.name}</span>
-          <span>&nbsp;{`(${column.tasks.length})`}</span>
-        </h2>
-      ) : (
-        <div className={styles.title}>&nbsp;</div>
-      )}
+    <Draggable draggableId={id} index={index}>
+      {({ innerRef, draggableProps, dragHandleProps }) => (
+        <div ref={innerRef} {...draggableProps} className={styles.container}>
+          <h2 {...dragHandleProps} className={styles.title}>
+            <span aria-hidden className={styles.color} />
+            <span className={styles.columnname}>{name}</span>
+            <span>&nbsp;{`(${tasks.length})`}</span>
+          </h2>
 
-      {column ? (
-        <>
-          {column.tasks.map((task) => (
-            <Task
-              key={task.id}
-              title={task.title}
-              subtasks={task.subtasks}
-              onTrigger={() => viewTask(column.id, task.id)}
-            />
-          ))}
-        </>
-      ) : (
-        <button onClick={addNewColumn} className={styles.newcolumn}>
-          + New Column
-        </button>
+          <Droppable
+            droppableId={toDroppableColumnId({ boardId, columnId: id })}
+            type={DroppableTypes.TASKS}
+          >
+            {({ innerRef, droppableProps, placeholder }) => (
+              <div ref={innerRef} {...droppableProps} className={styles.tasklist}>
+                {tasks.map((task, idx) => (
+                  <Task
+                    key={task.id}
+                    id={task.id}
+                    title={task.title}
+                    subtasks={task.subtasks}
+                    onTrigger={() => viewTask(id, task.id)}
+                    index={idx}
+                  />
+                ))}
+                {placeholder}
+              </div>
+            )}
+          </Droppable>
+        </div>
       )}
-    </div>
+    </Draggable>
   );
 };
