@@ -12,6 +12,7 @@ type BoardUpdate = {
         | { isAdded: true; id?: undefined; name: string }
         | { isAdded: false; id: UniqueId; name?: string }
       )[];
+  newIndex?: number;
 };
 
 export async function editBoard(boardUpdate: BoardUpdate) {
@@ -23,7 +24,7 @@ export async function editBoard(boardUpdate: BoardUpdate) {
   const repository = Dependencies.getBoardRepository();
 
   try {
-    await repository.updateBoard(userId, boardUpdate);
+    await repository.updateBoard(userId, boardUpdate, boardUpdate.newIndex);
   } catch (err) {
     notifyError((err as Error).message);
     return { ok: false };

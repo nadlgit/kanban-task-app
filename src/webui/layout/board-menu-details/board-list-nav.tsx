@@ -2,7 +2,7 @@ import styles from './board-list-nav.module.css';
 
 import { useEffect } from 'react';
 
-import { BoardListNavItem } from './board-list-nav-item';
+import { BoardListNavButton } from './board-list-nav-button';
 import { AddBoard, useBoardList } from 'webui/board';
 import { useModalToggle } from 'webui/shared';
 
@@ -24,17 +24,20 @@ export const BoardListNav = () => {
   return (
     <>
       <nav className={styles.container}>
-        <p className={styles.title}>{`All boards (${boardList.length})`}</p>
+        <p className={styles.title}>{`All boards (${boardList.length})`}</p>{' '}
         <ul className={styles.list}>
           {boardList.map((item) => (
-            <BoardListNavItem
-              key={item.id}
-              label={item.name}
-              onClick={() => setActiveBoardId(item.id)}
-              isActive={item.id === activeBoardId}
-            />
+            <li key={item.id} aria-current={item.id === activeBoardId}>
+              <BoardListNavButton
+                label={item.name}
+                onClick={() => setActiveBoardId(item.id)}
+                isActive={item.id === activeBoardId}
+              />
+            </li>
           ))}
-          <BoardListNavItem label="+ Create New Board" onClick={openAddBoard} isCreate />
+          <li>
+            <BoardListNavButton label="+ Create New Board" onClick={openAddBoard} isCreate />
+          </li>
         </ul>
       </nav>
 

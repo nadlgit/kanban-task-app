@@ -1,13 +1,15 @@
 import styles from './board-content.module.css';
 
 import { useState } from 'react';
+import { Droppable } from 'react-beautiful-dnd';
 
+import { AddColumn } from './add-column';
 import { Column } from './column';
 import { EditTask } from '../edit-task';
 import { DeleteTask } from '../delete-task';
 import { ViewTask } from '../view-task';
 import type { BoardEntity, UniqueId } from 'core/entities';
-import { useModalToggle } from 'webui/shared';
+import { DroppableTypes, useModalToggle } from 'webui/shared';
 
 type BoardContentProps = { board: BoardEntity; addNewColumn: () => void };
 
@@ -69,10 +71,23 @@ export const BoardContent = ({ board, addNewColumn }: BoardContentProps) => {
   return (
     <>
       <div className={styles.container}>
-        {board.columns.map((col) => (
-          <Column key={col.id} column={col} viewTask={openView} />
-        ))}
-        <Column addNewColumn={addNewColumn} />
+        <Droppable droppableId={board.id} type={DroppableTypes.COLUMNS} direction="horizontal">
+          {({ innerRef, droppableProps, placeholder }) => (
+            <div ref={innerRef} {...droppableProps} className={styles.columnlist}>
+              {board.columns.map((column, idx) => (
+                <Column
+                  key={column.id}
+                  {...column}
+                  viewTask={openView}
+                  index={idx}
+                  boardId={board.id}
+                />
+              ))}
+              {placeholder}
+            </div>
+          )}
+        </Droppable>
+        <AddColumn onTrigger={addNewColumn} />
       </div>
 
       {viewTaskProps && (

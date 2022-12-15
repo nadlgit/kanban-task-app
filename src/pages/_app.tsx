@@ -1,6 +1,7 @@
 import 'webui/shared/styles/globals.css';
 
 import Head from 'next/head';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import { AuthContextProvider } from 'webui/auth';
@@ -10,6 +11,7 @@ import { DemoBoardRepository, FirebaseBoardRepository } from 'infrastructure/boa
 import { ErrorFallback } from 'webui/misc';
 import { UINotification, UINotificationContainer } from 'webui/notification';
 import { AuthRouter } from 'webui/routes';
+import { handleDragEnd } from 'webui/shared';
 import type { NextAppPropsWithLayout } from 'webui/shared';
 import { ThemeContextProvider } from 'webui/theme';
 
@@ -30,7 +32,11 @@ export default function MyApp({ Component, pageProps }: NextAppPropsWithLayout) 
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <ThemeContextProvider>
           <AuthContextProvider>
-            <AuthRouter>{getLayout(<Component {...pageProps} />)}</AuthRouter>
+            <AuthRouter>
+              <DragDropContext onDragEnd={handleDragEnd}>
+                {getLayout(<Component {...pageProps} />)}
+              </DragDropContext>
+            </AuthRouter>
           </AuthContextProvider>
           <UINotificationContainer />
         </ThemeContextProvider>

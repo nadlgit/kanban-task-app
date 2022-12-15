@@ -38,6 +38,7 @@ describe('editTask()', () => {
         { title: faker.lorem.words(), isCompleted: true },
       ],
       newColumnId: faker.datatype.uuid(),
+      newIndex: faker.datatype.number(50),
     };
 
     const result = await editTask(testBoardId, testColumnId, testTask);
@@ -49,7 +50,7 @@ describe('editTask()', () => {
       testBoardId,
       testTask.newColumnId,
       testTask,
-      undefined,
+      testTask.newIndex,
       testColumnId
     );
     expect(notifyError).not.toHaveBeenCalled();

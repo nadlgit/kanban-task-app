@@ -107,9 +107,7 @@ export class DemoBoardRepository implements BoardRepository {
 
     const listenerCallback = this.#onBoardChangeCallback.get(boardUpdate.id);
     listenerCallback && listenerCallback();
-    if (board.name) {
-      this.#onBoardListChangeCallback();
-    }
+    this.#onBoardListChangeCallback();
   }
 
   async deleteBoard(userId: string, boardId: string) {
