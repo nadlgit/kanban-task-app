@@ -32,7 +32,7 @@ Users should be able to:
 
 - Register, log in and log out
 - Drag and drop columns to re-order them
-- Drag and drop projects to re-order them
+- Drag and drop projects to re-order them => requirement abandoned because it needs to be designed in accessible way
 
 Project should:
 
