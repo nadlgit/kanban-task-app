@@ -2,11 +2,10 @@ import type { Dependencies as OrigDependencies } from 'core/dependencies';
 
 let Dependencies: typeof OrigDependencies;
 
-beforeEach(() => {
-  return import('./dependencies').then((module) => {
-    Dependencies = module.Dependencies;
-    jest.resetModules();
-  });
+beforeEach(async () => {
+  const importedModule = await import('./dependencies');
+  Dependencies = importedModule.Dependencies;
+  jest.resetModules();
 });
 
 const mockAppNotificationFactory = () => ({
