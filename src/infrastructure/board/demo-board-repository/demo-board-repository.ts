@@ -12,7 +12,7 @@ import {
 import { getInitialBoards } from './initial-boards';
 import type { BoardEntity, UniqueId } from 'core/entities';
 import type { BoardRepository } from 'core/ports';
-import { doNothing } from 'webui/shared';
+import { doNothing } from 'core/utils';
 
 export class DemoBoardRepository implements BoardRepository {
   #boards: BoardEntity[] = getInitialBoards();

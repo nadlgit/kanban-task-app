@@ -2,7 +2,7 @@ import { getUserId } from './helpers';
 import { notifyError } from '../notification';
 import { Dependencies } from 'core/dependencies';
 import type { UniqueId } from 'core/entities';
-import { doNothing } from 'webui/shared';
+import { doNothing } from 'core/utils';
 
 export function onBoardListChange(callback: () => void) {
   const userId = getUserId();

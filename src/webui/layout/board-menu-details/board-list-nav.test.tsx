@@ -7,8 +7,8 @@ import type { PropsWithChildren } from 'react';
 
 import { BoardListNav } from './board-list-nav';
 import { getBoardList, onBoardListChange } from 'core/usecases';
+import { doNothing } from 'core/utils';
 import { AddBoard, BoardContextProvider } from 'webui/board';
-import { doNothing } from 'webui/shared';
 
 jest.mock('core/usecases');
 jest.mock('webui/board/components/add-board/add-board');
