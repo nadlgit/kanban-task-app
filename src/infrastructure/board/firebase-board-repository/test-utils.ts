@@ -11,9 +11,9 @@ import {
 } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 
-import type { BoardEntity, BoardList, UniqueId } from 'core/entities';
 import type { BoardDocSchema, TaskDocSchema } from './firestore-helpers';
-import { doNothing } from 'webui/shared';
+import type { BoardEntity, BoardList, UniqueId } from 'core/entities';
+import { doNothing } from 'core/utils';
 
 export class FirestoreDoc extends QueryDocumentSnapshot<DocumentData> {
   #id: string;

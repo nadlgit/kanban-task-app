@@ -6,7 +6,7 @@ import { BoardContextProvider } from './context-provider';
 import { useBoardList } from './use-board-list';
 import type { UniqueId } from 'core/entities';
 import { getBoardList, onBoardListChange } from 'core/usecases';
-import { doNothing } from 'webui/shared';
+import { doNothing } from 'core/utils';
 
 jest.mock('core/usecases');
 
