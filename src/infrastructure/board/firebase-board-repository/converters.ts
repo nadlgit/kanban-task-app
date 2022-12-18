@@ -5,7 +5,7 @@ import type {
   NextId,
   TaskDocSchema,
 } from './firestore-helpers';
-import type { BoardEntity, BoardList, TaskEntity, UniqueId } from 'core/entities';
+import type { BoardEntity, BoardList, ColumnEntity, TaskEntity, UniqueId } from 'core/entities';
 
 export const BOARD_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
   new Error('Missing data, unable to convert board')
@@ -13,10 +13,16 @@ export const BOARD_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
 export const TASK_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
   new Error('Missing data, unable to convert task')
 );
+export const NO_FIRESTORE_DOC_ERROR = Object.freeze(
+  new Error("Firestore doc doesn't exist, unable to convert")
+);
+
+export type BoardBase = Omit<BoardEntity, 'columns'> & { columns: Omit<ColumnEntity, 'tasks'>[] };
+
+export type BoardColumnTasks = Record<UniqueId, TaskEntity[]>;
 
 export function firestoreDocsToBoardList(boardDocs: FirestoreDocs) {
   const boardList: BoardList = [];
-
   boardDocs.forEach((doc) => {
     const { name, nextId } = doc.data() as BoardDocSchema;
     const index = Math.max(
@@ -25,39 +31,63 @@ export function firestoreDocsToBoardList(boardDocs: FirestoreDocs) {
     );
     boardList.splice(index, 0, { id: doc.id, name });
   });
-
   return boardList;
 }
 
-export function firestoreDocsToBoard(
-  boardInfo:
-    | { boardBefore?: undefined; boardDoc: FirestoreDoc }
-    | { boardBefore: BoardEntity; boardDoc?: undefined }
-    | { boardBefore: BoardEntity; boardDoc: FirestoreDoc },
-  taskDocs?: FirestoreDocs
-) {
-  let board: BoardEntity | undefined;
-  if (boardInfo?.boardDoc && boardInfo.boardDoc.exists()) {
-    const { name, columns } = boardInfo.boardDoc.data() as BoardDocSchema;
-    board = {
-      id: boardInfo.boardDoc.id,
-      name,
-      columns: firestoreColumnsToColumns(columns, boardInfo?.boardBefore?.columns),
-    };
-  } else {
-    board = boardInfo.boardBefore;
+export function firestoreDocToBoardBase(boardDoc: FirestoreDoc) {
+  if (!boardDoc.exists()) {
+    throw NO_FIRESTORE_DOC_ERROR;
   }
 
-  if (board && taskDocs && !taskDocs.empty) {
-    const columnTasks = firestoreTaskDocsToColumnTasks(taskDocs);
-    Object.entries(columnTasks).forEach(([key, tasks]) => {
-      const column = board?.columns.find(({ id }) => id === key);
-      if (column) {
-        column.tasks = tasks;
-      }
-    });
-  }
+  const { name, columns } = boardDoc.data() as BoardDocSchema;
+  const boardBase: BoardBase = { id: boardDoc.id, name, columns: [] };
+  Object.entries(columns).forEach(([key, { name, nextId }]) => {
+    const index = Math.max(
+      boardBase.columns.findIndex(({ id }) => id === nextId),
+      boardBase.columns.length
+    );
+    boardBase.columns.splice(index, 0, { id: key, name });
+  });
+  return boardBase;
+}
 
+export function firestoreDocsToBoardColumnTasks(taskDocs: FirestoreDocs) {
+  const columnTasks: BoardColumnTasks = {};
+  taskDocs.forEach((doc) => {
+    const {
+      title,
+      description,
+      subtasks,
+      status: { id: columnId },
+      nextId,
+    } = doc.data() as TaskDocSchema;
+    if (!columnTasks[columnId]) {
+      columnTasks[columnId] = [];
+    }
+    const column = columnTasks[columnId];
+    const index = Math.max(
+      column.findIndex(({ id }) => id === nextId),
+      column.length
+    );
+    column.splice(index, 0, { id: doc.id, title, description, subtasks });
+  });
+  return columnTasks;
+}
+
+export function firestorePartsToBoard(boardBase: BoardBase, columnTasks: BoardColumnTasks) {
+  const board: BoardEntity = {
+    ...boardBase,
+    columns: boardBase.columns.map(({ id, name }) => ({ id, name, tasks: [] })),
+  };
+  Object.entries(columnTasks).forEach(([key, tasks]) => {
+    const column = board.columns.find(({ id }) => id === key);
+    if (column) {
+      column.tasks = tasks.map((task) => ({
+        ...task,
+        subtasks: task.subtasks.map((st) => ({ ...st })),
+      }));
+    }
+  });
   return board;
 }
 
@@ -74,7 +104,12 @@ export function boardToFirestoreDoc(
     boardDoc.name = name;
   }
   if (columns !== undefined) {
-    boardDoc.columns = columnsToFirestoreColumns(columns);
+    boardDoc.columns = Object.fromEntries(
+      columns.map(({ id, name }, idx) => [
+        id,
+        { name, nextId: idx < columns.length - 1 ? columns[idx + 1].id : null },
+      ])
+    );
   }
   if (nextBoardId !== undefined) {
     boardDoc.nextId = nextBoardId;
@@ -139,64 +174,4 @@ export function taskToFirestoreDoc(
     throw TASK_TO_DOC_MISSING_DATA_ERROR;
   }
   return { taskDoc: taskDoc as TaskDocSchema, hasNoField };
-}
-
-function columnsToFirestoreColumns(columns: BoardEntity['columns']) {
-  return Object.fromEntries(
-    columns.map(({ id, name }, idx) => [
-      id,
-      { name, nextId: idx < columns.length - 1 ? columns[idx + 1].id : null },
-    ])
-  );
-}
-
-function firestoreColumnsToColumns(
-  firestoreColumns: BoardDocSchema['columns'],
-  boardColumnsBefore?: BoardEntity['columns']
-) {
-  const boardColumns: BoardEntity['columns'] = [];
-
-  Object.entries(firestoreColumns).forEach(([key, { name, nextId }]) => {
-    const index = Math.max(
-      boardColumns.findIndex(({ id }) => id === nextId),
-      boardColumns.length
-    );
-    boardColumns.splice(index, 0, { id: key, name, tasks: [] });
-  });
-
-  if (boardColumnsBefore) {
-    for (const column of boardColumns) {
-      const columnBefore = boardColumnsBefore.find(({ id }) => id === column.id);
-      if (columnBefore) {
-        column.tasks = columnBefore.tasks;
-      }
-    }
-  }
-
-  return boardColumns;
-}
-
-function firestoreTaskDocsToColumnTasks(taskDocs: FirestoreDocs) {
-  const columnTasks: Record<string, TaskEntity[]> = {};
-
-  taskDocs.forEach((doc) => {
-    const {
-      title,
-      description,
-      subtasks,
-      status: { id: columnId },
-      nextId,
-    } = doc.data() as TaskDocSchema;
-    if (!columnTasks[columnId]) {
-      columnTasks[columnId] = [];
-    }
-    const column = columnTasks[columnId];
-    const index = Math.max(
-      column.findIndex(({ id }) => id === nextId),
-      column.length
-    );
-    column.splice(index, 0, { id: doc.id, title, description, subtasks });
-  });
-
-  return columnTasks;
 }

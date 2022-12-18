@@ -3,153 +3,162 @@ import { faker } from '@faker-js/faker';
 import {
   boardToFirestoreDoc,
   BOARD_TO_DOC_MISSING_DATA_ERROR,
-  firestoreDocsToBoard,
+  firestoreDocToBoardBase,
+  firestoreDocsToBoardColumnTasks,
   firestoreDocsToBoardList,
+  firestorePartsToBoard,
+  NO_FIRESTORE_DOC_ERROR,
   taskToFirestoreDoc,
   TASK_TO_DOC_MISSING_DATA_ERROR,
 } from './converters';
-import {
-  FirestoreDoc,
-  FirestoreDocs,
-  testBoardDataFactory,
-  testBoardListDataFactory,
-} from './test-utils';
+import { emptyFirestoreDoc, emptyFirestoreDocs, FirestoreDoc, FirestoreDocs } from './test-utils';
 
 describe('firestoreDocsToBoardList()', () => {
   it('should handle empty board collection', () => {
-    const testData = testBoardListDataFactory([]);
-    const boardDocs = new FirestoreDocs(testData.boardDocs);
-    const expected = testData.boardList;
-
-    const result = firestoreDocsToBoardList(boardDocs);
-    expect(result).toEqual(expected);
+    const result = firestoreDocsToBoardList(emptyFirestoreDocs());
+    expect(result).toEqual([]);
   });
 
   it('should handle non empty board collection', () => {
-    const testData = testBoardListDataFactory([
+    const testUserId = faker.datatype.uuid();
+    const testBoards = [
       { id: faker.datatype.uuid(), name: faker.lorem.words() },
       { id: faker.datatype.uuid(), name: faker.lorem.words() },
       { id: faker.datatype.uuid(), name: faker.lorem.words() },
-    ]);
-    const boardDocs = new FirestoreDocs(testData.boardDocs);
-    const expected = testData.boardList;
+    ];
+    const testData = testBoards.map(({ id, name }, idx) => ({
+      id,
+      data: {
+        owner: testUserId,
+        name,
+        columns: {},
+        nextId: idx < testBoards.length - 1 ? testBoards[idx + 1].id : null,
+      },
+    }));
+    const expected = testBoards.map(({ id, name }) => ({ id, name }));
 
-    const result = firestoreDocsToBoardList(boardDocs);
+    const result = firestoreDocsToBoardList(new FirestoreDocs(testData));
     expect(result).toEqual(expected);
   });
 });
 
-describe('firestoreDocsToBoard()', () => {
-  it.each([
-    { desc: 'boardBefore undefined', boardBefore: undefined },
-    {
-      desc: 'boardBefore defined',
-      boardBefore: {
+describe('firestoreDocToBoardBase()', () => {
+  it('should throw when board doc doesnt exist', () => {
+    expect(() => firestoreDocToBoardBase(emptyFirestoreDoc())).toThrow(NO_FIRESTORE_DOC_ERROR);
+  });
+
+  it('should handle board doc', () => {
+    const testBoard = {
+      id: faker.datatype.uuid(),
+      name: faker.lorem.words(),
+      columns: [
+        {
+          id: faker.datatype.uuid(),
+          name: faker.lorem.words(),
+          tasks: [
+            {
+              id: faker.datatype.uuid(),
+              title: faker.lorem.words(),
+              description: faker.lorem.words(),
+              subtasks: [],
+            },
+          ],
+        },
+        {
+          id: faker.datatype.uuid(),
+          name: faker.lorem.words(),
+          tasks: [],
+        },
+        {
+          id: faker.datatype.uuid(),
+          name: faker.lorem.words(),
+          tasks: [],
+        },
+      ],
+    };
+    const testData = {
+      id: testBoard.id,
+      data: {
+        owner: faker.datatype.uuid(),
+        name: testBoard.name,
+        columns: Object.fromEntries(
+          testBoard.columns.map(({ id, name }, idx) => [
+            id,
+            {
+              name,
+              nextId: idx < testBoard.columns.length - 1 ? testBoard.columns[idx + 1].id : null,
+            },
+          ])
+        ),
+        nextId: null,
+      },
+    };
+    const expected = {
+      ...testBoard,
+      columns: testBoard.columns.map(({ id, name }) => ({ id, name })),
+    };
+
+    const result = firestoreDocToBoardBase(new FirestoreDoc(testData));
+    expect(result).toEqual(expected);
+  });
+});
+
+describe('firestoreDocsToBoardColumnTasks()', () => {
+  it('should handle task collection', () => {
+    const testBoardColumns = [
+      {
         id: faker.datatype.uuid(),
         name: faker.lorem.words(),
-        columns: [
+        tasks: [
           {
             id: faker.datatype.uuid(),
-            name: faker.lorem.words(),
-            tasks: [
-              {
-                id: faker.datatype.uuid(),
-                title: faker.lorem.words(),
-                description: faker.lorem.words(),
-                subtasks: [],
-              },
-            ],
+            title: faker.lorem.words(),
+            description: faker.lorem.words(),
+            subtasks: [],
           },
         ],
       },
-    },
-  ])('should handle $desc / boardDoc defined / taskDocs defined', ({ boardBefore }) => {
-    const testData = testBoardDataFactory({
-      id: faker.datatype.uuid(),
-      name: faker.lorem.words(),
-      columns: [
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
+      {
+        id: faker.datatype.uuid(),
+        name: faker.lorem.words(),
+        tasks: [
+          {
+            id: faker.datatype.uuid(),
+            title: faker.lorem.words(),
+            description: faker.lorem.words(),
+            subtasks: [],
+          },
+          {
+            id: faker.datatype.uuid(),
+            title: faker.lorem.words(),
+            description: faker.lorem.words(),
+            subtasks: [],
+          },
+        ],
+      },
+    ];
+    const testData = testBoardColumns.flatMap(({ id, name, tasks }) =>
+      tasks.map(({ id: taskId, title, description, subtasks }, idx) => ({
+        id: taskId,
+        data: {
+          title,
+          description,
+          subtasks,
+          status: { id, name },
+          nextId: idx < tasks.length - 1 ? tasks[idx + 1].id : null,
         },
-      ],
-    });
-    const boardDoc = new FirestoreDoc(testData.boardDoc);
-    const taskDocs = new FirestoreDocs(testData.taskDocs);
-    const expected = testData.board;
+      }))
+    );
+    const expected = Object.fromEntries(testBoardColumns.map(({ id, tasks }) => [id, tasks]));
 
-    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
+    const result = firestoreDocsToBoardColumnTasks(new FirestoreDocs(testData));
     expect(result).toEqual(expected);
   });
+});
 
-  it('should handle boardBefore defined / boardDoc undefined / taskDocs undefined', () => {
-    const boardBefore = {
-      id: faker.datatype.uuid(),
-      name: faker.lorem.words(),
-      columns: [
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
-        },
-      ],
-    };
-    const boardDoc = undefined;
-    const taskDocs = undefined;
-    const expected = boardBefore;
-
-    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
-    expect(result).toEqual(expected);
-  });
-
-  it('should handle boardBefore undefined / boardDoc defined / taskDocs undefined', () => {
-    const testData = testBoardDataFactory({
-      id: faker.datatype.uuid(),
-      name: faker.lorem.words(),
-      columns: [
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
-        },
-      ],
-    });
-    const boardBefore = undefined;
-    const boardDoc = new FirestoreDoc(testData.boardDoc);
-    const taskDocs = undefined;
-    const expected = {
-      ...testData.board,
-      columns: testData.board.columns.map(({ id, name }) => ({ id, name, tasks: [] })),
-    };
-
-    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
-    expect(result).toEqual(expected);
-  });
-
-  it('should handle boardBefore defined / boardDoc defined / taskDocs undefined', () => {
-    const testData = testBoardDataFactory({
+describe('firestorePartsToBoard()', () => {
+  it('should convert', () => {
+    const testBoard = {
       id: faker.datatype.uuid(),
       name: faker.lorem.words(),
       columns: [
@@ -184,142 +193,17 @@ describe('firestoreDocsToBoard()', () => {
           ],
         },
       ],
-    });
-    const boardBefore = {
-      id: testData.board.id,
-      name: faker.lorem.words(),
-      columns: [
-        testData.board.columns[0],
-        {
-          id: testData.board.columns[1].id,
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
-        },
-      ],
     };
-    const boardDoc = new FirestoreDoc(testData.boardDoc);
-    const taskDocs = undefined;
-    const expected = {
-      ...testData.board,
-      columns: testData.board.columns.map(({ id, name }) => {
-        const columnBefore = boardBefore.columns.find(({ id: idBefore }) => idBefore === id);
-        return { id, name, tasks: columnBefore ? columnBefore.tasks : [] };
-      }),
+    const testBoardBase = {
+      ...testBoard,
+      columns: testBoard.columns.map(({ id, name }) => ({ id, name })),
     };
+    const testColumnTasks = Object.fromEntries(
+      testBoard.columns.map(({ id, tasks }) => [id, tasks])
+    );
 
-    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
-    expect(result).toEqual(expected);
-  });
-
-  it('should handle boardBefore defined / boardDoc undefined / taskDocs defined ', () => {
-    const testData = testBoardDataFactory({
-      id: faker.datatype.uuid(),
-      name: faker.lorem.words(),
-      columns: [
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
-        },
-        {
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
-        },
-      ],
-    });
-    const boardBefore = {
-      id: testData.board.id,
-      name: faker.lorem.words(),
-      columns: [
-        testData.board.columns[0],
-        {
-          id: testData.board.columns[1].id,
-          name: faker.lorem.words(),
-          tasks: [
-            {
-              id: faker.datatype.uuid(),
-              title: faker.lorem.words(),
-              description: faker.lorem.words(),
-              subtasks: [],
-            },
-          ],
-        },
-      ],
-    };
-    const boardDoc = undefined;
-    const taskDocs = new FirestoreDocs(testData.taskDocs);
-    const expected = {
-      ...boardBefore,
-      columns: boardBefore.columns.map(({ id, name, tasks }) => {
-        const columnAfter = testData.board.columns.find(({ id: iAfter }) => iAfter === id);
-        return { id, name, tasks: columnAfter ? columnAfter.tasks : tasks };
-      }),
-    };
-
-    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
-    expect(result).toEqual(expected);
-  });
-
-  it.each([
-    { desc: ' taskDocs undefined', taskDocs: undefined },
-    {
-      desc: ' taskDocs defined',
-      taskDocs: new FirestoreDocs(
-        testBoardDataFactory({
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          columns: [
-            {
-              id: faker.datatype.uuid(),
-              name: faker.lorem.words(),
-              tasks: [
-                {
-                  id: faker.datatype.uuid(),
-                  title: faker.lorem.words(),
-                  description: faker.lorem.words(),
-                  subtasks: [],
-                },
-              ],
-            },
-          ],
-        }).taskDocs
-      ),
-    },
-  ])('should handle boardBefore undefined / boardDoc "empty" / $desc', ({ taskDocs }) => {
-    const boardBefore = undefined;
-    const boardDoc = new FirestoreDoc({} as ReturnType<typeof testBoardDataFactory>['boardDoc']);
-    const expected = undefined;
-
-    const result = firestoreDocsToBoard({ boardBefore, boardDoc }, taskDocs);
-    expect(result).toEqual(expected);
+    const result = firestorePartsToBoard(testBoardBase, testColumnTasks);
+    expect(result).toEqual(testBoard);
   });
 });
 
@@ -364,11 +248,15 @@ describe('boardToFirestoreDoc()', () => {
       boardDoc: {
         owner: testData.userId,
         name: testData.name,
-        columns: testBoardDataFactory({
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          columns: testData.columns,
-        }).boardDoc.data.columns,
+        columns: Object.fromEntries(
+          testData.columns.map(({ id, name }, idx) => [
+            id,
+            {
+              name,
+              nextId: idx < testData.columns.length - 1 ? testData.columns[idx + 1].id : null,
+            },
+          ])
+        ),
         nextId: testData.nextBoardId,
       },
       hasNoField: false,
@@ -406,11 +294,15 @@ describe('boardToFirestoreDoc()', () => {
     };
     const expected = {
       boardDoc: {
-        columns: testBoardDataFactory({
-          id: faker.datatype.uuid(),
-          name: faker.lorem.words(),
-          columns: testData.columns,
-        }).boardDoc.data.columns,
+        columns: Object.fromEntries(
+          testData.columns.map(({ id, name }, idx) => [
+            id,
+            {
+              name,
+              nextId: idx < testData.columns.length - 1 ? testData.columns[idx + 1].id : null,
+            },
+          ])
+        ),
       },
       hasNoField: false,
     };
