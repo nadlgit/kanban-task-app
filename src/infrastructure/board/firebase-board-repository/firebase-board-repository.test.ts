@@ -1,65 +1,50 @@
 import { faker } from '@faker-js/faker';
 
+import {
+  addBoardListSubscriptionCallback,
+  addBoardSubscriptionCallback,
+  getBoardListSubscriptionValue,
+  getBoardSubscriptionValue,
+} from './data-subscription';
 import { BOARD_UNDEFINED_ERROR, FirebaseBoardRepository } from './firebase-board-repository';
 import {
-  getBoardDoc,
   getBoardRef,
-  getBoardTaskDocs,
   getTaskRef,
-  getUserBoardDocs,
   newBoardRef,
   newColumnId,
   newTaskRef,
   startBatch,
 } from './firestore-helpers';
 import type { TaskDocSchema } from './firestore-helpers';
-import {
-  FirestoreDoc,
-  FirestoreDocs,
-  FirestoreRef,
-  testBoardDataFactory,
-  testBoardListDataFactory,
-} from './test-utils';
+import { FirestoreRef } from './test-utils';
 import type { BoardEntity, UniqueId } from 'core/entities';
+import { doNothing } from 'core/utils';
 
+jest.mock('./data-subscription');
 jest.mock('./firestore-helpers');
 
 let mockBoards: BoardEntity[] = [];
-const getMockFirestoreBoardAndTaskDocs = (boardId: UniqueId) => {
-  const boardIndex = mockBoards.findIndex(({ id }) => id === boardId);
-  const board = boardIndex >= 0 ? mockBoards[boardIndex] : undefined;
-  const nextBoardId =
-    boardIndex >= 0 && boardIndex < mockBoards.length - 1
-      ? mockBoards[boardIndex + 1].id
-      : undefined;
-  const { boardDoc, taskDocs } = board
-    ? testBoardDataFactory(board, nextBoardId)
-    : {
-        boardDoc: {} as ReturnType<typeof testBoardDataFactory>['boardDoc'],
-        taskDocs: [] as ReturnType<typeof testBoardDataFactory>['taskDocs'],
-      };
-  return { boardDoc, taskDocs };
-};
 
-const mockGetUserBoardDocs = getUserBoardDocs as jest.MockedFunction<typeof getUserBoardDocs>;
-mockGetUserBoardDocs.mockImplementation(() => {
-  const boardDocs = testBoardListDataFactory(
-    mockBoards.map(({ id, name }) => ({ id, name }))
-  ).boardDocs;
-  return Promise.resolve(new FirestoreDocs(boardDocs));
-});
+const mockAddBoardListSubscriptionCallback =
+  addBoardListSubscriptionCallback as jest.MockedFunction<typeof addBoardListSubscriptionCallback>;
 
-const mockGetBoardDoc = getBoardDoc as jest.MockedFunction<typeof getBoardDoc>;
-mockGetBoardDoc.mockImplementation((boardId) => {
-  const boardDoc = getMockFirestoreBoardAndTaskDocs(boardId).boardDoc;
-  return Promise.resolve(new FirestoreDoc(boardDoc));
-});
+const mockAddBoardSubscriptionCallback = addBoardSubscriptionCallback as jest.MockedFunction<
+  typeof addBoardSubscriptionCallback
+>;
 
-const mockGetBoardTaskDocs = getBoardTaskDocs as jest.MockedFunction<typeof getBoardTaskDocs>;
-mockGetBoardTaskDocs.mockImplementation((boardId) => {
-  const taskDocs = getMockFirestoreBoardAndTaskDocs(boardId).taskDocs;
-  return Promise.resolve(new FirestoreDocs(taskDocs));
-});
+const mockGetBoardListSubscriptionValue = getBoardListSubscriptionValue as jest.MockedFunction<
+  typeof getBoardListSubscriptionValue
+>;
+mockGetBoardListSubscriptionValue.mockImplementation(() =>
+  Promise.resolve(mockBoards.map(({ id, name }) => ({ id, name })))
+);
+
+const mockGetBoardSubscriptionValue = getBoardSubscriptionValue as jest.MockedFunction<
+  typeof getBoardSubscriptionValue
+>;
+mockGetBoardSubscriptionValue.mockImplementation((userId, boardId) =>
+  Promise.resolve(mockBoards.find(({ id }) => id === boardId))
+);
 
 const mockGetBoardRef = getBoardRef as jest.MockedFunction<typeof getBoardRef>;
 mockGetBoardRef.mockImplementation((boardId) => new FirestoreRef({ id: boardId }));
@@ -76,12 +61,11 @@ mockNewColumnId.mockImplementation(() => faker.datatype.uuid());
 const mockNewTaskRef = newTaskRef as jest.MockedFunction<typeof newTaskRef>;
 mockNewTaskRef.mockImplementation(() => new FirestoreRef({ id: faker.datatype.uuid() }));
 
-const mockStartBatch = startBatch as jest.MockedFunction<typeof startBatch>;
 const mockBatchSet: jest.MockedFunction<ReturnType<typeof startBatch>['set']> = jest.fn();
 const mockBatchUpdate: jest.MockedFunction<ReturnType<typeof startBatch>['update']> = jest.fn();
 const mockBatchDelete: jest.MockedFunction<ReturnType<typeof startBatch>['delete']> = jest.fn();
 const mockBatchCommit: jest.MockedFunction<ReturnType<typeof startBatch>['commit']> = jest.fn();
-mockStartBatch.mockImplementation(() => {
+(startBatch as jest.MockedFunction<typeof startBatch>).mockImplementation(() => {
   return {
     set: mockBatchSet,
     update: mockBatchUpdate,
@@ -108,8 +92,8 @@ describe('FirebaseBoardRepository.getBoardList()', () => {
     const result = await new FirebaseBoardRepository().getBoardList(testUserId);
 
     expect(result).toEqual(testBoardList);
-    expect(getUserBoardDocs).toHaveBeenCalledTimes(1);
-    expect(getUserBoardDocs).toHaveBeenCalledWith(testUserId);
+    expect(getBoardListSubscriptionValue).toHaveBeenCalledTimes(1);
+    expect(getBoardListSubscriptionValue).toHaveBeenCalledWith(testUserId);
   });
 });
 
@@ -148,10 +132,8 @@ describe('FirebaseBoardRepository.getBoard()', () => {
     const result = await new FirebaseBoardRepository().getBoard(testUserId, testBoard.id);
 
     expect(result).toEqual(testBoard);
-    expect(getBoardDoc).toHaveBeenCalledTimes(1);
-    expect(getBoardDoc).toHaveBeenCalledWith(testBoard.id);
-    expect(getBoardTaskDocs).toHaveBeenCalledTimes(1);
-    expect(getBoardTaskDocs).toHaveBeenCalledWith(testBoard.id);
+    expect(getBoardSubscriptionValue).toHaveBeenCalledTimes(1);
+    expect(getBoardSubscriptionValue).toHaveBeenCalledWith(testUserId, testBoard.id);
   });
 
   it('should throw when board is undefined', async () => {
@@ -162,10 +144,59 @@ describe('FirebaseBoardRepository.getBoard()', () => {
     await expect(new FirebaseBoardRepository().getBoard(testUserId, testBoardId)).rejects.toEqual(
       BOARD_UNDEFINED_ERROR
     );
-    expect(getBoardDoc).toHaveBeenCalledTimes(1);
-    expect(getBoardDoc).toHaveBeenCalledWith(testBoardId);
-    expect(getBoardTaskDocs).toHaveBeenCalledTimes(1);
-    expect(getBoardTaskDocs).toHaveBeenCalledWith(testBoardId);
+    expect(getBoardSubscriptionValue).toHaveBeenCalledTimes(1);
+    expect(getBoardSubscriptionValue).toHaveBeenCalledWith(testUserId, testBoardId);
+  });
+});
+
+describe('FirebaseBoardRepository.listenToBoardListChange()', () => {
+  it('should return unsubscribe function', () => {
+    const testUserId = faker.datatype.uuid();
+    const testCallback = () => {
+      doNothing();
+    };
+    const testUnsubscribe = () => {
+      doNothing();
+    };
+    mockAddBoardListSubscriptionCallback.mockImplementationOnce(() => {
+      return testUnsubscribe;
+    });
+
+    const result = new FirebaseBoardRepository().listenToBoardListChange(testUserId, testCallback);
+
+    expect(result).toEqual(testUnsubscribe);
+    expect(addBoardListSubscriptionCallback).toHaveBeenCalledTimes(1);
+    expect(addBoardListSubscriptionCallback).toHaveBeenCalledWith(testUserId, testCallback);
+  });
+});
+
+describe('FirebaseBoardRepository.listenToBoardChange()', () => {
+  it('should return unsubscribe function', () => {
+    const testUserId = faker.datatype.uuid();
+    const testBoardId = faker.datatype.uuid();
+    const testCallback = () => {
+      doNothing();
+    };
+    const testUnsubscribe = () => {
+      doNothing();
+    };
+    mockAddBoardSubscriptionCallback.mockImplementationOnce(() => {
+      return testUnsubscribe;
+    });
+
+    const result = new FirebaseBoardRepository().listenToBoardChange(
+      testUserId,
+      testBoardId,
+      testCallback
+    );
+
+    expect(result).toEqual(testUnsubscribe);
+    expect(addBoardSubscriptionCallback).toHaveBeenCalledTimes(1);
+    expect(addBoardSubscriptionCallback).toHaveBeenCalledWith(
+      testUserId,
+      testBoardId,
+      testCallback
+    );
   });
 });
 
@@ -206,21 +237,21 @@ describe('FirebaseBoardRepository.addBoard()', () => {
     const boardId = await repository.addBoard(testUserId, testBoard, testNewIndex);
 
     expect(boardId).toEqual(testBoardRef.id);
-    const testNextBoardId =
-      testBoardIndex < mockBoards.length - 1 ? mockBoards[testBoardIndex + 1].id : undefined;
-    const testBoardDocData = testBoardDataFactory(
-      {
-        id: testBoardRef.id,
-        name: testBoard.name,
-        columns: testBoard.columns.map(({ name }, idx) => ({
-          id: mockNewColumnId.mock.results[idx].value,
-          name,
-          tasks: [],
-        })),
-      },
-      testNextBoardId,
-      testUserId
-    ).boardDoc.data;
+    const testBoardColumns = testBoard.columns.map(({ name }, idx) => ({
+      id: mockNewColumnId.mock.results[idx].value,
+      name,
+    }));
+    const testBoardDocData = {
+      owner: testUserId,
+      name: testBoard.name,
+      columns: Object.fromEntries(
+        testBoardColumns.map(({ id, name }, idx) => [
+          id,
+          { name, nextId: idx < testBoardColumns.length - 1 ? testBoardColumns[idx + 1].id : null },
+        ])
+      ),
+      nextId: testBoardIndex < mockBoards.length - 1 ? mockBoards[testBoardIndex + 1].id : null,
+    };
     expect(mockBatchSet).toHaveBeenCalledTimes(1);
     expect(mockBatchSet.mock.calls[0]).toEqual([testBoardRef, testBoardDocData]);
     if (testPrevBoardRef) {
@@ -349,19 +380,20 @@ describe('FirebaseBoardRepository.updateBoard()', () => {
       const deletedIds = testBoardUpdate.columnsDeleted.map(({ id }) => id);
       testBoardUpdateColumns = testBoard.columns.filter(({ id }) => !deletedIds.includes(id));
     }
-    const testBoardDocData = testBoardDataFactory(
-      {
-        id: testBoard.id,
-        name: testBoard.name,
-        columns: testBoardUpdateColumns,
-      },
-      undefined,
-      testUserId
-    ).boardDoc.data;
+    const testBoardDocDataColumns = Object.fromEntries(
+      testBoardUpdateColumns.map(({ id, name }, idx) => [
+        id,
+        {
+          name,
+          nextId:
+            idx < testBoardUpdateColumns.length - 1 ? testBoardUpdateColumns[idx + 1].id : null,
+        },
+      ])
+    );
     expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
     expect(mockBatchUpdate.mock.calls[0]).toEqual([
       testBoardRef,
-      { columns: testBoardDocData.columns },
+      { columns: testBoardDocDataColumns },
     ]);
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });

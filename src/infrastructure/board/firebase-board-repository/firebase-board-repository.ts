@@ -4,17 +4,10 @@ import {
   addBoardSubscriptionCallback,
   getBoardListSubscriptionValue,
   getBoardSubscriptionValue,
-  initBoardListSubscription,
-  initBoardSubscription,
-  isBoardListSubscriptionInitialized,
-  isBoardSubscriptionInitialized,
 } from './data-subscription';
 import {
-  getBoardDoc,
   getBoardRef,
-  getBoardTaskDocs,
   getTaskRef,
-  getUserBoardDocs,
   newBoardRef,
   newColumnId,
   newTaskRef,
@@ -28,23 +21,11 @@ export const BOARD_UNDEFINED_ERROR = Object.freeze(new Error('Unable to find req
 
 export class FirebaseBoardRepository implements BoardRepository {
   async getBoardList(userId: UniqueId) {
-    if (!isBoardListSubscriptionInitialized(userId)) {
-      const boardDocs = await getUserBoardDocs(userId);
-      initBoardListSubscription(userId, boardDocs);
-    }
-    return getBoardListSubscriptionValue(userId);
+    return await getBoardListSubscriptionValue(userId);
   }
 
   async getBoard(userId: UniqueId, boardId: UniqueId) {
-    if (!isBoardSubscriptionInitialized(userId, boardId)) {
-      const [boardDoc, tasksDocs] = await Promise.all([
-        getBoardDoc(boardId),
-        getBoardTaskDocs(boardId),
-      ]);
-      initBoardSubscription(userId, boardId, boardDoc, tasksDocs);
-    }
-
-    const board = getBoardSubscriptionValue(userId, boardId);
+    const board = await getBoardSubscriptionValue(userId, boardId);
     if (!board) {
       throw BOARD_UNDEFINED_ERROR;
     }

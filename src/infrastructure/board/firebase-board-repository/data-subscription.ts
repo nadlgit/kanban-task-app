@@ -1,50 +1,55 @@
-import { firestoreDocsToBoard, firestoreDocsToBoardList } from './converters';
 import {
+  firestoreDocToBoardBase,
+  firestoreDocsToBoardColumnTasks,
+  firestoreDocsToBoardList,
+  firestorePartsToBoard,
+} from './converters';
+import type { BoardBase, BoardColumnTasks } from './converters';
+import {
+  getBoardDoc,
+  getBoardTaskDocs,
+  getUserBoardDocs,
   onBoardDocSnapshot,
   onBoardTaskDocsSnapshot,
   onUserBoardDocsSnapshot,
 } from './firestore-helpers';
-import type { FirestoreDoc, FirestoreDocs } from './firestore-helpers';
-import type { BoardEntity, BoardList, UniqueId } from 'core/entities';
+import type { BoardList, UniqueId } from 'core/entities';
 
-export function getBoardListSubscriptionValue(userId: UniqueId) {
-  return getBoardListSubscription(userId).getData().value ?? [];
-}
-
-export function isBoardListSubscriptionInitialized(userId: UniqueId) {
-  return getBoardListSubscription(userId).getData().isInitialized;
-}
-
-export function initBoardListSubscription(userId: UniqueId, boardDocs: FirestoreDocs) {
+export async function getBoardListSubscriptionValue(userId: UniqueId) {
   const subscription = getBoardListSubscription(userId);
+
   if (!subscription.getData().isInitialized) {
+    const boardDocs = await getUserBoardDocs(userId);
     subscription.setData(firestoreDocsToBoardList(boardDocs));
   }
+
+  return subscription.getData().value ?? [];
 }
 
 export function addBoardListSubscriptionCallback(userId: UniqueId, callback: () => void) {
   return getBoardListSubscription(userId).addCallBack(callback);
 }
 
-export function getBoardSubscriptionValue(userId: UniqueId, boardId: UniqueId) {
-  return getBoardSubscription(userId, boardId).getData().value;
-}
+export async function getBoardSubscriptionValue(userId: UniqueId, boardId: UniqueId) {
+  const baseSubscription = getBoardBaseSubscription(userId, boardId);
+  const tasksSubscription = getBoardColumnTasksSubscription(userId, boardId);
 
-export function isBoardSubscriptionInitialized(userId: UniqueId, boardId: UniqueId) {
-  return getBoardSubscription(userId, boardId).getData().isInitialized;
-}
-
-export function initBoardSubscription(
-  userId: UniqueId,
-  boardId: UniqueId,
-  boardDoc: FirestoreDoc,
-  taskDocs: FirestoreDocs
-) {
-  const subscription = getBoardSubscription(userId, boardId);
-  const board = firestoreDocsToBoard({ boardDoc }, taskDocs);
-  if (!subscription.getData().isInitialized && board) {
-    subscription.setData(board);
+  if (!baseSubscription.getData().isInitialized || !tasksSubscription.getData().isInitialized) {
+    const [boardDoc, tasksDocs] = await Promise.all([
+      getBoardDoc(boardId),
+      getBoardTaskDocs(boardId),
+    ]);
+    if (boardDoc) {
+      baseSubscription.setData(firestoreDocToBoardBase(boardDoc));
+    }
+    if (tasksDocs) {
+      tasksSubscription.setData(firestoreDocsToBoardColumnTasks(tasksDocs));
+    }
   }
+
+  const boardBase = baseSubscription.getData().value;
+  const columnTasks = tasksSubscription.getData().value;
+  return boardBase && columnTasks ? firestorePartsToBoard(boardBase, columnTasks) : undefined;
 }
 
 export function addBoardSubscriptionCallback(
@@ -52,7 +57,12 @@ export function addBoardSubscriptionCallback(
   boardId: UniqueId,
   callback: () => void
 ) {
-  return getBoardSubscription(userId, boardId).addCallBack(callback);
+  const unsubscribeBase = getBoardBaseSubscription(userId, boardId).addCallBack(callback);
+  const unsubscribeTasks = getBoardColumnTasksSubscription(userId, boardId).addCallBack(callback);
+  return () => {
+    unsubscribeTasks();
+    unsubscribeBase();
+  };
 }
 
 class Subscription<T> {
@@ -84,7 +94,11 @@ class Subscription<T> {
 }
 
 const boardListSubscription: Record<UniqueId, Subscription<BoardList>> = {};
-const boardSubscription: Record<UniqueId, Record<UniqueId, Subscription<BoardEntity>>> = {};
+const boardBaseSubscription: Record<UniqueId, Record<UniqueId, Subscription<BoardBase>>> = {};
+const boardColumnTasksSubscription: Record<
+  UniqueId,
+  Record<UniqueId, Subscription<BoardColumnTasks>>
+> = {};
 
 function getBoardListSubscription(userId: UniqueId) {
   if (!boardListSubscription[userId]) {
@@ -98,30 +112,32 @@ function getBoardListSubscription(userId: UniqueId) {
   return boardListSubscription[userId];
 }
 
-function getBoardSubscription(userId: UniqueId, boardId: UniqueId) {
-  if (!boardSubscription[userId]) {
-    boardSubscription[userId] = {};
+function getBoardBaseSubscription(userId: UniqueId, boardId: UniqueId) {
+  if (!boardBaseSubscription[userId]) {
+    boardBaseSubscription[userId] = {};
   }
-  if (!boardSubscription[userId][boardId]) {
-    const subscription = new Subscription<BoardEntity>();
-    boardSubscription[userId][boardId] = subscription;
+  if (!boardBaseSubscription[userId][boardId]) {
+    const subscription = new Subscription<BoardBase>();
+    boardBaseSubscription[userId][boardId] = subscription;
     onBoardDocSnapshot(boardId, (boardDoc) => {
-      const board = firestoreDocsToBoard({ boardBefore: subscription.getData().value, boardDoc });
-      if (board) {
-        subscription.setData(board);
-        subscription.executeCallbacks();
-      }
-    });
-    onBoardTaskDocsSnapshot(boardId, (taskDocs) => {
-      const boardBefore = subscription.getData().value;
-      if (boardBefore) {
-        const board = firestoreDocsToBoard({ boardBefore }, taskDocs);
-        if (board) {
-          subscription.setData(board);
-          subscription.executeCallbacks();
-        }
-      }
+      subscription.setData(firestoreDocToBoardBase(boardDoc));
+      subscription.executeCallbacks();
     });
   }
-  return boardSubscription[userId][boardId];
+  return boardBaseSubscription[userId][boardId];
+}
+
+function getBoardColumnTasksSubscription(userId: UniqueId, boardId: UniqueId) {
+  if (!boardColumnTasksSubscription[userId]) {
+    boardColumnTasksSubscription[userId] = {};
+  }
+  if (!boardColumnTasksSubscription[userId][boardId]) {
+    const subscription = new Subscription<BoardColumnTasks>();
+    boardColumnTasksSubscription[userId][boardId] = subscription;
+    onBoardTaskDocsSnapshot(boardId, (taskDocs) => {
+      subscription.setData(firestoreDocsToBoardColumnTasks(taskDocs));
+      subscription.executeCallbacks();
+    });
+  }
+  return boardColumnTasksSubscription[userId][boardId];
 }
