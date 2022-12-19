@@ -283,7 +283,7 @@ function getIndex(list: { id: UniqueId }[], itemId: UniqueId) {
 function getComputedIndexAfter(list: { id: UniqueId }[], indexAfter?: number) {
   return indexAfter !== undefined && indexAfter >= 0 && indexAfter < list.length
     ? indexAfter
-    : list.length - 1;
+    : list.length;
 }
 
 function getPrevId(list: { id: UniqueId }[], index: number) {

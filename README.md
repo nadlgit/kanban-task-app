@@ -2,8 +2,6 @@
 
 This is a full stack web app allowing authenticated users to manage their projects and tasks in Kanban boards. The design is adapted from the [Kanban task management web app challenge on Frontend Mentor](https://www.frontendmentor.io/challenges/kanban-task-management-web-app-wgQLt-HlbB).
 
-**Work in progress**: interaction with backend is still buggy.
-
 - Solution URL: [https://github.com/nadlgit/kanban-task-app](https://github.com/nadlgit/kanban-task-app)
 - Live Site URL: [https://nadl-kanban-task-app.netlify.app](https://nadl-kanban-task-app.netlify.app) or directly demo page [https://nadl-kanban-task-app.netlify.app/demo](https://nadl-kanban-task-app.netlify.app/demo)
 
@@ -26,7 +24,7 @@ Users should be able to:
 - **Bonus**: Keep track of any changes, even after refreshing the browser (`localStorage` could be used for this if you're not building out a full-stack app)
 - **Bonus**: Build this project as a full-stack application
 
-### Additional challenge
+### Personal additional challenge
 
 Users should be able to:
 

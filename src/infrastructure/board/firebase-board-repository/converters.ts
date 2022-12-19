@@ -13,9 +13,6 @@ export const BOARD_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
 export const TASK_TO_DOC_MISSING_DATA_ERROR = Object.freeze(
   new Error('Missing data, unable to convert task')
 );
-export const NO_FIRESTORE_DOC_ERROR = Object.freeze(
-  new Error("Firestore doc doesn't exist, unable to convert")
-);
 
 export type BoardBase = Omit<BoardEntity, 'columns'> & { columns: Omit<ColumnEntity, 'tasks'>[] };
 
@@ -25,27 +22,17 @@ export function firestoreDocsToBoardList(boardDocs: FirestoreDocs) {
   const boardList: BoardList = [];
   boardDocs.forEach((doc) => {
     const { name, nextId } = doc.data() as BoardDocSchema;
-    const index = Math.max(
-      boardList.findIndex(({ id }) => id === nextId),
-      boardList.length
-    );
+    const index = getIndexFromNextId(boardList, nextId);
     boardList.splice(index, 0, { id: doc.id, name });
   });
   return boardList;
 }
 
 export function firestoreDocToBoardBase(boardDoc: FirestoreDoc) {
-  if (!boardDoc.exists()) {
-    throw NO_FIRESTORE_DOC_ERROR;
-  }
-
   const { name, columns } = boardDoc.data() as BoardDocSchema;
   const boardBase: BoardBase = { id: boardDoc.id, name, columns: [] };
   Object.entries(columns).forEach(([key, { name, nextId }]) => {
-    const index = Math.max(
-      boardBase.columns.findIndex(({ id }) => id === nextId),
-      boardBase.columns.length
-    );
+    const index = getIndexFromNextId(boardBase.columns, nextId);
     boardBase.columns.splice(index, 0, { id: key, name });
   });
   return boardBase;
@@ -65,10 +52,7 @@ export function firestoreDocsToBoardColumnTasks(taskDocs: FirestoreDocs) {
       columnTasks[columnId] = [];
     }
     const column = columnTasks[columnId];
-    const index = Math.max(
-      column.findIndex(({ id }) => id === nextId),
-      column.length
-    );
+    const index = getIndexFromNextId(column, nextId);
     column.splice(index, 0, { id: doc.id, title, description, subtasks });
   });
   return columnTasks;
@@ -174,4 +158,9 @@ export function taskToFirestoreDoc(
     throw TASK_TO_DOC_MISSING_DATA_ERROR;
   }
   return { taskDoc: taskDoc as TaskDocSchema, hasNoField };
+}
+
+function getIndexFromNextId(list: { id: UniqueId }[], nextId: NextId) {
+  const nextIdIndex = list.findIndex(({ id }) => id === nextId);
+  return nextIdIndex >= 0 ? nextIdIndex : list.length;
 }

@@ -9,7 +9,12 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore';
-import type { DocumentData, DocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
+import type {
+  DocumentData,
+  DocumentSnapshot,
+  FirestoreError,
+  QuerySnapshot,
+} from 'firebase/firestore';
 
 import type { UniqueId } from 'core/entities';
 import { firebaseApp } from 'infrastructure/config';
@@ -76,17 +81,22 @@ export function getUserBoardDocs(userId: UniqueId) {
 
 export function onUserBoardDocsSnapshot(
   userId: UniqueId,
-  callback: (snapshot: FirestoreDocs) => void
+  callback: (snapshot: FirestoreDocs) => void,
+  onError?: (error: FirestoreError) => void
 ) {
-  return onSnapshot(userBoardCollectionQuery(userId), callback);
+  return onSnapshot(userBoardCollectionQuery(userId), callback, onError);
 }
 
 export function getBoardDoc(boardId: UniqueId) {
   return getDoc(getBoardRef(boardId));
 }
 
-export function onBoardDocSnapshot(boardId: UniqueId, callback: (snapshot: FirestoreDoc) => void) {
-  return onSnapshot(getBoardRef(boardId), callback);
+export function onBoardDocSnapshot(
+  boardId: UniqueId,
+  callback: (snapshot: FirestoreDoc) => void,
+  onError?: (error: FirestoreError) => void
+) {
+  return onSnapshot(getBoardRef(boardId), callback, onError);
 }
 
 export function getBoardTaskDocs(boardId: UniqueId) {
@@ -95,7 +105,8 @@ export function getBoardTaskDocs(boardId: UniqueId) {
 
 export function onBoardTaskDocsSnapshot(
   boardId: UniqueId,
-  callback: (snapshot: FirestoreDocs) => void
+  callback: (snapshot: FirestoreDocs) => void,
+  onError?: (error: FirestoreError) => void
 ) {
-  return onSnapshot(taskCollection(boardId), callback);
+  return onSnapshot(taskCollection(boardId), callback, onError);
 }
