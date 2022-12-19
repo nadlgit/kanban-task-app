@@ -14,6 +14,7 @@ import {
   onUserBoardDocsSnapshot,
 } from './firestore-helpers';
 import type { BoardList, UniqueId } from 'core/entities';
+import { doNothing } from 'core/utils';
 
 export async function getBoardListSubscriptionValue(userId: UniqueId) {
   const subscription = getBoardListSubscription(userId);
@@ -39,17 +40,17 @@ export async function getBoardSubscriptionValue(userId: UniqueId, boardId: Uniqu
       getBoardDoc(boardId),
       getBoardTaskDocs(boardId),
     ]);
-    if (boardDoc) {
+    if (boardDoc.exists()) {
       baseSubscription.setData(firestoreDocToBoardBase(boardDoc));
-    }
-    if (tasksDocs) {
       tasksSubscription.setData(firestoreDocsToBoardColumnTasks(tasksDocs));
     }
   }
 
   const boardBase = baseSubscription.getData().value;
   const columnTasks = tasksSubscription.getData().value;
-  return boardBase && columnTasks ? firestorePartsToBoard(boardBase, columnTasks) : undefined;
+  return boardBase !== undefined && columnTasks !== undefined
+    ? firestorePartsToBoard(boardBase, columnTasks)
+    : undefined;
 }
 
 export function addBoardSubscriptionCallback(
@@ -69,6 +70,7 @@ class Subscription<T> {
   #data: { isInitialized: false; value?: undefined } | { isInitialized: true; value: T } = {
     isInitialized: false,
   };
+  #unsubscribe: () => void = doNothing;
   #callbacks: (() => void)[] = [];
 
   getData() {
@@ -91,6 +93,16 @@ class Subscription<T> {
       cbfn();
     }
   }
+
+  setUnsubscribe(unsubscribe: () => void) {
+    this.#unsubscribe = unsubscribe;
+  }
+
+  resetData() {
+    this.#unsubscribe();
+    this.#unsubscribe = doNothing;
+    this.#data = { isInitialized: false, value: undefined };
+  }
 }
 
 const boardListSubscription: Record<UniqueId, Subscription<BoardList>> = {};
@@ -104,10 +116,17 @@ function getBoardListSubscription(userId: UniqueId) {
   if (!boardListSubscription[userId]) {
     const subscription = new Subscription<BoardList>();
     boardListSubscription[userId] = subscription;
-    onUserBoardDocsSnapshot(userId, (boardDocs) => {
-      subscription.setData(firestoreDocsToBoardList(boardDocs));
-      subscription.executeCallbacks();
-    });
+    const unsubscribe = onUserBoardDocsSnapshot(
+      userId,
+      (boardDocs) => {
+        subscription.setData(firestoreDocsToBoardList(boardDocs));
+        subscription.executeCallbacks();
+      },
+      () => {
+        subscription.resetData();
+      }
+    );
+    subscription.setUnsubscribe(unsubscribe);
   }
   return boardListSubscription[userId];
 }
@@ -119,10 +138,19 @@ function getBoardBaseSubscription(userId: UniqueId, boardId: UniqueId) {
   if (!boardBaseSubscription[userId][boardId]) {
     const subscription = new Subscription<BoardBase>();
     boardBaseSubscription[userId][boardId] = subscription;
-    onBoardDocSnapshot(boardId, (boardDoc) => {
-      subscription.setData(firestoreDocToBoardBase(boardDoc));
-      subscription.executeCallbacks();
-    });
+    const unsubscribe = onBoardDocSnapshot(
+      boardId,
+      (boardDoc) => {
+        if (boardDoc.exists()) {
+          subscription.setData(firestoreDocToBoardBase(boardDoc));
+          subscription.executeCallbacks();
+        }
+      },
+      () => {
+        subscription.resetData();
+      }
+    );
+    subscription.setUnsubscribe(unsubscribe);
   }
   return boardBaseSubscription[userId][boardId];
 }
@@ -134,10 +162,17 @@ function getBoardColumnTasksSubscription(userId: UniqueId, boardId: UniqueId) {
   if (!boardColumnTasksSubscription[userId][boardId]) {
     const subscription = new Subscription<BoardColumnTasks>();
     boardColumnTasksSubscription[userId][boardId] = subscription;
-    onBoardTaskDocsSnapshot(boardId, (taskDocs) => {
-      subscription.setData(firestoreDocsToBoardColumnTasks(taskDocs));
-      subscription.executeCallbacks();
-    });
+    const unsubscribe = onBoardTaskDocsSnapshot(
+      boardId,
+      (taskDocs) => {
+        subscription.setData(firestoreDocsToBoardColumnTasks(taskDocs));
+        subscription.executeCallbacks();
+      },
+      () => {
+        subscription.resetData();
+      }
+    );
+    subscription.setUnsubscribe(unsubscribe);
   }
   return boardColumnTasksSubscription[userId][boardId];
 }

@@ -7,11 +7,10 @@ import {
   firestoreDocsToBoardColumnTasks,
   firestoreDocsToBoardList,
   firestorePartsToBoard,
-  NO_FIRESTORE_DOC_ERROR,
   taskToFirestoreDoc,
   TASK_TO_DOC_MISSING_DATA_ERROR,
 } from './converters';
-import { emptyFirestoreDoc, emptyFirestoreDocs, FirestoreDoc, FirestoreDocs } from './test-utils';
+import { emptyFirestoreDocs, FirestoreDoc, FirestoreDocs } from './test-utils';
 
 describe('firestoreDocsToBoardList()', () => {
   it('should handle empty board collection', () => {
@@ -43,11 +42,7 @@ describe('firestoreDocsToBoardList()', () => {
 });
 
 describe('firestoreDocToBoardBase()', () => {
-  it('should throw when board doc doesnt exist', () => {
-    expect(() => firestoreDocToBoardBase(emptyFirestoreDoc())).toThrow(NO_FIRESTORE_DOC_ERROR);
-  });
-
-  it('should handle board doc', () => {
+  it('should handle board document', () => {
     const testBoard = {
       id: faker.datatype.uuid(),
       name: faker.lorem.words(),
