@@ -4,11 +4,11 @@ import { useForm } from 'react-hook-form';
 
 import { DeleteColumnConfirm } from './delete-column-confirm';
 import type { BoardEntity, UniqueId } from 'core/entities';
+import { doNothing } from 'core/utils';
 import { generateId } from 'infrastructure/utils';
 import {
   boardTextInputRegisterOptions,
   Button,
-  doNothing,
   TextField,
   TextFieldGroup,
   updateTextInputErrors,
