@@ -253,13 +253,14 @@ describe('FirebaseBoardRepository.addBoard()', () => {
       nextId: testBoardIndex < mockBoards.length - 1 ? mockBoards[testBoardIndex + 1].id : null,
     };
     expect(mockBatchSet).toHaveBeenCalledTimes(1);
-    expect(mockBatchSet.mock.calls[0]).toEqual([testBoardRef, testBoardDocData]);
+    const [mockCallDocRef, mockCallDocData] = mockBatchSet.mock.calls[0];
+    expect(mockCallDocRef.id).toEqual(testBoardRef.id);
+    expect(mockCallDocData).toEqual(testBoardDocData);
     if (testPrevBoardRef) {
       expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-      expect(mockBatchUpdate.mock.calls[0]).toEqual([
-        testPrevBoardRef,
-        { nextId: testBoardRef.id },
-      ]);
+      const [mockCallPrevDocRef, mockCallPrevDocData] = mockBatchUpdate.mock.calls[0];
+      expect(mockCallPrevDocRef.id).toEqual(testPrevBoardRef.id);
+      expect(mockCallPrevDocData).toEqual({ nextId: testBoardRef.id });
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -280,7 +281,9 @@ describe('FirebaseBoardRepository.updateBoard()', () => {
     await repository.updateBoard(testUserId, testBoardUpdate);
 
     expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBatchUpdate.mock.calls[0]).toEqual([testBoardRef, { name: testBoardUpdate.name }]);
+    const [mockCallDocRef, mockCallDocData] = mockBatchUpdate.mock.calls[0];
+    expect(mockCallDocRef.id).toEqual(testBoardRef.id);
+    expect(mockCallDocData).toEqual({ name: testBoardUpdate.name });
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
 
@@ -391,10 +394,9 @@ describe('FirebaseBoardRepository.updateBoard()', () => {
       ])
     );
     expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBatchUpdate.mock.calls[0]).toEqual([
-      testBoardRef,
-      { columns: testBoardDocDataColumns },
-    ]);
+    const [mockCallDocRef, mockCallDocData] = mockBatchUpdate.mock.calls[0];
+    expect(mockCallDocRef.id).toEqual(testBoardRef.id);
+    expect(mockCallDocData).toEqual({ columns: testBoardDocDataColumns });
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
 
@@ -422,15 +424,15 @@ describe('FirebaseBoardRepository.updateBoard()', () => {
     const nextBoardBeforeId =
       testIndex < mockBoards.length - 1 ? mockBoards[testIndex + 1].id : null;
     const prevBoardAfterRef =
-      testNewIndex > 0 ? new FirestoreRef({ id: mockBoards[testNewIndex].id }) : undefined;
+      testNewIndex > 0 ? new FirestoreRef({ id: mockBoards[testNewIndex - 1].id }) : undefined;
     const nextBoardAfterId =
       testNewIndex < mockBoards.length - 1 ? mockBoards[testNewIndex + 1].id : null;
-    const expectedUpdates = [[testBoardRef, { nextId: nextBoardAfterId }]];
+    const expectedUpdates = [[testBoardRef.id, { nextId: nextBoardAfterId }]];
     if (prevBoardBeforeRef) {
-      expectedUpdates.push([prevBoardBeforeRef, { nextId: nextBoardBeforeId }]);
+      expectedUpdates.push([prevBoardBeforeRef.id, { nextId: nextBoardBeforeId }]);
     }
     if (prevBoardAfterRef) {
-      expectedUpdates.push([prevBoardAfterRef, { nextId: testBoardId }]);
+      expectedUpdates.push([prevBoardAfterRef.id, { nextId: testBoardId }]);
     }
 
     const repository = new FirebaseBoardRepository();
@@ -439,7 +441,8 @@ describe('FirebaseBoardRepository.updateBoard()', () => {
 
     expect(mockBatchUpdate).toHaveBeenCalledTimes(expectedUpdates.length);
     for (const param of mockBatchUpdate.mock.calls) {
-      expect(expectedUpdates).toContainEqual(param);
+      const [mockCallDocRef, mockCallDocData] = param;
+      expect(expectedUpdates).toContainEqual([mockCallDocRef.id, mockCallDocData]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -557,14 +560,13 @@ describe('FirebaseBoardRepository.deleteBoard()', () => {
 
     expect(mockBatchDelete).toHaveBeenCalledTimes(1 + testTaskRefs.length);
     for (const expected of [testBoardRef, ...testTaskRefs]) {
-      expect(mockBatchDelete.mock.calls).toContainEqual([expected]);
+      expect(mockBatchDelete.mock.calls.map(([docRef]) => docRef.id)).toContainEqual(expected.id);
     }
     if (testPrevBoardRef) {
       expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-      expect(mockBatchUpdate.mock.calls[0]).toEqual([
-        testPrevBoardRef,
-        { nextId: testNextBoardId },
-      ]);
+      const [mockCallPrevDocRef, mockCallPrevDocData] = mockBatchUpdate.mock.calls[0];
+      expect(mockCallPrevDocRef.id).toEqual(testPrevBoardRef.id);
+      expect(mockCallPrevDocData).toEqual({ nextId: testNextBoardId });
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -658,10 +660,14 @@ describe('FirebaseBoardRepository.addTask()', () => {
         testTaskIndex < testColumn.tasks.length - 1 ? testColumn.tasks[testTaskIndex + 1].id : null,
     };
     expect(mockBatchSet).toHaveBeenCalledTimes(1);
-    expect(mockBatchSet.mock.calls[0]).toEqual([testTaskRef, testTaskDocData]);
+    const [mockCallDocRef, mockCallDocData] = mockBatchSet.mock.calls[0];
+    expect(mockCallDocRef.id).toEqual(testTaskRef.id);
+    expect(mockCallDocData).toEqual(testTaskDocData);
     if (testPrevTaskRef) {
       expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-      expect(mockBatchUpdate.mock.calls[0]).toEqual([testPrevTaskRef, { nextId: testTaskRef.id }]);
+      const [mockCallPrevDocRef, mockCallPrevDocData] = mockBatchUpdate.mock.calls[0];
+      expect(mockCallPrevDocRef.id).toEqual(testPrevTaskRef.id);
+      expect(mockCallPrevDocData).toEqual({ nextId: testTaskRef.id });
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -799,19 +805,22 @@ describe('FirebaseBoardRepository.updateTask()', () => {
     const nextTaskBeforeId =
       testIndex < testColumn.tasks.length - 1 ? testColumn.tasks[testIndex + 1].id : null;
     const prevTaskAfterRef =
-      testNewIndex > 0 ? new FirestoreRef({ id: testColumn.tasks[testNewIndex].id }) : undefined;
+      testNewIndex > 0
+        ? new FirestoreRef({ id: testColumn.tasks[testNewIndex - 1].id })
+        : undefined;
     const nextTaskAfterId =
       testNewIndex < testColumn.tasks.length - 1 ? testColumn.tasks[testNewIndex + 1].id : null;
-    const expectedUpdates = [[testTaskRef, { nextId: nextTaskAfterId }]];
+    const expectedUpdates = [[testTaskRef.id, { nextId: nextTaskAfterId }]];
     if (prevTaskBeforeRef) {
-      expectedUpdates.push([prevTaskBeforeRef, { nextId: nextTaskBeforeId }]);
+      expectedUpdates.push([prevTaskBeforeRef.id, { nextId: nextTaskBeforeId }]);
     }
     if (prevTaskAfterRef) {
-      expectedUpdates.push([prevTaskAfterRef, { nextId: testTaskId }]);
+      expectedUpdates.push([prevTaskAfterRef.id, { nextId: testTaskId }]);
     }
     expect(mockBatchUpdate).toHaveBeenCalledTimes(expectedUpdates.length);
     for (const param of mockBatchUpdate.mock.calls) {
-      expect(expectedUpdates).toContainEqual(param);
+      const [mockCallDocRef, mockCallDocData] = param;
+      expect(expectedUpdates).toContainEqual([mockCallDocRef.id, mockCallDocData]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -886,7 +895,7 @@ describe('FirebaseBoardRepository.updateTask()', () => {
         : null;
     const expectedUpdates = [
       [
-        testTaskRef,
+        testTaskRef.id,
         {
           status: { id: testNewColumn.id, name: testNewColumn.name },
           nextId: nextTaskAfterId,
@@ -894,14 +903,15 @@ describe('FirebaseBoardRepository.updateTask()', () => {
       ],
     ];
     if (prevTaskBeforeRef) {
-      expectedUpdates.push([prevTaskBeforeRef, { nextId: nextTaskBeforeId }]);
+      expectedUpdates.push([prevTaskBeforeRef.id, { nextId: nextTaskBeforeId }]);
     }
     if (prevTaskAfterRef) {
-      expectedUpdates.push([prevTaskAfterRef, { nextId: testTaskId }]);
+      expectedUpdates.push([prevTaskAfterRef.id, { nextId: testTaskId }]);
     }
     expect(mockBatchUpdate).toHaveBeenCalledTimes(expectedUpdates.length);
     for (const param of mockBatchUpdate.mock.calls) {
-      expect(expectedUpdates).toContainEqual(param);
+      const [mockCallDocRef, mockCallDocData] = param;
+      expect(expectedUpdates).toContainEqual([mockCallDocRef.id, mockCallDocData]);
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
@@ -961,10 +971,12 @@ describe('FirebaseBoardRepository.deleteTask()', () => {
     const testNextTaskId =
       testTaskIndex < testColumn.tasks.length - 1 ? testColumn.tasks[testTaskIndex + 1].id : null;
     expect(mockBatchDelete).toHaveBeenCalledTimes(1);
-    expect(mockBatchDelete.mock.calls[0]).toEqual([testTaskRef]);
+    expect(mockBatchDelete.mock.calls[0][0].id).toEqual(testTaskRef.id);
     if (testPrevTaskRef) {
       expect(mockBatchUpdate).toHaveBeenCalledTimes(1);
-      expect(mockBatchUpdate.mock.calls[0]).toEqual([testPrevTaskRef, { nextId: testNextTaskId }]);
+      const [mockCallPrevDocRef, mockCallPrevDocData] = mockBatchUpdate.mock.calls[0];
+      expect(mockCallPrevDocRef.id).toEqual(testPrevTaskRef.id);
+      expect(mockCallPrevDocData).toEqual({ nextId: testNextTaskId });
     }
     expect(mockBatchCommit).toHaveBeenCalledTimes(1);
   });
