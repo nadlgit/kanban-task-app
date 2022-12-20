@@ -25,15 +25,17 @@ describe('firestoreDocsToBoardList()', () => {
       { id: faker.datatype.uuid(), name: faker.lorem.words() },
       { id: faker.datatype.uuid(), name: faker.lorem.words() },
     ];
-    const testData = testBoards.map(({ id, name }, idx) => ({
-      id,
-      data: {
-        owner: testUserId,
-        name,
-        columns: {},
-        nextId: idx < testBoards.length - 1 ? testBoards[idx + 1].id : null,
-      },
-    }));
+    const testData = testBoards
+      .map(({ id, name }, idx) => ({
+        id,
+        data: {
+          owner: testUserId,
+          name,
+          columns: {},
+          nextId: idx < testBoards.length - 1 ? testBoards[idx + 1].id : null,
+        },
+      }))
+      .reverse();
     const expected = testBoards.map(({ id, name }) => ({ id, name }));
 
     const result = firestoreDocsToBoardList(new FirestoreDocs(testData));
@@ -77,13 +79,15 @@ describe('firestoreDocToBoardBase()', () => {
         owner: faker.datatype.uuid(),
         name: testBoard.name,
         columns: Object.fromEntries(
-          testBoard.columns.map(({ id, name }, idx) => [
-            id,
-            {
-              name,
-              nextId: idx < testBoard.columns.length - 1 ? testBoard.columns[idx + 1].id : null,
-            },
-          ])
+          testBoard.columns
+            .map(({ id, name }, idx) => [
+              id,
+              {
+                name,
+                nextId: idx < testBoard.columns.length - 1 ? testBoard.columns[idx + 1].id : null,
+              },
+            ])
+            .reverse()
         ),
         nextId: null,
       },
@@ -132,18 +136,20 @@ describe('firestoreDocsToBoardColumnTasks()', () => {
         ],
       },
     ];
-    const testData = testBoardColumns.flatMap(({ id, name, tasks }) =>
-      tasks.map(({ id: taskId, title, description, subtasks }, idx) => ({
-        id: taskId,
-        data: {
-          title,
-          description,
-          subtasks,
-          status: { id, name },
-          nextId: idx < tasks.length - 1 ? tasks[idx + 1].id : null,
-        },
-      }))
-    );
+    const testData = testBoardColumns
+      .flatMap(({ id, name, tasks }) =>
+        tasks.map(({ id: taskId, title, description, subtasks }, idx) => ({
+          id: taskId,
+          data: {
+            title,
+            description,
+            subtasks,
+            status: { id, name },
+            nextId: idx < tasks.length - 1 ? tasks[idx + 1].id : null,
+          },
+        }))
+      )
+      .reverse();
     const expected = Object.fromEntries(testBoardColumns.map(({ id, tasks }) => [id, tasks]));
 
     const result = firestoreDocsToBoardColumnTasks(new FirestoreDocs(testData));
