@@ -13,7 +13,8 @@ export const useActiveBoard = () => {
     if (activeBoardId && !loadingBoardList) {
       const updateBoard = async () => {
         setLoading(true);
-        setBoard(await getBoard(activeBoardId));
+        const updatedBoard = await getBoard(activeBoardId);
+        setBoard(updatedBoard ? { ...updatedBoard } : null);
         setLoading(false);
       };
       updateBoard();
