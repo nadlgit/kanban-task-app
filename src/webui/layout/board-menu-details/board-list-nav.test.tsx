@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 import { useEffect } from 'react';
@@ -85,6 +85,8 @@ describe('BoardListNav component', () => {
 
     await userEvt.click(getAddBoardBtnElt());
 
-    expect(getBoardActiveItem()).toHaveAccessibleName(mockBoardList[expectedActiveIndex].name);
+    await waitFor(() =>
+      expect(getBoardActiveItem()).toHaveAccessibleName(mockBoardList[expectedActiveIndex].name)
+    );
   });
 });

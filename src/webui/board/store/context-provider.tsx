@@ -18,7 +18,7 @@ export const BoardContextProvider = ({ isDemo, children }: BoardContextProviderP
     const updateBoardList = async () => {
       setLoading(true);
       const list = await getBoardList();
-      setBoardList(list);
+      setBoardList([...list]);
       setActiveBoardIdState((activeId) => {
         if (list.find((board) => board.id === activeId)) {
           return activeId;
